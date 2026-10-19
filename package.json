@@ -1,5 +1,5 @@
 {
-  "name": "duolingo-clone",
+  "name": "ilmi",
   "version": "1.0.1",
   "private": true,
   "scripts": {
@@ -22,7 +22,7 @@
     "@radix-ui/react-progress": "^1.1.8",
     "@radix-ui/react-separator": "^1.1.8",
     "@radix-ui/react-slot": "^1.2.4",
-		"@vercel/config": "^0.5.0",
+    "@vercel/config": "^0.5.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.0",
     "dotenv": "^17.4.2",
@@ -65,7 +65,7 @@
     "email": "sanidhya.verma12345@gmail.com",
     "url": "https://github.com/sanidhyy"
   },
-  "description": "Interactive platform for language learning with lessons, quizzes, and progress tracking.",
+  "description": "Duolingo-style app for learning the Quran, Hadith and Sirah.",
   "keywords": [
     "reactjs",
     "nextjs",
@@ -103,12 +103,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/sanidhyy/duolingo-clone.git"
+    "url": "https://github.com/aliabusaleh/duolingo-clone.git"
   },
-  "homepage": "https://github.com/sanidhyy/duolingo-clone#readme",
+  "homepage": "https://github.com/aliabusaleh/duolingo-clone#readme",
   "bugs": {
-    "url": "https://github.com/sanidhyy/duolingo-clone/issues",
-    "email": "sanidhya.verma12345@gmail.com"
+    "url": "https://github.com/aliabusaleh/duolingo-clone/issues"
   },
   "funding": [
     {
@@ -118,6 +117,12 @@
     {
       "type": "Buy me a coffee",
       "url": "https://www.buymeacoffee.com/sanidhy"
+    }
+  ],
+  "contributors": [
+    {
+      "name": "Ali Abu Saleh",
+      "url": "https://github.com/aliabusaleh"
     }
   ]
 }

@@ -19,6 +19,11 @@ const config = {
       },
     },
     extend: {
+      fontFamily: {
+        sans: ["var(--font-nunito)", "var(--font-arabic)", "sans-serif"],
+        quran: ["var(--font-quran)", "serif"],
+        arabic: ["var(--font-arabic)", "serif"],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",

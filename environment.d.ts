@@ -7,9 +7,16 @@ declare global {
       // neon db uri
       DATABASE_URL: string;
 
+      // "local" enables local dev login (development only)
+
+      NEXT_PUBLIC_DEV_AUTH?: string;
+
+      // "true" enables Stripe subscriptions
+      NEXT_PUBLIC_ENABLE_PAYMENTS?: string;
+
       // stripe api key and webhook
-      STRIPE_API_SECRET_KEY: string;
-      STRIPE_WEBHOOK_SECRET: string;
+      STRIPE_API_SECRET_KEY?: string;
+      STRIPE_WEBHOOK_SECRET?: string;
 
       // public app url
       NEXT_PUBLIC_APP_URL: string;

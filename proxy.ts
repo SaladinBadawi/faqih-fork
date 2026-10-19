@@ -1,4 +1,7 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { NextResponse } from "next/server";
+
+import { features } from "@/config";
 
 const isPublicRoute = createRouteMatcher([
   "/",
@@ -7,9 +10,12 @@ const isPublicRoute = createRouteMatcher([
   "/api/webhooks/stripe",
 ]);
 
-export default clerkMiddleware(async (auth, request) => {
-  if (!isPublicRoute(request)) await auth.protect();
-});
+// Local dev login: everyone is the local dev user, so nothing to protect.
+export default features.localAuth
+  ? () => NextResponse.next()
+  : clerkMiddleware(async (auth, request) => {
+      if (!isPublicRoute(request)) await auth.protect();
+    });
 
 export const config = {
   matcher: [

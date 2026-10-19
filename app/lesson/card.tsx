@@ -73,6 +73,7 @@ export const Card = ({
       >
         {type === "ASSIST" && <div aria-hidden />}
         <p
+          dir="auto"
           className={cn(
             "text-sm text-neutral-600 lg:text-base",
             selected && "text-sky-500",
