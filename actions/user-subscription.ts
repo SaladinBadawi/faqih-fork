@@ -1,16 +1,18 @@
 "use server";
 
-import { auth, currentUser } from "@clerk/nextjs/server";
-
+import { APP_NAME, features } from "@/config";
 import { getUserSubscription } from "@/db/queries";
-import { stripe } from "@/lib/stripe";
+import { getAuth, getCurrentUser } from "@/lib/auth";
+import { getStripe } from "@/lib/stripe";
 import { absoluteUrl } from "@/lib/utils";
 
 const returnUrl = absoluteUrl("/shop");
 
 export const createStripeUrl = async () => {
-  const { userId } = await auth();
-  const user = await currentUser();
+  if (!features.payments) throw new Error("Payments are disabled.");
+
+  const { userId } = await getAuth();
+  const user = await getCurrentUser();
 
   if (!userId || !user) throw new Error("Unauthorized.");
 
@@ -18,7 +20,7 @@ export const createStripeUrl = async () => {
 
   // redirect user to customer portal who already have a subscription
   if (userSubscription && userSubscription.stripeCustomerId) {
-    const stripeSession = await stripe.billingPortal.sessions.create({
+    const stripeSession = await getStripe().billingPortal.sessions.create({
       customer: userSubscription.stripeCustomerId,
       return_url: returnUrl,
     });
@@ -27,17 +29,17 @@ export const createStripeUrl = async () => {
   }
 
   // checkout
-  const stripeSession = await stripe.checkout.sessions.create({
+  const stripeSession = await getStripe().checkout.sessions.create({
     mode: "subscription",
     payment_method_types: ["card"],
-    customer_email: user.emailAddresses[0].emailAddress,
+    customer_email: user.email,
     line_items: [
       {
         quantity: 1,
         price_data: {
           currency: "USD",
           product_data: {
-            name: "Lingo Pro",
+            name: `${APP_NAME} Pro`,
             description: "Unlimited hearts.",
           },
           unit_amount: 2000, // $20.00 USD

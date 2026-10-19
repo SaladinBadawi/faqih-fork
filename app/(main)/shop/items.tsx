@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { refillHearts } from "@/actions/user-progress";
 import { createStripeUrl } from "@/actions/user-subscription";
 import { Button } from "@/components/ui/button";
+import { features } from "@/config";
 import { MAX_HEARTS, POINTS_TO_REFILL } from "@/constants";
 
 type ItemsProps = {
@@ -74,19 +75,25 @@ export const Items = ({
         </Button>
       </div>
 
-      <div className="flex w-full items-center gap-x-4 border-t-2 p-4 pt-8">
-        <Image src="/unlimited.svg" alt="Unlimited" height={60} width={60} />
+      {features.payments && (
+        <div className="flex w-full items-center gap-x-4 border-t-2 p-4 pt-8">
+          <Image src="/unlimited.svg" alt="Unlimited" height={60} width={60} />
 
-        <div className="flex-1">
-          <p className="text-base font-bold text-neutral-700 lg:text-xl">
-            Unlimited hearts
-          </p>
+          <div className="flex-1">
+            <p className="text-base font-bold text-neutral-700 lg:text-xl">
+              Unlimited hearts
+            </p>
+          </div>
+
+          <Button
+            onClick={onUpgrade}
+            disabled={pending}
+            aria-disabled={pending}
+          >
+            {hasActiveSubscription ? "settings" : "upgrade"}
+          </Button>
         </div>
-
-        <Button onClick={onUpgrade} disabled={pending} aria-disabled={pending}>
-          {hasActiveSubscription ? "settings" : "upgrade"}
-        </Button>
-      </div>
+      )}
     </ul>
   );
 };

@@ -1,6 +1,5 @@
 "use server";
 
-import { auth, currentUser } from "@clerk/nextjs/server";
 import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -13,10 +12,11 @@ import {
   getUserSubscription,
 } from "@/db/queries";
 import { challengeProgress, challenges, userProgress } from "@/db/schema";
+import { getAuth, getCurrentUser } from "@/lib/auth";
 
 export const upsertUserProgress = async (courseId: number) => {
-  const { userId } = await auth();
-  const user = await currentUser();
+  const { userId } = await getAuth();
+  const user = await getCurrentUser();
 
   if (!userId || !user) throw new Error("Unauthorized.");
 
@@ -57,7 +57,7 @@ export const upsertUserProgress = async (courseId: number) => {
 };
 
 export const reduceHearts = async (challengeId: number) => {
-  const { userId } = await auth();
+  const { userId } = await getAuth();
 
   if (!userId) throw new Error("Unauthorized.");
 

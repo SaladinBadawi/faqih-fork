@@ -1,15 +1,6 @@
-import {
-  ClerkLoaded,
-  ClerkLoading,
-  SignInButton,
-  SignUpButton,
-  Show,
-} from "@clerk/nextjs";
-import { Loader } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
 
-import { Button } from "@/components/ui/button";
+import { GetStartedButtons } from "@/components/auth-controls";
 
 export default function MarketingPage() {
   return (
@@ -20,35 +11,11 @@ export default function MarketingPage() {
 
       <div className="flex flex-col items-center gap-y-8">
         <h1 className="max-w-[480px] text-center text-xl font-bold text-neutral-600 lg:text-3xl">
-          Learn, practice and master new languages with Lingo.
+          Learn the Quran, Hadith and Sirah — a few minutes a day.
         </h1>
 
         <div className="flex w-full max-w-[330px] flex-col items-center gap-y-3">
-          <ClerkLoading>
-            <Loader className="h-5 w-5 animate-spin text-muted-foreground" />
-          </ClerkLoading>
-
-          <ClerkLoaded>
-            <Show when="signed-in">
-              <Button size="lg" variant="secondary" className="w-full" asChild>
-                <Link href="/learn">Continue Learning</Link>
-              </Button>
-            </Show>
-
-            <Show when="signed-out">
-              <SignUpButton mode="modal">
-                <Button size="lg" variant="secondary" className="w-full">
-                  Get Started
-                </Button>
-              </SignUpButton>
-
-              <SignInButton mode="modal">
-                <Button size="lg" variant="primaryOutline" className="w-full">
-                  I already have an account
-                </Button>
-              </SignInButton>
-            </Show>
-          </ClerkLoaded>
+          <GetStartedButtons />
         </div>
       </div>
     </div>

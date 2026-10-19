@@ -3,21 +3,24 @@ import { headers } from "next/headers";
 import { NextResponse, type NextRequest } from "next/server";
 import Stripe from "stripe";
 
+import { features } from "@/config";
 import db from "@/db/drizzle";
 import { userSubscription } from "@/db/schema";
-import { stripe } from "@/lib/stripe";
+import { getStripe } from "@/lib/stripe";
 
 export async function POST(req: NextRequest) {
+  if (!features.payments) return new NextResponse(null, { status: 404 });
+
   const body = await req.text();
   const signature = (await headers()).get("Stripe-Signature") as string;
 
   let event: Stripe.Event;
 
   try {
-    event = stripe.webhooks.constructEvent(
+    event = getStripe().webhooks.constructEvent(
       body,
       signature,
-      process.env.STRIPE_WEBHOOK_SECRET
+      process.env.STRIPE_WEBHOOK_SECRET ?? ""
     );
   } catch (error: unknown) {
     return new NextResponse(`Webhook error ${JSON.stringify(error)}`, {
@@ -29,7 +32,7 @@ export async function POST(req: NextRequest) {
 
   // user subscription completed
   if (event.type === "checkout.session.completed") {
-    const subscription = await stripe.subscriptions.retrieve(
+    const subscription = await getStripe().subscriptions.retrieve(
       session.subscription as string
     );
 
@@ -49,7 +52,7 @@ export async function POST(req: NextRequest) {
 
   // renew user subscription
   if (event.type === "invoice.payment_succeeded") {
-    const subscription = await stripe.subscriptions.retrieve(
+    const subscription = await getStripe().subscriptions.retrieve(
       session.subscription as string
     );
 

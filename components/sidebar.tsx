@@ -1,8 +1,8 @@
-import { ClerkLoading, ClerkLoaded, UserButton } from "@clerk/nextjs";
-import { Loader } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
+import { UserMenu } from "@/components/auth-controls";
+import { APP_NAME } from "@/config";
 import { cn } from "@/lib/utils";
 
 import { SidebarItem } from "./sidebar-item";
@@ -24,7 +24,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
           <Image src="/mascot.svg" alt="Mascot" height={40} width={40} />
 
           <h1 className="text-2xl font-extrabold tracking-wide text-green-600">
-            Lingo
+            {APP_NAME}
           </h1>
         </div>
       </Link>
@@ -41,17 +41,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
       </div>
 
       <div className="p-4">
-        <ClerkLoading>
-          <Loader className="h-5 w-5 animate-spin text-muted-foreground" />
-        </ClerkLoading>
-
-        <ClerkLoaded>
-          <UserButton
-            appearance={{
-              elements: { userButtonPopoverCard: { pointerEvents: "initial" } },
-            }}
-          />
-        </ClerkLoaded>
+        <UserMenu />
       </div>
     </div>
   );

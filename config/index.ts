@@ -1,50 +1,39 @@
 import type { Metadata } from "next";
 
+// Working name — change it here and it updates across the app.
+export const APP_NAME = "Ilmi";
+
 export const siteConfig: Metadata = {
-  title: "Lingo",
+  title: APP_NAME,
   description:
-    "Interactive platform for language learning with lessons, quizzes, and progress tracking.",
+    "Learn the Quran, Hadith and Sirah in a few minutes a day with bite-sized lessons, quizzes and progress tracking.",
   keywords: [
-    "reactjs",
-    "nextjs",
-    "vercel",
-    "react",
-    "duolingo-clone",
-    "learn-language",
-    "shadcn",
-    "shadcn-ui",
-    "radix-ui",
-    "cn",
-    "clsx",
-    "lingo",
-    "postgresql",
-    "sonner",
-    "drizzle",
-    "zustand",
-    "mysql",
-    "lucide-react",
-    "clerk-themes",
-    "clerk",
-    "postcss",
-    "prettier",
-    "react-dom",
-    "tailwindcss",
-    "tailwindcss-animate",
-    "ui/ux",
-    "js",
-    "javascript",
-    "typescript",
-    "eslint",
-    "html",
-    "css",
+    "quran",
+    "hadith",
+    "sirah",
+    "seerah",
+    "islam",
+    "islamic studies",
+    "learn arabic",
+    "tajweed",
+    "hifz",
+    "muslim",
   ] as Array<string>,
   authors: {
-    name: "Sanidhya Kumar Verma",
-    url: "https://github.com/sanidhyy",
+    name: "Ali Abu Saleh",
+    url: "https://github.com/aliabusaleh",
   },
 } as const;
 
 export const links = {
-  sourceCode: "https://github.com/sanidhyy/duolingo-clone",
-  email: "sanidhya.verma12345@gmail.com",
+  sourceCode: "https://github.com/aliabusaleh/duolingo-clone",
+} as const;
+
+export const features = {
+  // Stripe subscriptions ("unlimited hearts"). Off by default: knowledge stays free.
+  payments: process.env.NEXT_PUBLIC_ENABLE_PAYMENTS === "true",
+  // Local dev login: skips Clerk and signs you in as a fixed dev user. Never on in production.
+  localAuth:
+    process.env.NEXT_PUBLIC_DEV_AUTH === "local" &&
+    process.env.NODE_ENV !== "production",
 } as const;
