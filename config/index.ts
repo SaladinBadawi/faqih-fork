@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 
-// Working name — change it here and it updates across the app.
-export const APP_NAME = "Ilmi";
+export const APP_NAME = "Faqih";
+// Shown with the name so people know what the app teaches, not just fiqh.
+export const APP_TAGLINE = "Learn Quran, Hadith & Sirah";
 
 export const siteConfig: Metadata = {
-  title: APP_NAME,
+  title: `${APP_NAME}: ${APP_TAGLINE}`,
   description:
     "Learn the Quran, Hadith and Sirah in a few minutes a day with bite-sized lessons, quizzes and progress tracking.",
   keywords: [
@@ -26,7 +27,7 @@ export const siteConfig: Metadata = {
 } as const;
 
 export const links = {
-  sourceCode: "https://github.com/aliabusaleh/duolingo-clone",
+  sourceCode: "https://github.com/aliabusaleh/faqih",
 } as const;
 
 export const features = {

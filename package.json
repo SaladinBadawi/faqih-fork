@@ -1,5 +1,5 @@
 {
-  "name": "ilmi",
+  "name": "faqih",
   "version": "1.0.1",
   "private": true,
   "scripts": {
@@ -65,7 +65,7 @@
     "email": "sanidhya.verma12345@gmail.com",
     "url": "https://github.com/sanidhyy"
   },
-  "description": "Duolingo-style app for learning the Quran, Hadith and Sirah.",
+  "description": "Faqih: Learn Quran, Hadith & Sirah. A Duolingo-style app with bite-sized daily lessons.",
   "keywords": [
     "reactjs",
     "nextjs",
@@ -103,11 +103,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/aliabusaleh/duolingo-clone.git"
+    "url": "https://github.com/aliabusaleh/faqih.git"
   },
-  "homepage": "https://github.com/aliabusaleh/duolingo-clone#readme",
+  "homepage": "https://github.com/aliabusaleh/faqih#readme",
   "bugs": {
-    "url": "https://github.com/aliabusaleh/duolingo-clone/issues"
+    "url": "https://github.com/aliabusaleh/faqih/issues"
   },
   "funding": [
     {
