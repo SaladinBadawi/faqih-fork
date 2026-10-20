@@ -2,6 +2,7 @@ import { CheckCircle, XCircle } from "lucide-react";
 import { useKey } from "react-use";
 
 import { useMessages } from "@/components/locale-provider";
+import { useIsKids } from "@/components/mode-provider";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -22,7 +23,10 @@ export const Footer = ({
   const t = useMessages();
   // Size by CSS breakpoint, not JS: a JS media query renders differently on
   // the server and the client (hydration mismatch).
-  const responsiveSize = "h-9 px-3 lg:h-12 lg:px-8";
+  // Kids always get the big buttons.
+  const responsiveSize = useIsKids()
+    ? "h-14 px-8 text-lg"
+    : "h-9 px-3 lg:h-12 lg:px-8";
 
   return (
     <footer

@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { upsertChallengeProgress } from "@/actions/challenge-progress";
 import { reduceHearts } from "@/actions/user-progress";
 import { useMessages } from "@/components/locale-provider";
+import { useIsKids } from "@/components/mode-provider";
 import { MAX_HEARTS } from "@/constants";
 import {
   challengeOptions,
@@ -47,6 +48,7 @@ type QuizProps = {
   initialHearts: number;
   initialLessonId: number;
   reviewStatus: (typeof lessons.$inferSelect)["reviewStatus"];
+  isExam?: boolean;
   initialLessonChallenges: (typeof challenges.$inferSelect & {
     completed: boolean;
     challengeOptions: (typeof challengeOptions.$inferSelect)[];
@@ -64,6 +66,7 @@ export const Quiz = ({
   initialHearts,
   initialLessonId,
   reviewStatus,
+  isExam,
   initialLessonChallenges,
   userSubscription,
 }: QuizProps) => {
@@ -75,6 +78,7 @@ export const Quiz = ({
   });
   const { width, height } = useWindowSize();
   const t = useMessages();
+  const isKids = useIsKids();
 
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -222,15 +226,17 @@ export const Quiz = ({
           />
 
           <h1 className="text-lg font-bold text-neutral-700 lg:text-3xl">
-            {t.lesson.finished}
+            {isExam ? t.lesson.examPassed : t.lesson.finished}
           </h1>
 
           <div className="flex w-full items-center gap-x-4">
             <ResultCard variant="points" value={challenges.length * 10} />
-            <ResultCard
-              variant="hearts"
-              value={userSubscription?.isActive ? Infinity : hearts}
-            />
+            {!isKids && (
+              <ResultCard
+                variant="hearts"
+                value={userSubscription?.isActive ? Infinity : hearts}
+              />
+            )}
           </div>
         </div>
 
@@ -261,6 +267,7 @@ export const Quiz = ({
         hearts={hearts}
         percentage={percentage}
         hasActiveSubscription={!!userSubscription?.isActive}
+        hideHearts={isKids}
       />
 
       <div className="flex-1">

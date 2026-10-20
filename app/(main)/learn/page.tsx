@@ -7,11 +7,11 @@ import { StickyWrapper } from "@/components/sticky-wrapper";
 import { UserProgress } from "@/components/user-progress";
 import {
   getCourseProgress,
-  getLessonPercentage,
   getUnits,
   getUserProgress,
   getUserSubscription,
 } from "@/db/queries";
+import { getMode } from "@/lib/preferences";
 
 import { Header } from "./header";
 import { Unit } from "./unit";
@@ -19,23 +19,18 @@ import { Unit } from "./unit";
 const LearnPage = async () => {
   const userProgressData = getUserProgress();
   const courseProgressData = getCourseProgress();
-  const lessonPercentageData = getLessonPercentage();
   const unitsData = getUnits();
   const userSubscriptionData = getUserSubscription();
 
-  const [
-    userProgress,
-    units,
-    courseProgress,
-    lessonPercentage,
-    userSubscription,
-  ] = await Promise.all([
-    userProgressData,
-    unitsData,
-    courseProgressData,
-    lessonPercentageData,
-    userSubscriptionData,
-  ]);
+  const [userProgress, units, courseProgress, userSubscription, mode] =
+    await Promise.all([
+      userProgressData,
+      unitsData,
+      courseProgressData,
+      userSubscriptionData,
+      getMode(),
+    ]);
+  const isKids = mode === "kids";
 
   if (!courseProgress || !userProgress || !userProgress.activeCourse)
     redirect("/courses");
@@ -50,23 +45,23 @@ const LearnPage = async () => {
           hearts={userProgress.hearts}
           points={userProgress.points}
           hasActiveSubscription={isPro}
+          hideHearts={isKids}
         />
 
-        {!isPro && <Promo />}
-        <Quests points={userProgress.points} />
+        {!isPro && !isKids && <Promo />}
+        {!isKids && <Quests points={userProgress.points} />}
       </StickyWrapper>
       <FeedWrapper>
         <Header title={userProgress.activeCourse.title} />
         {units.map((unit) => (
           <div key={unit.id} className="mb-10">
             <Unit
-              id={unit.id}
-              order={unit.order}
-              description={unit.description}
               title={unit.title}
+              description={unit.description}
               lessons={unit.lessons}
-              activeLesson={courseProgress.activeLesson}
-              activeLessonPercentage={lessonPercentage}
+              unlocked={unit.unlocked}
+              completed={unit.completed}
+              testedOut={unit.testedOut}
             />
           </div>
         ))}

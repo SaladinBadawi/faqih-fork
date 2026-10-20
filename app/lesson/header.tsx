@@ -8,12 +8,14 @@ type HeaderProps = {
   hearts: number;
   percentage: number;
   hasActiveSubscription: boolean;
+  hideHearts?: boolean;
 };
 
 export const Header = ({
   hearts,
   percentage,
   hasActiveSubscription,
+  hideHearts,
 }: HeaderProps) => {
   const { open } = useExitModal();
 
@@ -26,7 +28,10 @@ export const Header = ({
 
       <Progress value={percentage} />
 
-      <div className="flex items-center font-bold text-rose-500">
+      <div
+        className="flex items-center font-bold text-rose-500"
+        hidden={hideHearts}
+      >
         <Image
           src="/heart.svg"
           height={28}

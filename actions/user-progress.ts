@@ -13,6 +13,7 @@ import {
 } from "@/db/queries";
 import { challengeProgress, challenges, userProgress } from "@/db/schema";
 import { getAuth, getCurrentUser } from "@/lib/auth";
+import { getMode } from "@/lib/preferences";
 
 export const upsertUserProgress = async (courseId: number) => {
   const { userId } = await getAuth();
@@ -82,6 +83,9 @@ export const reduceHearts = async (challengeId: number) => {
   const isPractice = !!existingChallengeProgress;
 
   if (isPractice) return { error: "practice" };
+
+  // Kids mode has no hearts: a wrong answer just means "try again".
+  if ((await getMode()) === "kids") return { error: "kids" };
 
   if (!currentUserProgress) throw new Error("User progress not found.");
 

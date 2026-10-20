@@ -8,6 +8,7 @@ import db from "@/db/drizzle";
 import { getUserProgress, getUserSubscription } from "@/db/queries";
 import { challengeProgress, challenges, userProgress } from "@/db/schema";
 import { getAuth } from "@/lib/auth";
+import { getMode } from "@/lib/preferences";
 
 export const upsertChallengeProgress = async (challengeId: number) => {
   const { userId } = await getAuth();
@@ -36,10 +37,12 @@ export const upsertChallengeProgress = async (challengeId: number) => {
 
   const isPractice = !!existingChallengeProgress;
 
+  // Kids mode has no hearts, so running out never stops a lesson.
   if (
     currentUserProgress.hearts === 0 &&
     !isPractice &&
-    !userSubscription?.isActive
+    !userSubscription?.isActive &&
+    (await getMode()) !== "kids"
   )
     return { error: "hearts" };
 

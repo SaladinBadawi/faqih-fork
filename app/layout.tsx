@@ -1,8 +1,10 @@
 import { ClerkProvider } from "@clerk/nextjs";
+import { arSA } from "@clerk/localizations";
 import type { Metadata, Viewport } from "next";
 import { Amiri_Quran, Noto_Naskh_Arabic, Nunito } from "next/font/google";
 
 import { LocaleProvider } from "@/components/locale-provider";
+import { ModeProvider } from "@/components/mode-provider";
 import { ExitModal } from "@/components/modals/exit-modal";
 import { HeartsModal } from "@/components/modals/hearts-modal";
 import { PracticeModal } from "@/components/modals/practice-modal";
@@ -10,6 +12,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { APP_NAME, features, siteConfig } from "@/config";
 import { dir, messages } from "@/lib/i18n";
 import { getLocale } from "@/lib/locale";
+import { getMode } from "@/lib/preferences";
 import { cn } from "@/lib/utils";
 
 import "./globals.css";
@@ -45,7 +48,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const locale = await getLocale();
+  const [locale, mode] = await Promise.all([getLocale(), getMode()]);
 
   const app = (
     <html lang={locale} dir={dir(locale)}>
@@ -59,11 +62,13 @@ export default async function RootLayout({
         )}
       >
         <LocaleProvider locale={locale}>
-          <Toaster theme="light" richColors closeButton />
-          <ExitModal />
-          <HeartsModal />
-          <PracticeModal />
-          {children}
+          <ModeProvider mode={mode}>
+            <Toaster theme="light" richColors closeButton />
+            <ExitModal />
+            <HeartsModal />
+            <PracticeModal />
+            {children}
+          </ModeProvider>
         </LocaleProvider>
       </body>
     </html>
@@ -74,6 +79,8 @@ export default async function RootLayout({
 
   return (
     <ClerkProvider
+      // Clerk's sign-in and sign-up screens follow the app language.
+      localization={locale === "ar" ? arSA : undefined}
       appearance={{
         layout: {
           logoImageUrl: "/favicon.ico",

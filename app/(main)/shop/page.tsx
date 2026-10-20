@@ -7,10 +7,14 @@ import { StickyWrapper } from "@/components/sticky-wrapper";
 import { UserProgress } from "@/components/user-progress";
 import { getUserProgress, getUserSubscription } from "@/db/queries";
 import { getMessages } from "@/lib/locale";
+import { getMode } from "@/lib/preferences";
 
 import { Items } from "./items";
 
 const ShopPage = async () => {
+  // Not part of kids mode (no points, hearts or rankings).
+  if ((await getMode()) === "kids") redirect("/learn");
+
   const userProgressData = getUserProgress();
   const userSubscriptionData = getUserSubscription();
 

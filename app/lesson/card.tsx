@@ -3,6 +3,7 @@ import { useCallback, useRef } from "react";
 import Image from "next/image";
 import { useKey } from "react-use";
 
+import { useIsKids } from "@/components/mode-provider";
 import { challenges } from "@/db/schema";
 import { LIST_TYPES } from "@/lib/exercises";
 import { cn, isArabic } from "@/lib/utils";
@@ -34,6 +35,7 @@ export const Card = ({
   // Most options have no audio: only render an <audio> element when they do.
   const audioRef = useRef<HTMLAudioElement>(null);
   const isList = LIST_TYPES.includes(type);
+  const isKids = useIsKids();
 
   const handleClick = useCallback(() => {
     if (disabled) return;
@@ -60,7 +62,8 @@ export const Card = ({
           status === "wrong" &&
           "border-rose-300 bg-rose-100 hover:bg-rose-100",
         disabled && "pointer-events-none hover:bg-white",
-        isList && "w-full lg:p-3"
+        isList && "w-full lg:p-3",
+        isKids && "p-6 lg:p-8"
       )}
     >
       {audioSrc && <audio ref={audioRef} src={audioSrc} preload="auto" />}
@@ -82,6 +85,7 @@ export const Card = ({
           className={cn(
             "text-sm text-neutral-600 lg:text-base",
             isArabic(text) && "font-arabic text-lg leading-loose lg:text-xl",
+            isKids && "text-xl lg:text-2xl",
             selected && "text-sky-500",
             selected && status === "correct" && "text-green-500",
             selected && status === "wrong" && "text-rose-500"
@@ -90,7 +94,9 @@ export const Card = ({
           {text}
         </p>
 
+        {/* Keyboard shortcuts mean nothing to young kids: hide them. */}
         <div
+          hidden={isKids}
           className={cn(
             "flex h-[20px] w-[20px] items-center justify-center rounded-lg border-2 text-xs font-semibold text-neutral-400 lg:h-[30px] lg:w-[30px] lg:text-[15px]",
             selected && "border-sky-300 text-sky-500",

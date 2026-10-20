@@ -6,6 +6,7 @@ import Link from "next/link";
 import { UserMenu } from "@/components/auth-controls";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { useMessages } from "@/components/locale-provider";
+import { useIsKids } from "@/components/mode-provider";
 import { APP_NAME } from "@/config";
 import { cn } from "@/lib/utils";
 
@@ -17,6 +18,7 @@ type SidebarProps = {
 
 export const Sidebar = ({ className }: SidebarProps) => {
   const t = useMessages();
+  const isKids = useIsKids();
 
   return (
     <div
@@ -37,17 +39,27 @@ export const Sidebar = ({ className }: SidebarProps) => {
 
       <div className="flex flex-1 flex-col gap-y-2">
         <SidebarItem label={t.nav.learn} href="/learn" iconSrc="/learn.svg" />
+        {/* Kids mode keeps the menu short: no points, hearts or rankings. */}
+        {!isKids && (
+          <>
+            <SidebarItem
+              label={t.nav.leaderboard}
+              href="/leaderboard"
+              iconSrc="/leaderboard.svg"
+            />
+            <SidebarItem
+              label={t.nav.quests}
+              href="/quests"
+              iconSrc="/quests.svg"
+            />
+            <SidebarItem label={t.nav.shop} href="/shop" iconSrc="/shop.svg" />
+          </>
+        )}
         <SidebarItem
-          label={t.nav.leaderboard}
-          href="/leaderboard"
-          iconSrc="/leaderboard.svg"
+          label={t.nav.settings}
+          href="/settings"
+          iconSrc="/mascot.svg"
         />
-        <SidebarItem
-          label={t.nav.quests}
-          href="/quests"
-          iconSrc="/quests.svg"
-        />
-        <SidebarItem label={t.nav.shop} href="/shop" iconSrc="/shop.svg" />
       </div>
 
       <div className="flex flex-col items-start gap-y-3 p-4">

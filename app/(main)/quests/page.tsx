@@ -10,8 +10,12 @@ import { QUESTS } from "@/constants";
 import { getUserProgress, getUserSubscription } from "@/db/queries";
 import { formatNumber, messages } from "@/lib/i18n";
 import { getLocale } from "@/lib/locale";
+import { getMode } from "@/lib/preferences";
 
 const QuestsPage = async () => {
+  // Not part of kids mode (no points, hearts or rankings).
+  if ((await getMode()) === "kids") redirect("/learn");
+
   const userProgressData = getUserProgress();
   const userSubscriptionData = getUserSubscription();
 

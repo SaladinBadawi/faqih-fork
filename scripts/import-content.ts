@@ -11,6 +11,8 @@ import {
   buildNawawi,
   type CourseSpec,
 } from "./content/courses";
+import { withExams } from "./content/exams";
+import { buildFullQuran } from "./content/full-quran";
 import { buildKidsShortSurahs } from "./content/kids";
 import {
   type SourceText,
@@ -101,6 +103,8 @@ const upsertSurahs = async (surahs: Surah[]) => {
     });
 };
 
+// One unit at a time, each table in a few multi-row inserts: the full Quran
+// course has tens of thousands of challenges, too many for a request each.
 const insertCourse = async (
   course: CourseSpec,
   sourceIds: Map<string, number>
@@ -118,6 +122,7 @@ const insertCourse = async (
     })
     .returning();
 
+  let lessonCount = 0;
   let challengeCount = 0;
 
   for (const [u, unit] of course.units.entries()) {
@@ -131,51 +136,74 @@ const insertCourse = async (
       })
       .returning();
 
-    for (const [l, lesson] of unit.lessons.entries()) {
-      const [lessonRow] = await db
-        .insert(schema.lessons)
-        .values({
+    if (unit.lessons.length === 0) continue;
+
+    const lessonRows = await db
+      .insert(schema.lessons)
+      .values(
+        unit.lessons.map((lesson, l) => ({
           unitId: unitRow.id,
           title: lesson.title,
+          kind: lesson.kind ?? "lesson",
           order: l + 1,
-          reviewStatus: "draft",
-        })
-        .returning();
+          reviewStatus: "draft" as const,
+        }))
+      )
+      .returning({ id: schema.lessons.id, order: schema.lessons.order });
+    const lessonIds = new Map(lessonRows.map((row) => [row.order, row.id]));
 
-      for (const [c, challenge] of lesson.challenges.entries()) {
+    const specs = unit.lessons.flatMap((lesson, l) =>
+      lesson.challenges.map((challenge, c) => {
         const sourceTextId = sourceIds.get(challenge.sourceKey);
         if (!sourceTextId)
           throw new Error(`No source text for ${challenge.sourceKey}`);
-
-        const [challengeRow] = await db
-          .insert(schema.challenges)
-          .values({
-            lessonId: lessonRow.id,
-            type: challenge.type ?? "ASSIST",
+        return {
+          challenge,
+          row: {
+            lessonId: lessonIds.get(l + 1)!,
+            type: challenge.type ?? ("ASSIST" as const),
             payload: challenge.payload ?? null,
             prompt: challenge.prompt,
             question: challenge.question,
             sourceTextId,
             order: c + 1,
-          })
-          .returning();
+          },
+        };
+      })
+    );
 
-        // ORDER, MATCH and typed answers have no options.
-        if (challenge.options.length > 0)
-          await db.insert(schema.challengeOptions).values(
-            challenge.options.map((o) => ({
-              challengeId: challengeRow.id,
-              text: o.text,
-              correct: o.correct,
-            }))
-          );
-        challengeCount++;
-      }
+    // Match inserted rows back by (lesson, order), not by position.
+    const challengeIds = new Map<string, number>();
+    for (const batch of batches(specs)) {
+      const rows = await db
+        .insert(schema.challenges)
+        .values(batch.map((s) => s.row))
+        .returning({
+          id: schema.challenges.id,
+          lessonId: schema.challenges.lessonId,
+          order: schema.challenges.order,
+        });
+      for (const row of rows)
+        challengeIds.set(`${row.lessonId}:${row.order}`, row.id);
     }
+
+    // ORDER, MATCH and typed answers have no options.
+    const optionRows = specs.flatMap(({ challenge, row }) =>
+      challenge.options.map((o) => ({
+        challengeId: challengeIds.get(`${row.lessonId}:${row.order}`)!,
+        text: o.text,
+        correct: o.correct,
+      }))
+    );
+    for (const batch of batches(optionRows))
+      await db.insert(schema.challengeOptions).values(batch);
+
+    lessonCount += unit.lessons.length;
+    challengeCount += specs.length;
   }
 
   console.log(
-    `  ${course.title}: ${course.units.length} unit(s), ${course.units.flatMap((u) => u.lessons).length} lessons, ${challengeCount} challenges`
+    `  ${course.title}: ${course.units.length} unit(s), ${lessonCount} lessons, ${challengeCount} challenges`
   );
 };
 
@@ -209,9 +237,11 @@ const main = async () => {
   for (const lang of ["ar", "en"] as const)
     for (const course of [
       buildKidsShortSurahs(quran.surahs, quran.ayat, lang),
-      buildFatiha(fatiha, lang),
-      buildNawawi(nawawi, 10, lang),
-      buildMorningEvening(morningEvening, lang),
+      buildFullQuran(quran.surahs, quran.ayat, lang),
+      // These have no exam builder of their own: exams sample their lessons.
+      withExams(buildFatiha(fatiha, lang)),
+      withExams(buildNawawi(nawawi, 10, lang)),
+      withExams(buildMorningEvening(morningEvening, lang)),
     ])
       await insertCourse(course, sourceIds);
 
