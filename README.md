@@ -45,7 +45,7 @@ Here is the folder structure of this app.
 
 <!--- FOLDER_STRUCTURE_START --->
 ```bash
-duolingo-clone/
+faqih/
   |- actions/
     |-- challenge-progress.ts
     |-- user-progress.ts
@@ -66,7 +66,8 @@ duolingo-clone/
   |- components/
     |-- modals/
     |-- ui/
-    |-- banner.tsx
+    |-- arabic-text.tsx
+    |-- auth-controls.tsx
     |-- feed-wrapper.tsx
     |-- mobile-header.tsx
     |-- mobile-sidebar.tsx
@@ -82,8 +83,10 @@ duolingo-clone/
     |-- drizzle.ts
     |-- queries.ts
     |-- schema.ts
+  |- docs/
   |- lib/
     |-- admin.ts
+    |-- auth.ts
     |-- stripe.ts
     |-- utils.ts
   |- public/
