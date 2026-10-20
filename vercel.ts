@@ -1,6 +1,7 @@
-import type { VercelConfig } from '@vercel/config/v1';
+import type { VercelConfig } from "@vercel/config/v1";
 
+// No ignoreCommand: the README-update workflow commits after every merge, and a
+// "skip docs-only changes" rule then cancelled every deploy.
 export const config: VercelConfig = {
-	ignoreCommand: "git diff HEAD^ HEAD --name-only | grep -qEv '(\.md$|LICENSE$|\.env\.example$|^\.github/|^\.vscode/)' && exit 1 || exit 0",
-	trailingSlash: false,
+  trailingSlash: false,
 };
