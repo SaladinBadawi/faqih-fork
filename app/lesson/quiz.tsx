@@ -73,10 +73,6 @@ export const Quiz = ({
   const [incorrectAudio, _i, incorrectControls] = useAudio({
     src: "/incorrect.wav",
   });
-  const [finishAudio] = useAudio({
-    src: "/finish.mp3",
-    autoPlay: true,
-  });
   const { width, height } = useWindowSize();
   const t = useMessages();
 
@@ -199,7 +195,8 @@ export const Quiz = ({
   if (!challenge) {
     return (
       <>
-        {finishAudio}
+        {/* Mounted only on the finish screen, so it plays exactly once there. */}
+        <audio src="/finish.mp3" autoPlay />
         <Confetti
           recycle={false}
           numberOfPieces={500}

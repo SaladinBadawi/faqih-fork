@@ -1,5 +1,5 @@
 import { CheckCircle, XCircle } from "lucide-react";
-import { useKey, useMedia } from "react-use";
+import { useKey } from "react-use";
 
 import { useMessages } from "@/components/locale-provider";
 import { Button } from "@/components/ui/button";
@@ -20,7 +20,9 @@ export const Footer = ({
 }: FooterProps) => {
   useKey("Enter", onCheck, {}, [onCheck]);
   const t = useMessages();
-  const isMobile = useMedia("(max-width: 1024px)");
+  // Size by CSS breakpoint, not JS: a JS media query renders differently on
+  // the server and the client (hydration mismatch).
+  const responsiveSize = "h-9 px-3 lg:h-12 lg:px-8";
 
   return (
     <footer
@@ -48,7 +50,7 @@ export const Footer = ({
         {status === "completed" && (
           <Button
             variant="default"
-            size={isMobile ? "sm" : "lg"}
+            className={responsiveSize}
             onClick={() => (window.location.href = `/lesson/${lessonId}`)}
           >
             {t.lesson.practiceAgain}
@@ -58,9 +60,8 @@ export const Footer = ({
         <Button
           disabled={disabled}
           aria-disabled={disabled}
-          className="ms-auto"
+          className={cn("ms-auto", responsiveSize)}
           onClick={onCheck}
-          size={isMobile ? "sm" : "lg"}
           variant={status === "wrong" ? "danger" : "secondary"}
         >
           {status === "none" && t.lesson.check}

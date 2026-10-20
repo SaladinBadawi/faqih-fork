@@ -1,7 +1,7 @@
-import { useCallback } from "react";
+import { useCallback, useRef } from "react";
 
 import Image from "next/image";
-import { useAudio, useKey } from "react-use";
+import { useKey } from "react-use";
 
 import { challenges } from "@/db/schema";
 import { LIST_TYPES } from "@/lib/exercises";
@@ -31,16 +31,19 @@ export const Card = ({
   disabled,
   type,
 }: CardProps) => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [audio, _, controls] = useAudio({ src: audioSrc || "" });
+  // Most options have no audio: only render an <audio> element when they do.
+  const audioRef = useRef<HTMLAudioElement>(null);
   const isList = LIST_TYPES.includes(type);
 
   const handleClick = useCallback(() => {
     if (disabled) return;
 
-    void controls.play();
+    if (audioRef.current) {
+      audioRef.current.currentTime = 0;
+      void audioRef.current.play().catch(() => {});
+    }
     onClick();
-  }, [disabled, onClick, controls]);
+  }, [disabled, onClick]);
 
   useKey(shortcut, handleClick, {}, [handleClick]);
 
@@ -60,7 +63,7 @@ export const Card = ({
         isList && "w-full lg:p-3"
       )}
     >
-      {audio}
+      {audioSrc && <audio ref={audioRef} src={audioSrc} preload="auto" />}
       {imageSrc && (
         <div className="relative mb-4 aspect-square max-h-[80px] w-full lg:max-h-[150px]">
           <Image src={imageSrc} fill alt={text} />

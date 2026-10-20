@@ -1,7 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
 import Image from "next/image";
 
 import { useMessages } from "@/components/locale-provider";
@@ -17,13 +15,8 @@ import {
 import { usePracticeModal } from "@/store/use-practice-modal";
 
 export const PracticeModal = () => {
-  const [isClient, setIsClient] = useState(false);
   const t = useMessages();
   const { isOpen, close } = usePracticeModal();
-
-  useEffect(() => setIsClient(true), []);
-
-  if (!isClient) return null;
 
   return (
     <Dialog open={isOpen} onOpenChange={close}>
