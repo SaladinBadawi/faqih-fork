@@ -26,6 +26,7 @@ const LessonPage = async () => {
     <Quiz
       initialLessonId={lesson.id}
       reviewStatus={lesson.reviewStatus}
+      isExam={lesson.kind === "exam"}
       initialLessonChallenges={lesson.challenges}
       initialHearts={userProgress.hearts}
       initialPercentage={initialPercentage}

@@ -38,9 +38,53 @@ const en = {
     leaderboard: "Leaderboard",
     quests: "Quests",
     shop: "Shop",
+    settings: "Settings",
   },
   courses: { title: "Courses" },
-  learn: { continue: "Continue", start: "Start" },
+  learn: {
+    continue: "Continue",
+    start: "Start",
+    exam: "Exam",
+    locked: "Locked",
+    unitDone: "Completed",
+    testedOut: "Exam passed: the lessons are still here to learn",
+  },
+  settings: {
+    title: "Settings",
+    language: "Language",
+    mode: "Mode",
+    kids: "Kids",
+    kidsDescription:
+      "Short surahs, big buttons, simple screens and no hearts to lose.",
+    full: "Full",
+    fullDescription: "Every course, the whole Quran, exams and hearts.",
+    tour: "Show the tour again",
+  },
+  tour: {
+    skip: "Skip",
+    next: "Next",
+    back: "Back",
+    done: "Let's start",
+    chooseMode: "Who is learning?",
+    steps: [
+      {
+        title: "Welcome to Faqih",
+        body: "Learn and memorise the Quran a few minutes a day. It's free, and every ayah comes from a cited source.",
+      },
+      {
+        title: "Surahs, lessons and exams",
+        body: "Each surah is a unit. Its lessons open one after another, and an exam closes it.",
+      },
+      {
+        title: "Already know a surah?",
+        body: "Take its exam straight away. Passing opens the next surah. The lessons you skipped stay unfinished, so you can come back to them.",
+      },
+      {
+        title: "Kids or full",
+        body: "Kids mode keeps things simple: short surahs, big buttons, no hearts. You can change this any time in Settings.",
+      },
+    ],
+  },
   quests: {
     title: "Quests",
     viewAll: "View all",
@@ -74,6 +118,7 @@ const en = {
     totalXp: "Total XP",
     heartsLeft: "Hearts left",
     error: "Something went wrong. Please try again.",
+    examPassed: "Exam passed! The next unit is open.",
     prompts: {
       LISTEN: "Listen and choose the ayah",
       TRUE_FALSE: "True or false?",
@@ -132,9 +177,52 @@ const ar: Messages = {
     leaderboard: "المتصدّرون",
     quests: "المهام",
     shop: "المتجر",
+    settings: "الإعدادات",
   },
   courses: { title: "الدورات" },
-  learn: { continue: "تابع", start: "ابدأ" },
+  learn: {
+    continue: "تابع",
+    start: "ابدأ",
+    exam: "اختبار",
+    locked: "مقفلة",
+    unitDone: "مكتملة",
+    testedOut: "اجتزت الاختبار، والدروس باقية لتتعلّمها",
+  },
+  settings: {
+    title: "الإعدادات",
+    language: "اللغة",
+    mode: "الوضع",
+    kids: "الأطفال",
+    kidsDescription: "قصار السور، أزرار كبيرة، شاشات بسيطة، ولا قلوب تُفقد.",
+    full: "الكامل",
+    fullDescription: "كل الدورات، القرآن كاملًا، الاختبارات والقلوب.",
+    tour: "اعرض الجولة مرة أخرى",
+  },
+  tour: {
+    skip: "تخطَّ",
+    next: "التالي",
+    back: "السابق",
+    done: "لنبدأ",
+    chooseMode: "من سيتعلّم؟",
+    steps: [
+      {
+        title: "أهلًا بك في فقيه",
+        body: "تعلّم القرآن واحفظه في دقائق كل يوم. التطبيق مجاني، وكل آية موثّقة بمصدرها.",
+      },
+      {
+        title: "سور ودروس واختبارات",
+        body: "كل سورة وحدة، تُفتح دروسها واحدًا تلو الآخر، ويُختم كلٌّ منها باختبار.",
+      },
+      {
+        title: "تحفظ السورة من قبل؟",
+        body: "خُض اختبارها مباشرة. إن نجحت فُتحت لك السورة التالية، وتبقى الدروس التي تخطّيتها غير مكتملة لتعود إليها متى شئت.",
+      },
+      {
+        title: "للأطفال أم كامل؟",
+        body: "وضع الأطفال بسيط: قصار السور، أزرار كبيرة، ولا قلوب. يمكنك تغييره متى شئت من الإعدادات.",
+      },
+    ],
+  },
   quests: {
     title: "المهام",
     viewAll: "عرض الكل",
@@ -168,6 +256,7 @@ const ar: Messages = {
     totalXp: "مجموع النقاط",
     heartsLeft: "القلوب المتبقية",
     error: "حدث خطأ، حاول مرة أخرى.",
+    examPassed: "نجحت في الاختبار! فُتحت الوحدة التالية.",
     prompts: {
       LISTEN: "استمع واختر الآية",
       TRUE_FALSE: "صح أم خطأ؟",

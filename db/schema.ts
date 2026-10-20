@@ -66,9 +66,14 @@ export const unitsRelations = relations(units, ({ many, one }) => ({
 // Lessons stay "draft" until a qualified reviewer approves them.
 export const reviewStatusEnum = pgEnum("review_status", ["draft", "reviewed"]);
 
+// An exam closes each unit. Passing it opens the next unit (see lib/progress)
+// without marking this unit's lessons as done.
+export const lessonKindEnum = pgEnum("lesson_kind", ["lesson", "exam"]);
+
 export const lessons = pgTable("lessons", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
+  kind: lessonKindEnum("kind").notNull().default("lesson"),
   reviewStatus: reviewStatusEnum("review_status").notNull().default("draft"),
   unitId: integer("unit_id")
     .references(() => units.id, {

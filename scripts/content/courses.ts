@@ -24,7 +24,11 @@ export type ChallengeSpec = {
   options: OptionSpec[];
 };
 
-export type LessonSpec = { title: string; challenges: ChallengeSpec[] };
+export type LessonSpec = {
+  title: string;
+  kind?: "lesson" | "exam"; // "lesson" unless set
+  challenges: ChallengeSpec[];
+};
 export type UnitSpec = {
   title: string;
   description: string;

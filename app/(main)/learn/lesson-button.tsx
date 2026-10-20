@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Crown, Star } from "lucide-react";
+import { Check, Crown, GraduationCap, Star } from "lucide-react";
 import Link from "next/link";
 import { CircularProgressbarWithChildren } from "react-circular-progressbar";
 
@@ -16,6 +16,9 @@ type LessonButtonProps = {
   totalCount: number;
   locked?: boolean;
   current?: boolean;
+  completed?: boolean;
+  /** The unit's exam: always open in an open unit, see lib/progress. */
+  exam?: boolean;
   percentage: number;
 };
 
@@ -25,6 +28,8 @@ export const LessonButton = ({
   totalCount,
   locked,
   current,
+  completed,
+  exam,
   percentage,
 }: LessonButtonProps) => {
   const t = useMessages();
@@ -42,16 +47,23 @@ export const LessonButton = ({
 
   const isFirst = index === 0;
   const isLast = index === totalCount;
-  const isCompleted = !current && !locked;
+  const isCompleted = !!completed;
 
-  const Icon = isCompleted ? Check : isLast ? Crown : Star;
+  const Icon = isCompleted
+    ? Check
+    : exam
+      ? GraduationCap
+      : isLast
+        ? Crown
+        : Star;
 
-  const href = isCompleted ? `/lesson/${id}` : "/lesson";
+  const href = `/lesson/${id}`;
 
   return (
     <Link
       href={href}
       aria-disabled={locked}
+      aria-label={exam ? t.learn.exam : undefined}
       style={{ pointerEvents: locked ? "none" : "auto" }}
     >
       <div
@@ -99,21 +111,33 @@ export const LessonButton = ({
             </CircularProgressbarWithChildren>
           </div>
         ) : (
-          <Button
-            size="rounded"
-            variant={locked ? "locked" : "secondary"}
-            className="h-[70px] w-[70px] border-b-8"
-          >
-            <Icon
+          <div className="flex flex-col items-center gap-y-1">
+            <Button
+              size="rounded"
+              variant={locked ? "locked" : "secondary"}
               className={cn(
-                "h-10 w-10",
-                locked
-                  ? "fill-neutral-400 stroke-neutral-400 text-neutral-400"
-                  : "fill-primary-foreground text-primary-foreground",
-                isCompleted && "fill-none stroke-[4]"
+                "h-[70px] w-[70px] border-b-8",
+                exam &&
+                  !locked &&
+                  "border-amber-600 bg-amber-500 hover:bg-amber-500/90"
               )}
-            />
-          </Button>
+            >
+              <Icon
+                className={cn(
+                  "h-10 w-10",
+                  locked
+                    ? "fill-neutral-400 stroke-neutral-400 text-neutral-400"
+                    : "fill-primary-foreground text-primary-foreground",
+                  isCompleted && "fill-none stroke-[4]"
+                )}
+              />
+            </Button>
+            {exam && (
+              <span className="text-sm font-bold text-amber-600">
+                {t.learn.exam}
+              </span>
+            )}
+          </div>
         )}
       </div>
     </Link>

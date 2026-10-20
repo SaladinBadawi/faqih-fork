@@ -6,6 +6,7 @@ Lessons are generated from primary texts by `npm run content:import`
 | Course                           | Source                                                                                                | Citation shown                                                                       |
 | -------------------------------- | ----------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
 | Kids: Short Surahs               | Same Quran source; Al-Fatiha and An-Nas to Al-Fil                                                     | `Quran s:n`, links to quran.com                                                      |
+| The Whole Quran                  | Same Quran source; all 114 surahs, a lesson per 5 ayat                                                | `Quran s:n`, links to quran.com                                                      |
 | Quran: Al-Fatiha                 | [alquran.cloud](https://alquran.cloud/api): Uthmani text (Tanzil), Sahih International, Alafasy audio | `Quran 1:n`, links to quran.com                                                      |
 | Hadith: an-Nawawi's Forty (1–10) | [fawazahmed0/hadith-api](https://github.com/fawazahmed0/hadith-api)                                   | `an-Nawawi's Forty Hadith #n` + takhrij (e.g. Bukhari & Muslim), links to sunnah.com |
 | Adhkar: Morning & Evening        | [hisnmuslim.com API](https://www.hisnmuslim.com), Hisn al-Muslim ch. 27                               | `Hisn al-Muslim #id`, links to hisnmuslim.com                                        |
@@ -21,6 +22,13 @@ Besides picking an option (`ASSIST`, `SELECT`), a challenge can be `LISTEN`,
 `TRUE_FALSE`, `COMPLETE_WORD`, `COMPLETE_AYAH`, `ORDER` or `MATCH`. The
 type-specific data lives in `challenges.payload` (see `lib/exercises.ts`).
 The kids course generates all of them from the Quran text.
+
+## Exams
+
+Every unit ends with an exam (`kind: "exam"`). Quran units get their own
+exam, mostly multi-ayah questions (`scripts/content/exams.ts`). Other
+courses get an exam sampled from the unit's lessons. Passing an exam opens
+the next unit without marking the unit's lessons as done.
 
 ## Rules
 

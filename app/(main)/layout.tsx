@@ -2,10 +2,16 @@ import type { PropsWithChildren } from "react";
 
 import { MobileHeader } from "@/components/mobile-header";
 import { Sidebar } from "@/components/sidebar";
+import { Tour } from "@/components/tour";
+import { isTourDone } from "@/lib/preferences";
 
-const MainLayout = ({ children }: PropsWithChildren) => {
+const MainLayout = async ({ children }: PropsWithChildren) => {
+  const showTour = !(await isTourDone());
+
   return (
     <>
+      {/* Keyed so "show the tour again" in Settings reopens it. */}
+      <Tour key={String(showTour)} open={showTour} />
       <MobileHeader />
       <Sidebar className="hidden lg:flex" />
       <main className="h-full pt-[50px] lg:ps-[256px] lg:pt-0">

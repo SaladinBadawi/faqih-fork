@@ -5,6 +5,9 @@ import { eq } from "drizzle-orm";
 import { features } from "@/config";
 import { getAuth } from "@/lib/auth";
 import { getLocale } from "@/lib/locale";
+import { courseInMode } from "@/lib/mode";
+import { getMode } from "@/lib/preferences";
+import { computeProgress, firstOpenLesson } from "@/lib/progress";
 
 import db from "./drizzle";
 import {
@@ -18,13 +21,16 @@ import {
 
 const DAY_IN_MS = 86_400_000;
 
-// Only courses in the visitor's language.
+// Only courses in the visitor's language, and for their mode (kids/full).
 export const getCourses = cache(async () => {
-  const data = await db.query.courses.findMany({
-    where: eq(courses.language, await getLocale()),
-  });
+  const [data, mode] = await Promise.all([
+    db.query.courses.findMany({
+      where: eq(courses.language, await getLocale()),
+    }),
+    getMode(),
+  ]);
 
-  return data;
+  return data.filter((course) => courseInMode(course.track, mode));
 });
 
 // Draft lessons are hidden unless features.showDrafts is on.
@@ -44,8 +50,13 @@ export const getUserProgress = cache(async () => {
     },
   });
 
-  // A course in the other language isn't active while this language is shown.
-  if (data?.activeCourse && data.activeCourse.language !== (await getLocale()))
+  // A course in the other language, or for the other mode, isn't active
+  // while this language and mode are chosen.
+  if (
+    data?.activeCourse &&
+    (data.activeCourse.language !== (await getLocale()) ||
+      !courseInMode(data.activeCourse.track, await getMode()))
+  )
     return { ...data, activeCourse: null, activeCourseId: null };
 
   return data;
@@ -57,6 +68,8 @@ export const getUnits = cache(async () => {
 
   if (!userId || !userProgress?.activeCourseId) return [];
 
+  // Only ids and progress: the full Quran course has thousands of challenges,
+  // and the learn page doesn't need their text.
   const data = await db.query.units.findMany({
     where: eq(units.courseId, userProgress.activeCourseId),
     orderBy: (units, { asc }) => [asc(units.order)],
@@ -66,9 +79,10 @@ export const getUnits = cache(async () => {
         orderBy: (lessons, { asc }) => [asc(lessons.order)],
         with: {
           challenges: {
-            orderBy: (challenges, { asc }) => [asc(challenges.order)],
+            columns: { id: true },
             with: {
               challengeProgress: {
+                columns: { completed: true },
                 where: eq(challengeProgress.userId, userId),
               },
             },
@@ -78,26 +92,26 @@ export const getUnits = cache(async () => {
     },
   });
 
-  const normalizedData = data.map((unit) => {
-    const lessonsWithCompletedStatus = unit.lessons.map((lesson) => {
-      if (lesson.challenges.length === 0)
-        return { ...lesson, completed: false };
-
-      const allCompletedChallenges = lesson.challenges.every((challenge) => {
-        return (
-          challenge.challengeProgress &&
+  const withCompletion = data.map((unit) => ({
+    ...unit,
+    lessons: unit.lessons.map(({ challenges, ...lesson }) => {
+      const done = challenges.filter(
+        (challenge) =>
           challenge.challengeProgress.length > 0 &&
           challenge.challengeProgress.every((progress) => progress.completed)
-        );
-      });
+      ).length;
 
-      return { ...lesson, completed: allCompletedChallenges };
-    });
+      return {
+        ...lesson,
+        completed: challenges.length > 0 && done === challenges.length,
+        percentage: challenges.length
+          ? Math.round((done / challenges.length) * 100)
+          : 0,
+      };
+    }),
+  }));
 
-    return { ...unit, lessons: lessonsWithCompletedStatus };
-  });
-
-  return normalizedData;
+  return computeProgress(withCompletion);
 });
 
 export const getCourseById = cache(async (courseId: number) => {
@@ -120,48 +134,9 @@ export const getCourseById = cache(async (courseId: number) => {
 });
 
 export const getCourseProgress = cache(async () => {
-  const { userId } = await getAuth();
-  const userProgress = await getUserProgress();
+  const activeLesson = firstOpenLesson(await getUnits());
 
-  if (!userId || !userProgress?.activeCourseId) return null;
-
-  const unitsInActiveCourse = await db.query.units.findMany({
-    orderBy: (units, { asc }) => [asc(units.order)],
-    where: eq(units.courseId, userProgress.activeCourseId),
-    with: {
-      lessons: {
-        where: visibleLessons,
-        orderBy: (lessons, { asc }) => [asc(lessons.order)],
-        with: {
-          unit: true,
-          challenges: {
-            with: {
-              challengeProgress: {
-                where: eq(challengeProgress.userId, userId),
-              },
-            },
-          },
-        },
-      },
-    },
-  });
-
-  const firstUncompletedLesson = unitsInActiveCourse
-    .flatMap((unit) => unit.lessons)
-    .find((lesson) => {
-      return lesson.challenges.some((challenge) => {
-        return (
-          !challenge.challengeProgress ||
-          challenge.challengeProgress.length === 0 ||
-          challenge.challengeProgress.some((progress) => !progress.completed)
-        );
-      });
-    });
-
-  return {
-    activeLesson: firstUncompletedLesson,
-    activeLessonId: firstUncompletedLesson?.id,
-  };
+  return { activeLesson, activeLessonId: activeLesson?.id };
 });
 
 export const getLesson = cache(async (id?: number) => {
@@ -173,6 +148,12 @@ export const getLesson = cache(async (id?: number) => {
   const lessonId = id || courseProgress?.activeLessonId;
 
   if (!lessonId) return null;
+
+  // Only lessons of the active course that are open (see lib/progress).
+  const lessonState = (await getUnits())
+    .flatMap((unit) => unit.lessons)
+    .find((lesson) => lesson.id === lessonId);
+  if (!lessonState || lessonState.locked) return null;
 
   const data = await db.query.lessons.findFirst({
     where: eq(lessons.id, lessonId),
@@ -203,26 +184,6 @@ export const getLesson = cache(async (id?: number) => {
   });
 
   return { ...data, challenges: normalizedChallenges };
-});
-
-export const getLessonPercentage = cache(async () => {
-  const courseProgress = await getCourseProgress();
-
-  if (!courseProgress?.activeLessonId) return 0;
-
-  const lesson = await getLesson(courseProgress?.activeLessonId);
-
-  if (!lesson) return 0;
-
-  const completedChallenges = lesson.challenges.filter(
-    (challenge) => challenge.completed
-  );
-
-  const percentage = Math.round(
-    (completedChallenges.length / lesson.challenges.length) * 100
-  );
-
-  return percentage;
 });
 
 export const getUserSubscription = cache(async () => {

@@ -78,6 +78,8 @@ part-time).** Full Quran adds ≈ 3–4 weeks, and Tajweed adds ≈ 3–4 weeks.
 - Done in M1: Arabic by default, full RTL, logical margins, mirrored sidebar
   and arrows, Arabic-Indic digits, a typed UI dictionary (`lib/i18n.ts`), and
   an English ⇄ العربية switch saved in a cookie.
+- Clerk's sign-in and sign-up screens are in Arabic too
+  (`@clerk/localizations`).
 - Left: an Arabic UI font for interface text, and an RTL check of every new
   exercise screen from M2.
 
@@ -98,10 +100,22 @@ part-time).** Full Quran adds ≈ 3–4 weeks, and Tajweed adds ≈ 3–4 weeks.
 - The kids course uses every type. `LISTEN` and `COMPLETE_WORD` are Arabic
   only, so the English course has no translation questions.
 
+- **Exams and unlocking** (`lib/progress.ts`): every unit ends with an
+  exam. Units open in order; the next one opens when this one is completed
+  **or its exam is passed**. Passing the exam doesn't mark the skipped
+  lessons as done: they stay open to learn. Inside an open unit, lessons open
+  one by one, but the exam is always open, so a learner can test out.
+- **Kids / full mode**, a per-device setting (Settings page and tour):
+  - Kids: only kids courses, no hearts, no shop, leaderboard or quests, bigger
+    cards and buttons, no keyboard-shortcut badges.
+  - Full: every other course, with hearts.
+- **Welcome tour** on the first visit, with Skip on every step and a
+  kids/full choice at the end. Settings can show it again.
+
 **Left:**
 
 - Repeat-N-times audio and audio-first prompts for kids who can't read yet.
-- Kids UI variant: bigger tap targets, rewards and stickers, no hearts.
+- Rewards and stickers for kids.
 
 ### M3 — Kids track (3–4 weeks, runs alongside M2; content is the bottleneck)
 
@@ -125,10 +139,13 @@ part-time).** Full Quran adds ≈ 3–4 weeks, and Tajweed adds ≈ 3–4 weeks.
 - Privacy-respecting analytics and error reporting.
 - Feedback loop and a process for reporting content corrections.
 
-### M5 — Full Quran (3–4 weeks)
+### M5 — Full Quran 🚧 _started_
 
-- Exercises generated from the Tanzil Uthmani text for all 6,236 ayat. Since
-  the text is fixed, no hand-written lessons are needed.
+- ✅ **The Whole Quran** course (Arabic and English meaning): 114 units in
+  mushaf order, a lesson per 5 ayat mixing question types, and an exam per
+  surah whose questions span more than one ayah (what follows a two-ayah
+  passage, how a passage ends, three ayat in order, ayat ↔ numbers,
+  listening).
 - Difficulty levels: hide 1 word → hide several words → first-letter hints →
   the whole ayah.
 - Typed Arabic answers with an on-screen Arabic keyboard. Matching ignores

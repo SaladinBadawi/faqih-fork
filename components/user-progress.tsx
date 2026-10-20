@@ -10,6 +10,8 @@ type UserProgressProps = {
   hearts: number;
   points: number;
   hasActiveSubscription: boolean;
+  /** Kids mode: no hearts, and points aren't spent in a shop. */
+  hideHearts?: boolean;
 };
 
 export const UserProgress = ({
@@ -17,6 +19,7 @@ export const UserProgress = ({
   hearts,
   points,
   hasActiveSubscription,
+  hideHearts,
 }: UserProgressProps) => {
   return (
     <div className="flex w-full items-center justify-between gap-x-2">
@@ -32,35 +35,39 @@ export const UserProgress = ({
         </Button>
       </Link>
 
-      <Link href="/shop">
-        <Button variant="ghost" className="text-orange-500">
-          <Image
-            src="/points.svg"
-            height={28}
-            width={28}
-            alt="Points"
-            className="me-2"
-          />
-          {points}
-        </Button>
-      </Link>
+      {!hideHearts && (
+        <>
+          <Link href="/shop">
+            <Button variant="ghost" className="text-orange-500">
+              <Image
+                src="/points.svg"
+                height={28}
+                width={28}
+                alt="Points"
+                className="me-2"
+              />
+              {points}
+            </Button>
+          </Link>
 
-      <Link href="/shop">
-        <Button variant="ghost" className="text-rose-500">
-          <Image
-            src="/heart.svg"
-            height={22}
-            width={22}
-            alt="Hearts"
-            className="me-2"
-          />
-          {hasActiveSubscription ? (
-            <InfinityIcon className="stroke-3 h-4 w-4" />
-          ) : (
-            hearts
-          )}
-        </Button>
-      </Link>
+          <Link href="/shop">
+            <Button variant="ghost" className="text-rose-500">
+              <Image
+                src="/heart.svg"
+                height={22}
+                width={22}
+                alt="Hearts"
+                className="me-2"
+              />
+              {hasActiveSubscription ? (
+                <InfinityIcon className="stroke-3 h-4 w-4" />
+              ) : (
+                hearts
+              )}
+            </Button>
+          </Link>
+        </>
+      )}
     </div>
   );
 };
