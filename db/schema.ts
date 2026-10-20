@@ -12,6 +12,7 @@ import {
 import { MAX_HEARTS } from "@/constants";
 
 export const tracksEnum = pgEnum("track", [
+  "kids",
   "quran",
   "hadith",
   "sirah",
@@ -31,6 +32,8 @@ export const courses = pgTable("courses", {
   slug: text("slug").unique(), // e.g. "quran-al-fatiha"; set by the content importer
   track: tracksEnum("track"),
   language: languageEnum("language").notNull().default("en"),
+  minAge: integer("min_age"), // for kids courses
+  maxAge: integer("max_age"),
 });
 
 export const coursesRelations = relations(courses, ({ many }) => ({
@@ -111,6 +114,17 @@ export const challengesRelations = relations(challenges, ({ one, many }) => ({
     references: [sourceTexts.id],
   }),
 }));
+
+// The 114 surahs, imported with the full Quran text (one source_texts row per
+// ayah, keyed "quran:<surah>:<ayah>").
+export const surahs = pgTable("surahs", {
+  number: integer("number").primaryKey(),
+  name: text("name").notNull(), // Arabic, e.g. "سُورَةُ ٱلْفَاتِحَةِ"
+  englishName: text("english_name").notNull(), // e.g. "Al-Faatiha"
+  englishNameTranslation: text("english_name_translation").notNull(), // e.g. "The Opening"
+  revelationType: text("revelation_type").notNull(), // "Meccan" | "Medinan"
+  ayahCount: integer("ayah_count").notNull(),
+});
 
 export const sourceKindEnum = pgEnum("source_kind", [
   "ayah",

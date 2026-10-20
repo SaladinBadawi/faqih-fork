@@ -30,7 +30,9 @@ export type UnitSpec = {
 export type CourseSpec = {
   slug: string;
   language: Language;
-  track: "quran" | "hadith" | "adhkar";
+  track: "kids" | "quran" | "hadith" | "adhkar";
+  minAge?: number;
+  maxAge?: number;
   title: string;
   imageSrc: string;
   units: UnitSpec[];
@@ -60,13 +62,13 @@ const shuffle = <T>(items: T[], seed: string) => {
 };
 
 // Picks `count` distinct distractors from `pool`, excluding the answer.
-const pick = <T>(pool: T[], exclude: T, count: number, seed: string) =>
+export const pick = <T>(pool: T[], exclude: T, count: number, seed: string) =>
   shuffle(
     [...new Set(pool)].filter((p) => p !== exclude),
     seed
   ).slice(0, count);
 
-const options = (correct: string, wrong: string[], seed: string) =>
+export const options = (correct: string, wrong: string[], seed: string) =>
   shuffle(
     [
       { text: correct, correct: true },
@@ -75,7 +77,7 @@ const options = (correct: string, wrong: string[], seed: string) =>
     `${seed}:options`
   );
 
-const words = (text: string) => text.split(/\s+/).filter(Boolean);
+export const words = (text: string) => text.split(/\s+/).filter(Boolean);
 
 const excerpt = (text: string, maxWords: number) => {
   const w = words(text);
@@ -87,7 +89,7 @@ const chunk = <T>(items: T[], size: number) =>
     items.slice(i * size, i * size + size)
   );
 
-const num = (lang: Language, n: number) =>
+export const num = (lang: Language, n: number) =>
   lang === "ar" ? n.toLocaleString("ar-EG") : String(n);
 
 const range = (lang: Language, a: number, b: number) =>
