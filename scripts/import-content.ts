@@ -151,7 +151,8 @@ const insertCourse = async (
           .insert(schema.challenges)
           .values({
             lessonId: lessonRow.id,
-            type: "ASSIST",
+            type: challenge.type ?? "ASSIST",
+            payload: challenge.payload ?? null,
             prompt: challenge.prompt,
             question: challenge.question,
             sourceTextId,
@@ -159,13 +160,15 @@ const insertCourse = async (
           })
           .returning();
 
-        await db.insert(schema.challengeOptions).values(
-          challenge.options.map((o) => ({
-            challengeId: challengeRow.id,
-            text: o.text,
-            correct: o.correct,
-          }))
-        );
+        // ORDER, MATCH and typed answers have no options.
+        if (challenge.options.length > 0)
+          await db.insert(schema.challengeOptions).values(
+            challenge.options.map((o) => ({
+              challengeId: challengeRow.id,
+              text: o.text,
+              correct: o.correct,
+            }))
+          );
         challengeCount++;
       }
     }

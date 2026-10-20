@@ -1,4 +1,5 @@
 import { challengeOptions, challenges } from "@/db/schema";
+import { LIST_TYPES } from "@/lib/exercises";
 import { cn } from "@/lib/utils";
 
 import { Card } from "./card";
@@ -24,9 +25,9 @@ export const Challenge = ({
     <div
       className={cn(
         "grid gap-2",
-        type === "ASSIST" && "grid-cols-1",
-        type === "SELECT" &&
-          "grid-cols-2 lg:grid-cols-[repeat(auto-fit,minmax(0,1fr))]"
+        LIST_TYPES.includes(type)
+          ? "grid-cols-1"
+          : "grid-cols-2 lg:grid-cols-[repeat(auto-fit,minmax(0,1fr))]"
       )}
     >
       {options.map((option, i) => (

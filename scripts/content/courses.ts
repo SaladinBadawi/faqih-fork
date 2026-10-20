@@ -1,3 +1,5 @@
+import type { ChallengePayload, ChallengeType } from "@/lib/exercises";
+
 import type { SourceText } from "./sources";
 
 // Builds courses from imported source texts, one course per language.
@@ -14,6 +16,8 @@ export type Language = "ar" | "en";
 export type OptionSpec = { text: string; correct: boolean };
 
 export type ChallengeSpec = {
+  type?: ChallengeType; // ASSIST unless set
+  payload?: ChallengePayload;
   prompt: string;
   question: string;
   sourceKey: string;
