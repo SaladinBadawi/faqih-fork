@@ -1,8 +1,12 @@
+import { normalizeArabic } from "@/lib/arabic";
+import { shuffle } from "@/lib/exercises";
+
 import {
   type ChallengeSpec,
   type CourseSpec,
   type Language,
   type LessonSpec,
+  num,
   options,
   pick,
   words,
@@ -18,6 +22,26 @@ export const KIDS_SURAHS = [
 const KIDS_MIN_AGE = 5;
 const KIDS_MAX_AGE = 10;
 const DISTRACTORS = 2;
+const ORDER_MIN_WORDS = 3;
+const ORDER_MAX_WORDS = 10;
+const MATCH_PAIRS = 4;
+const EXCERPT_WORDS = 5;
+
+// The words of an ayah. Waqf (pause) marks that stand alone are kept with
+// the word before them, so a learner never has to place a bare mark.
+const ayahWords = (text: string) =>
+  words(text).reduce<string[]>((out, w) => {
+    if (!/\p{L}/u.test(w) && out.length > 0) out[out.length - 1] += ` ${w}`;
+    else out.push(w);
+    return out;
+  }, []);
+
+const excerpt = (text: string) => {
+  const w = ayahWords(text);
+  return w.length <= EXCERPT_WORDS
+    ? text
+    : `${w.slice(0, EXCERPT_WORDS).join(" ")} …`;
+};
 
 // Wrong answers come from the same surah first (the closest real
 // alternatives), then from the other kids surahs. All of them are real ayat.
@@ -107,6 +131,141 @@ const surahUnit = (
 
   const present = (c: ChallengeSpec | null): c is ChallengeSpec => c !== null;
 
+  // Tap the ayah's words in order.
+  const order = (ayah: SourceText): ChallengeSpec | null => {
+    const w = ayahWords(text(ayah));
+    if (w.length < ORDER_MIN_WORDS || w.length > ORDER_MAX_WORDS) return null;
+    return {
+      type: "ORDER",
+      payload: { words: w },
+      prompt: ar ? "رتّب كلمات الآية" : "Put the words in order (meaning)",
+      question: "",
+      sourceKey: ayah.key,
+      options: [],
+    };
+  };
+
+  // Hear the recitation, pick the ayah. Arabic only: in English it would be
+  // a translation question.
+  const listen = (ayah: SourceText): ChallengeSpec | null => {
+    if (!ar || !ayah.audioSrc) return null;
+    const seed = `kids:${ayah.key}:listen`;
+    const same = ayat.filter((a) => a.arabic === ayah.arabic).map(text);
+    const wrong = distractors(own, rest, same, seed);
+    if (!wrong) return null;
+    return {
+      type: "LISTEN",
+      prompt: "استمع واختر الآية",
+      question: "",
+      sourceKey: ayah.key,
+      options: options(text(ayah), wrong, seed),
+    };
+  };
+
+  // One word of the ayah is missing; wrong choices are real words from other
+  // ayat. Arabic only. The longest word is hidden: it is the most distinctive.
+  const completeWord = (ayah: SourceText): ChallengeSpec | null => {
+    if (!ar) return null;
+    const w = ayahWords(ayah.arabic);
+    if (w.length < ORDER_MIN_WORDS) return null;
+    const lengths = w.map((x) => normalizeArabic(x).length);
+    const hide = lengths.indexOf(Math.max(...lengths));
+    const answer = w[hide];
+    const key = normalizeArabic(answer);
+    const pool = (list: SourceText[]) =>
+      list
+        .flatMap((a) => ayahWords(a.arabic))
+        .filter((x) => normalizeArabic(x).length > 1);
+    const same = [...pool(ayat), ...pool(others)].filter(
+      (x) => normalizeArabic(x) === key
+    );
+    const seed = `kids:${ayah.key}:word`;
+    const wrong = distractors(
+      pool(ayat),
+      pool(others),
+      [answer, ...same],
+      seed
+    );
+    // Skip if two choices would read the same without diacritics.
+    if (!wrong || new Set(wrong.map(normalizeArabic)).size < wrong.length)
+      return null;
+    return {
+      type: "COMPLETE_WORD",
+      payload: {
+        before: w.slice(0, hide).join(" "),
+        after: w.slice(hide + 1).join(" "),
+        answer,
+        mode: "choose",
+      },
+      prompt: "أكمل الكلمة الناقصة",
+      question: "",
+      sourceKey: ayah.key,
+      options: options(answer, wrong, seed),
+    };
+  };
+
+  // Match the first ayat to their numbers. Repeated or same-looking ayat are
+  // left out, so every pair is unambiguous.
+  const match = (): ChallengeSpec | null => {
+    const seen = new Set<string>();
+    const chosen = ayat
+      .filter((a) => {
+        const left = excerpt(text(a));
+        if (seen.has(left)) return false;
+        seen.add(left);
+        return true;
+      })
+      .slice(0, MATCH_PAIRS);
+    if (chosen.length < 3) return null;
+    return {
+      type: "MATCH",
+      payload: {
+        pairs: chosen.map((a) => ({
+          left: excerpt(text(a)),
+          right: num(lang, a.number),
+        })),
+      },
+      prompt: ar ? "صِل كل آية برقمها" : "Match each ayah to its number",
+      question: "",
+      sourceKey: chosen[0].key,
+      options: [],
+    };
+  };
+
+  // Does the second ayah come right after the first? Half the time it does;
+  // otherwise it is another real ayah of the surah that can't follow.
+  const trueFalse = (
+    ayah: SourceText,
+    following: SourceText
+  ): ChallengeSpec | null => {
+    const seed = `kids:${following.key}:tf:${lang}`;
+    const right = ayat
+      .slice(0, -1)
+      .flatMap((a, i) => (text(a) === text(ayah) ? [text(ayat[i + 1])] : []));
+    const [wrongNext] = pick(
+      own.filter((t) => !right.includes(t) && t !== text(ayah)),
+      text(following),
+      1,
+      seed
+    );
+    const isTrue = !wrongNext || shuffle([true, false], seed)[0];
+    if (!isTrue && !wrongNext) return null;
+    const second = isTrue ? text(following) : wrongNext;
+    return {
+      type: "TRUE_FALSE",
+      prompt: ar
+        ? "هل تأتي الآية الثانية بعد الأولى مباشرة؟"
+        : "Does the second ayah come right after the first? (meaning)",
+      question: `${text(ayah)}\n⬇\n${second}`,
+      sourceKey: following.key,
+      // Always in this order: true, then false.
+      options: [
+        { text: ar ? "صح" : "True", correct: isTrue },
+        { text: ar ? "خطأ" : "False", correct: !isTrue },
+      ],
+    };
+  };
+
   const lessons: LessonSpec[] = [
     {
       title: ar ? "ما الآية التالية؟" : "What comes next?",
@@ -118,6 +277,29 @@ const surahUnit = (
     {
       title: ar ? "أكمل الآية" : "Complete the ayah",
       challenges: ayat.map(complete).filter(present),
+    },
+    {
+      title: ar ? "استمع واختر" : "Listen and choose",
+      challenges: ayat.map(listen).filter(present),
+    },
+    {
+      title: ar ? "الكلمة الناقصة" : "The missing word",
+      challenges: ayat.map(completeWord).filter(present),
+    },
+    {
+      title: ar ? "رتّب الكلمات" : "Word order",
+      challenges: ayat.map(order).filter(present),
+    },
+    {
+      title: ar ? "صح أم خطأ" : "True or false",
+      challenges: ayat
+        .slice(0, -1)
+        .map((a, i) => trueFalse(a, ayat[i + 1]))
+        .filter(present),
+    },
+    {
+      title: ar ? "أرقام الآيات" : "Ayah numbers",
+      challenges: [match()].filter(present),
     },
   ];
 

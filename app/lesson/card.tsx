@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useAudio, useKey } from "react-use";
 
 import { challenges } from "@/db/schema";
+import { LIST_TYPES } from "@/lib/exercises";
 import { cn, isArabic } from "@/lib/utils";
 
 type CardProps = {
@@ -32,6 +33,7 @@ export const Card = ({
 }: CardProps) => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [audio, _, controls] = useAudio({ src: audioSrc || "" });
+  const isList = LIST_TYPES.includes(type);
 
   const handleClick = useCallback(() => {
     if (disabled) return;
@@ -55,7 +57,7 @@ export const Card = ({
           status === "wrong" &&
           "border-rose-300 bg-rose-100 hover:bg-rose-100",
         disabled && "pointer-events-none hover:bg-white",
-        type === "ASSIST" && "w-full lg:p-3"
+        isList && "w-full lg:p-3"
       )}
     >
       {audio}
@@ -68,10 +70,10 @@ export const Card = ({
       <div
         className={cn(
           "flex items-center justify-between",
-          type === "ASSIST" && "flex-row-reverse"
+          isList && "flex-row-reverse"
         )}
       >
-        {type === "ASSIST" && <div aria-hidden />}
+        {isList && <div aria-hidden />}
         <p
           dir="auto"
           className={cn(

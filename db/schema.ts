@@ -2,6 +2,7 @@ import { relations } from "drizzle-orm";
 import {
   boolean,
   integer,
+  jsonb,
   pgEnum,
   pgTable,
   serial,
@@ -10,6 +11,7 @@ import {
 } from "drizzle-orm/pg-core";
 
 import { MAX_HEARTS } from "@/constants";
+import { CHALLENGE_TYPES, type ChallengePayload } from "@/lib/exercises";
 
 export const tracksEnum = pgEnum("track", [
   "kids",
@@ -84,7 +86,7 @@ export const lessonsRelations = relations(lessons, ({ one, many }) => ({
   challenges: many(challenges),
 }));
 
-export const challengesEnum = pgEnum("type", ["SELECT", "ASSIST"]);
+export const challengesEnum = pgEnum("type", CHALLENGE_TYPES);
 
 export const challenges = pgTable("challenges", {
   id: serial("id").primaryKey(),
@@ -96,6 +98,8 @@ export const challenges = pgTable("challenges", {
   type: challengesEnum("type").notNull(),
   question: text("question").notNull(),
   prompt: text("prompt"), // overrides the default title shown above the question
+  // Type-specific data (word order, pairs, typed answer...); see lib/exercises.
+  payload: jsonb("payload").$type<ChallengePayload>(),
   sourceTextId: integer("source_text_id").references(() => sourceTexts.id, {
     onDelete: "set null",
   }),

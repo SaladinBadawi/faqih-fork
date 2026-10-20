@@ -15,6 +15,13 @@ The import always loads the **full Quran** (114 surahs, 6,236 ayat) into
 course can use any ayah. The basmalah that the Uthmani edition puts before
 the first ayah of each surah is removed (it is only an ayah in Al-Fatiha).
 
+## Exercise types
+
+Besides picking an option (`ASSIST`, `SELECT`), a challenge can be `LISTEN`,
+`TRUE_FALSE`, `COMPLETE_WORD`, `COMPLETE_AYAH`, `ORDER` or `MATCH`. The
+type-specific data lives in `challenges.payload` (see `lib/exercises.ts`).
+The kids course generates all of them from the Quran text.
+
 ## Rules
 
 - Every course is built twice: an Arabic course and an English course. A

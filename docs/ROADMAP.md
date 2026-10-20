@@ -81,18 +81,27 @@ part-time).** Full Quran adds ≈ 3–4 weeks, and Tajweed adds ≈ 3–4 weeks.
 - Left: an Arabic UI font for interface text, and an RTL check of every new
   exercise screen from M2.
 
-### M2 — Exercise engine and audio (2–3 weeks)
+### M2 — Exercise engine and audio 🚧 _in progress_
 
-- New challenge types:
-  - `MATCH` (pairs)
-  - `ORDER` (arrange words or ayat)
-  - `COMPLETE_WORD` (choose or type the missing word)
-  - `COMPLETE_AYAH` (choose or type the rest of the ayah)
-  - `LISTEN` (audio → pick the ayah)
-  - `TRUE_FALSE`
-- Audio player with per-ayah clips, slow replay and repeat-N-times.
-- Audio-first prompts, so young kids who can't read yet can play.
-- Kids UI variant: big tap targets, rewards and stickers, no hearts.
+**Done:**
+
+- New challenge types, each with its own screen (`app/lesson/exercises/`):
+  - `ORDER`: tap the ayah's words in order
+  - `MATCH`: pair items from two columns (ayah ↔ number)
+  - `COMPLETE_WORD`: one missing word, chosen or typed
+  - `COMPLETE_AYAH`: type the rest of an ayah
+  - `LISTEN`: hear the recitation, pick the ayah
+  - `TRUE_FALSE`: does this ayah come next?
+- Typed Arabic answers are matched leniently (`lib/arabic.ts`): no diacritics
+  needed, and the Uthmani or everyday spelling is accepted.
+- Audio player with normal and slow replay.
+- The kids course uses every type. `LISTEN` and `COMPLETE_WORD` are Arabic
+  only, so the English course has no translation questions.
+
+**Left:**
+
+- Repeat-N-times audio and audio-first prompts for kids who can't read yet.
+- Kids UI variant: bigger tap targets, rewards and stickers, no hearts.
 
 ### M3 — Kids track (3–4 weeks, runs alongside M2; content is the bottleneck)
 
