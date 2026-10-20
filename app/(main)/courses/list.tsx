@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { upsertUserProgress } from "@/actions/user-progress";
+import { useMessages } from "@/components/locale-provider";
 import { courses, userProgress } from "@/db/schema";
 
 import { Card } from "./card";
@@ -18,6 +19,7 @@ type ListProps = {
 export const List = ({ courses, activeCourseId }: ListProps) => {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
+  const t = useMessages();
 
   const onClick = (id: number) => {
     if (pending) return;
@@ -25,7 +27,12 @@ export const List = ({ courses, activeCourseId }: ListProps) => {
     if (id === activeCourseId) return router.push("/learn");
 
     startTransition(() => {
-      upsertUserProgress(id).catch(() => toast.error("Something went wrong."));
+      upsertUserProgress(id).catch((error) => {
+        // The action ends with redirect("/learn"), which surfaces here as a
+        // rejected promise; that's success, not an error.
+        if (String(error?.digest ?? "").startsWith("NEXT_REDIRECT")) return;
+        toast.error(t.error);
+      });
     });
   };
 

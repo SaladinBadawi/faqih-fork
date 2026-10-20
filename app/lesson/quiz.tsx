@@ -10,24 +10,47 @@ import { toast } from "sonner";
 
 import { upsertChallengeProgress } from "@/actions/challenge-progress";
 import { reduceHearts } from "@/actions/user-progress";
+import { useMessages } from "@/components/locale-provider";
 import { MAX_HEARTS } from "@/constants";
-import { challengeOptions, challenges, userSubscription } from "@/db/schema";
+import {
+  challengeOptions,
+  challenges,
+  lessons,
+  sourceTexts,
+  userSubscription,
+} from "@/db/schema";
+import {
+  type Answer,
+  type CompleteAyahPayload,
+  type CompleteWordPayload,
+  type MatchPayload,
+  type OrderPayload,
+  usesOptions,
+} from "@/lib/exercises";
 import { useHeartsModal } from "@/store/use-hearts-modal";
 import { usePracticeModal } from "@/store/use-practice-modal";
 
 import { Challenge } from "./challenge";
+import { AudioPlayer } from "./exercises/audio-player";
+import { BlankSentence } from "./exercises/blank-sentence";
+import { MatchExercise } from "./exercises/match";
+import { OrderExercise } from "./exercises/order";
+import { TypedAnswer } from "./exercises/typed-answer";
 import { Footer } from "./footer";
 import { Header } from "./header";
 import { QuestionBubble } from "./question-bubble";
 import { ResultCard } from "./result-card";
+import { SourceNote } from "./source-note";
 
 type QuizProps = {
   initialPercentage: number;
   initialHearts: number;
   initialLessonId: number;
+  reviewStatus: (typeof lessons.$inferSelect)["reviewStatus"];
   initialLessonChallenges: (typeof challenges.$inferSelect & {
     completed: boolean;
     challengeOptions: (typeof challengeOptions.$inferSelect)[];
+    sourceText: typeof sourceTexts.$inferSelect | null;
   })[];
   userSubscription:
     | (typeof userSubscription.$inferSelect & {
@@ -40,6 +63,7 @@ export const Quiz = ({
   initialPercentage,
   initialHearts,
   initialLessonId,
+  reviewStatus,
   initialLessonChallenges,
   userSubscription,
 }: QuizProps) => {
@@ -49,11 +73,8 @@ export const Quiz = ({
   const [incorrectAudio, _i, incorrectControls] = useAudio({
     src: "/incorrect.wav",
   });
-  const [finishAudio] = useAudio({
-    src: "/finish.mp3",
-    autoPlay: true,
-  });
   const { width, height } = useWindowSize();
+  const t = useMessages();
 
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -80,9 +101,26 @@ export const Quiz = ({
 
   const [selectedOption, setSelectedOption] = useState<number>();
   const [status, setStatus] = useState<"none" | "wrong" | "correct">("none");
+  // Exercises without options (ORDER, MATCH, typed answers) report here.
+  const [answer, setAnswer] = useState<Answer>({
+    ready: false,
+    correct: false,
+  });
+  // Bumped on retry, so those exercises start over.
+  const [attempt, setAttempt] = useState(0);
 
   const challenge = challenges[activeIndex];
   const options = challenge?.challengeOptions ?? [];
+  const optionBased =
+    !!challenge && usesOptions(challenge.type, challenge.payload);
+  const ready = optionBased ? !!selectedOption : answer.ready;
+
+  const resetAnswer = () => {
+    setStatus("none");
+    setSelectedOption(undefined);
+    setAnswer({ ready: false, correct: false });
+    setAttempt((a) => a + 1);
+  };
 
   const onNext = () => {
     setActiveIndex((current) => current + 1);
@@ -95,26 +133,27 @@ export const Quiz = ({
   };
 
   const onContinue = () => {
-    if (!selectedOption) return;
+    if (!ready) return;
 
     if (status === "wrong") {
-      setStatus("none");
-      setSelectedOption(undefined);
+      resetAnswer();
       return;
     }
 
     if (status === "correct") {
       onNext();
-      setStatus("none");
-      setSelectedOption(undefined);
+      resetAnswer();
       return;
     }
 
-    const correctOption = options.find((option) => option.correct);
+    let isCorrect = answer.correct;
+    if (optionBased) {
+      const correctOption = options.find((option) => option.correct);
+      if (!correctOption) return;
+      isCorrect = correctOption.id === selectedOption;
+    }
 
-    if (!correctOption) return;
-
-    if (correctOption.id === selectedOption) {
+    if (isCorrect) {
       startTransition(() => {
         upsertChallengeProgress(challenge.id)
           .then((response) => {
@@ -132,7 +171,7 @@ export const Quiz = ({
               setHearts((prev) => Math.min(prev + 1, MAX_HEARTS));
             }
           })
-          .catch(() => toast.error("Something went wrong. Please try again."));
+          .catch(() => toast.error(t.lesson.error));
       });
     } else {
       startTransition(() => {
@@ -148,7 +187,7 @@ export const Quiz = ({
 
             if (!response?.error) setHearts((prev) => Math.max(prev - 1, 0));
           })
-          .catch(() => toast.error("Something went wrong. Please try again."));
+          .catch(() => toast.error(t.lesson.error));
       });
     }
   };
@@ -156,7 +195,8 @@ export const Quiz = ({
   if (!challenge) {
     return (
       <>
-        {finishAudio}
+        {/* Mounted only on the finish screen, so it plays exactly once there. */}
+        <audio src="/finish.mp3" autoPlay />
         <Confetti
           recycle={false}
           numberOfPieces={500}
@@ -182,7 +222,7 @@ export const Quiz = ({
           />
 
           <h1 className="text-lg font-bold text-neutral-700 lg:text-3xl">
-            Great job! <br /> You&apos;ve completed the lesson.
+            {t.lesson.finished}
           </h1>
 
           <div className="flex w-full items-center gap-x-4">
@@ -203,10 +243,15 @@ export const Quiz = ({
     );
   }
 
+  const prompts: Partial<Record<string, string>> = t.lesson.prompts;
   const title =
-    challenge.type === "ASSIST"
-      ? "Select the correct meaning"
-      : challenge.question;
+    challenge.prompt ??
+    prompts[challenge.type] ??
+    (challenge.type === "ASSIST" ? t.lesson.defaultPrompt : challenge.question);
+
+  const exerciseKey = `${challenge.id}:${attempt}`;
+  const payload = challenge.payload;
+  const selectedText = options.find((o) => o.id === selectedOption)?.text;
 
   return (
     <>
@@ -226,17 +271,74 @@ export const Quiz = ({
             </h1>
 
             <div>
-              {challenge.type === "ASSIST" && (
+              {(challenge.type === "ASSIST" ||
+                challenge.type === "TRUE_FALSE" ||
+                challenge.type === "COMPLETE_AYAH") && (
                 <QuestionBubble question={challenge.question} />
               )}
 
-              <Challenge
-                options={options}
-                onSelect={onSelect}
-                status={status}
-                selectedOption={selectedOption}
-                disabled={pending}
-                type={challenge.type}
+              {challenge.type === "LISTEN" &&
+                challenge.sourceText?.audioSrc && (
+                  <AudioPlayer src={challenge.sourceText.audioSrc} />
+                )}
+
+              {challenge.type === "COMPLETE_WORD" && (
+                <BlankSentence
+                  before={(payload as CompleteWordPayload).before}
+                  after={(payload as CompleteWordPayload).after}
+                  fill={optionBased ? selectedText : undefined}
+                />
+              )}
+
+              {optionBased && (
+                <Challenge
+                  options={options}
+                  onSelect={onSelect}
+                  status={status}
+                  selectedOption={selectedOption}
+                  disabled={pending}
+                  type={challenge.type}
+                />
+              )}
+
+              {challenge.type === "ORDER" && (
+                <OrderExercise
+                  key={exerciseKey}
+                  words={(payload as OrderPayload).words}
+                  seed={challenge.id}
+                  status={status}
+                  onAnswer={setAnswer}
+                />
+              )}
+
+              {challenge.type === "MATCH" && (
+                <MatchExercise
+                  key={exerciseKey}
+                  pairs={(payload as MatchPayload).pairs}
+                  seed={challenge.id}
+                  status={status}
+                  onAnswer={setAnswer}
+                />
+              )}
+
+              {!optionBased &&
+                (challenge.type === "COMPLETE_WORD" ||
+                  challenge.type === "COMPLETE_AYAH") && (
+                  <TypedAnswer
+                    key={exerciseKey}
+                    answer={
+                      (payload as CompleteWordPayload | CompleteAyahPayload)
+                        .answer
+                    }
+                    multiline={challenge.type === "COMPLETE_AYAH"}
+                    status={status}
+                    onAnswer={setAnswer}
+                  />
+                )}
+
+              <SourceNote
+                source={challenge.sourceText}
+                isDraft={reviewStatus !== "reviewed"}
               />
             </div>
           </div>
@@ -244,7 +346,7 @@ export const Quiz = ({
       </div>
 
       <Footer
-        disabled={pending || !selectedOption}
+        disabled={pending || !ready}
         status={status}
         onCheck={onContinue}
       />

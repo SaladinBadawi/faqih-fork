@@ -1,10 +1,11 @@
-import { useCallback } from "react";
+import { useCallback, useRef } from "react";
 
 import Image from "next/image";
-import { useAudio, useKey } from "react-use";
+import { useKey } from "react-use";
 
 import { challenges } from "@/db/schema";
-import { cn } from "@/lib/utils";
+import { LIST_TYPES } from "@/lib/exercises";
+import { cn, isArabic } from "@/lib/utils";
 
 type CardProps = {
   id: number;
@@ -30,15 +31,19 @@ export const Card = ({
   disabled,
   type,
 }: CardProps) => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [audio, _, controls] = useAudio({ src: audioSrc || "" });
+  // Most options have no audio: only render an <audio> element when they do.
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const isList = LIST_TYPES.includes(type);
 
   const handleClick = useCallback(() => {
     if (disabled) return;
 
-    void controls.play();
+    if (audioRef.current) {
+      audioRef.current.currentTime = 0;
+      void audioRef.current.play().catch(() => {});
+    }
     onClick();
-  }, [disabled, onClick, controls]);
+  }, [disabled, onClick]);
 
   useKey(shortcut, handleClick, {}, [handleClick]);
 
@@ -55,10 +60,10 @@ export const Card = ({
           status === "wrong" &&
           "border-rose-300 bg-rose-100 hover:bg-rose-100",
         disabled && "pointer-events-none hover:bg-white",
-        type === "ASSIST" && "w-full lg:p-3"
+        isList && "w-full lg:p-3"
       )}
     >
-      {audio}
+      {audioSrc && <audio ref={audioRef} src={audioSrc} preload="auto" />}
       {imageSrc && (
         <div className="relative mb-4 aspect-square max-h-[80px] w-full lg:max-h-[150px]">
           <Image src={imageSrc} fill alt={text} />
@@ -68,14 +73,15 @@ export const Card = ({
       <div
         className={cn(
           "flex items-center justify-between",
-          type === "ASSIST" && "flex-row-reverse"
+          isList && "flex-row-reverse"
         )}
       >
-        {type === "ASSIST" && <div aria-hidden />}
+        {isList && <div aria-hidden />}
         <p
           dir="auto"
           className={cn(
             "text-sm text-neutral-600 lg:text-base",
+            isArabic(text) && "font-arabic text-lg leading-loose lg:text-xl",
             selected && "text-sky-500",
             selected && status === "correct" && "text-green-500",
             selected && status === "wrong" && "text-rose-500"

@@ -2,7 +2,9 @@ import { cache } from "react";
 
 import { eq } from "drizzle-orm";
 
+import { features } from "@/config";
 import { getAuth } from "@/lib/auth";
+import { getLocale } from "@/lib/locale";
 
 import db from "./drizzle";
 import {
@@ -16,11 +18,19 @@ import {
 
 const DAY_IN_MS = 86_400_000;
 
+// Only courses in the visitor's language.
 export const getCourses = cache(async () => {
-  const data = await db.query.courses.findMany();
+  const data = await db.query.courses.findMany({
+    where: eq(courses.language, await getLocale()),
+  });
 
   return data;
 });
+
+// Draft lessons are hidden unless features.showDrafts is on.
+const visibleLessons = features.showDrafts
+  ? undefined
+  : eq(lessons.reviewStatus, "reviewed");
 
 export const getUserProgress = cache(async () => {
   const { userId } = await getAuth();
@@ -33,6 +43,10 @@ export const getUserProgress = cache(async () => {
       activeCourse: true,
     },
   });
+
+  // A course in the other language isn't active while this language is shown.
+  if (data?.activeCourse && data.activeCourse.language !== (await getLocale()))
+    return { ...data, activeCourse: null, activeCourseId: null };
 
   return data;
 });
@@ -48,6 +62,7 @@ export const getUnits = cache(async () => {
     orderBy: (units, { asc }) => [asc(units.order)],
     with: {
       lessons: {
+        where: visibleLessons,
         orderBy: (lessons, { asc }) => [asc(lessons.order)],
         with: {
           challenges: {
@@ -93,6 +108,7 @@ export const getCourseById = cache(async (courseId: number) => {
         orderBy: (units, { asc }) => [asc(units.order)],
         with: {
           lessons: {
+            where: visibleLessons,
             orderBy: (lessons, { asc }) => [asc(lessons.order)],
           },
         },
@@ -114,6 +130,7 @@ export const getCourseProgress = cache(async () => {
     where: eq(units.courseId, userProgress.activeCourseId),
     with: {
       lessons: {
+        where: visibleLessons,
         orderBy: (lessons, { asc }) => [asc(lessons.order)],
         with: {
           unit: true,
@@ -164,6 +181,7 @@ export const getLesson = cache(async (id?: number) => {
         orderBy: (challenges, { asc }) => [asc(challenges.order)],
         with: {
           challengeOptions: true,
+          sourceText: true,
           challengeProgress: {
             where: eq(challengeProgress.userId, userId),
           },
@@ -173,6 +191,7 @@ export const getLesson = cache(async (id?: number) => {
   });
 
   if (!data || !data.challenges) return null;
+  if (data.reviewStatus !== "reviewed" && !features.showDrafts) return null;
 
   const normalizedChallenges = data.challenges.map((challenge) => {
     const completed =
