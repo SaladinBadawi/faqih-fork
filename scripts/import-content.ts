@@ -1,5 +1,6 @@
 import { neon } from "@neondatabase/serverless";
 import "dotenv/config";
+import { sql as drizzleSql, getTableColumns } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/neon-http";
 
 import * as schema from "@/db/schema";
@@ -10,11 +11,14 @@ import {
   buildNawawi,
   type CourseSpec,
 } from "./content/courses";
+import { buildKidsShortSurahs } from "./content/kids";
 import {
+  type SourceText,
+  type Surah,
   fetchHisnChapter,
   fetchNawawi,
-  fetchSurah,
-  type SourceText,
+  fetchQuran,
+  surahAyat,
 } from "./content/sources";
 
 // Usage: npm run content:import [-- --refresh]
@@ -27,33 +31,74 @@ const db = drizzle(sql, { schema });
 
 const refresh = process.argv.includes("--refresh");
 
+const BATCH_SIZE = 500;
+
+const batches = <T>(items: T[]) =>
+  Array.from({ length: Math.ceil(items.length / BATCH_SIZE) }, (_, i) =>
+    items.slice(i * BATCH_SIZE, (i + 1) * BATCH_SIZE)
+  );
+
+// On a key conflict, overwrite every column with the newly imported value.
+const updateFromExcluded = Object.fromEntries(
+  Object.entries(getTableColumns(schema.sourceTexts))
+    .filter(([field]) => field !== "id" && field !== "key")
+    .map(([field, column]) => [
+      field,
+      drizzleSql.raw(`excluded."${column.name}"`),
+    ])
+);
+
+// Batched: the full Quran alone is 6,236 rows.
 const upsertSourceTexts = async (texts: SourceText[]) => {
   const ids = new Map<string, number>();
 
-  for (const t of texts) {
-    const values = {
-      key: t.key,
-      kind: t.kind,
-      arabic: t.arabic,
-      translation: t.translation,
-      translationBy: t.translationBy,
-      citation: t.citation,
-      citationAr: t.citationAr,
-      hadithRef: t.hadithRef,
-      hadithRefAr: t.hadithRefAr,
-      sourceUrl: t.sourceUrl,
-      audioSrc: t.audioSrc,
-      repeat: t.repeat,
-    };
-    const [row] = await db
+  for (const batch of batches(texts)) {
+    const rows = await db
       .insert(schema.sourceTexts)
-      .values(values)
-      .onConflictDoUpdate({ target: schema.sourceTexts.key, set: values })
-      .returning({ id: schema.sourceTexts.id });
-    ids.set(t.key, row.id);
+      .values(
+        batch.map((t) => ({
+          key: t.key,
+          kind: t.kind,
+          arabic: t.arabic,
+          translation: t.translation,
+          translationBy: t.translationBy,
+          citation: t.citation,
+          citationAr: t.citationAr,
+          hadithRef: t.hadithRef,
+          hadithRefAr: t.hadithRefAr,
+          sourceUrl: t.sourceUrl,
+          audioSrc: t.audioSrc,
+          repeat: t.repeat,
+        }))
+      )
+      .onConflictDoUpdate({
+        target: schema.sourceTexts.key,
+        set: updateFromExcluded,
+      })
+      .returning({ id: schema.sourceTexts.id, key: schema.sourceTexts.key });
+
+    for (const row of rows) ids.set(row.key, row.id);
   }
 
   return ids;
+};
+
+const upsertSurahs = async (surahs: Surah[]) => {
+  await db
+    .insert(schema.surahs)
+    .values(surahs)
+    .onConflictDoUpdate({
+      target: schema.surahs.number,
+      set: {
+        name: drizzleSql.raw("excluded.name"),
+        englishName: drizzleSql.raw("excluded.english_name"),
+        englishNameTranslation: drizzleSql.raw(
+          "excluded.english_name_translation"
+        ),
+        revelationType: drizzleSql.raw("excluded.revelation_type"),
+        ayahCount: drizzleSql.raw("excluded.ayah_count"),
+      },
+    });
 };
 
 const insertCourse = async (
@@ -68,6 +113,8 @@ const insertCourse = async (
       slug: course.slug,
       track: course.track,
       language: course.language,
+      minAge: course.minAge ?? null,
+      maxAge: course.maxAge ?? null,
     })
     .returning();
 
@@ -131,20 +178,22 @@ const insertCourse = async (
 
 const main = async () => {
   console.log(`Fetching sources${refresh ? " (refresh)" : ""}…`);
-  const [fatiha, nawawi, morningEvening] = await Promise.all([
-    fetchSurah(1, refresh),
+  const [quran, nawawi, morningEvening] = await Promise.all([
+    fetchQuran(refresh),
     fetchNawawi(refresh),
     fetchHisnChapter(27, refresh),
   ]);
 
+  const fatiha = surahAyat(quran.ayat, 1);
   const missingRefs = morningEvening.filter((d) => !d.hadithRef).length;
   console.log(
-    `  Al-Fatiha: ${fatiha.length} ayat · Nawawi: ${nawawi.length} hadith · Hisn al-Muslim ch. 27: ${morningEvening.length} adhkar (${missingRefs} still need a hadith reference)`
+    `  Quran: ${quran.surahs.length} surahs, ${quran.ayat.length} ayat · Nawawi: ${nawawi.length} hadith · Hisn al-Muslim ch. 27: ${morningEvening.length} adhkar (${missingRefs} still need a hadith reference)`
   );
 
   console.log("Saving source texts…");
+  await upsertSurahs(quran.surahs);
   const sourceIds = await upsertSourceTexts([
-    ...fatiha,
+    ...quran.ayat,
     ...nawawi,
     ...morningEvening,
   ]);
@@ -156,6 +205,7 @@ const main = async () => {
   // One course per language; nothing mixes Arabic and English.
   for (const lang of ["ar", "en"] as const)
     for (const course of [
+      buildKidsShortSurahs(quran.surahs, quran.ayat, lang),
       buildFatiha(fatiha, lang),
       buildNawawi(nawawi, 10, lang),
       buildMorningEvening(morningEvening, lang),

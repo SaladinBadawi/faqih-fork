@@ -20,6 +20,7 @@ export type SourceText = {
   repeat: number | null;
   // Not stored: helpers for building challenges.
   number: number;
+  surah?: number;
 };
 
 const CACHE_DIR = path.join(process.cwd(), "content", "cache");
@@ -51,48 +52,115 @@ const arNum = (n: number) => n.toLocaleString("ar-EG");
 
 /* ---------- Quran: api.alquran.cloud (Uthmani text from Tanzil) ---------- */
 
-type AlQuranEdition = {
-  name: string; // Arabic surah name, e.g. "سُورَةُ ٱلْفَاتِحَةِ"
-  edition: { identifier: string; englishName: string };
-  ayahs: { numberInSurah: number; text: string; audio?: string }[];
+export const SURAH_COUNT = 114;
+export const AYAH_COUNT = 6236;
+
+export type Surah = {
+  number: number;
+  name: string; // Arabic, e.g. "سُورَةُ ٱلْفَاتِحَةِ"
+  englishName: string;
+  englishNameTranslation: string;
+  revelationType: string;
+  ayahCount: number;
 };
 
-export const fetchSurah = async (
-  surah: number,
+type AlQuranFull = {
+  surahs: (Omit<Surah, "ayahCount"> & {
+    ayahs: {
+      number: number;
+      numberInSurah: number;
+      text: string;
+      audio?: string;
+    }[];
+  })[];
+};
+
+// Removes Arabic diacritics and Quranic marks, for comparing words.
+const bare = (s: string) =>
+  s.replace(/[\u064B-\u065F\u0670\u06D6-\u06ED]/g, "");
+
+// The Uthmani edition prefixes the basmalah to the first ayah of every surah
+// except Al-Fatiha (where it is ayah 1) and At-Tawbah. It isn't part of those
+// ayat, so drop it. Compared without diacritics, since its spelling varies.
+const stripBasmalah = (surah: number, text: string, basmalah: string) => {
+  if (surah === 1) return text;
+  const w = text.split(" ");
+  const b = basmalah.split(" ");
+  const prefixed = b.every((word, i) => bare(w[i] ?? "") === bare(word));
+  return prefixed ? w.slice(b.length).join(" ") : text;
+};
+
+/** The whole Quran: 114 surahs and 6,236 ayat with translation and audio. */
+export const fetchQuran = async (
   refresh: boolean
-): Promise<SourceText[]> => {
-  const editions = "quran-uthmani,en.sahih,ar.alafasy";
-  const { data } = await fetchJson<{ data: AlQuranEdition[] }>(
-    `https://api.alquran.cloud/v1/surah/${surah}/editions/${editions}`,
-    `quran-${surah}.json`,
-    refresh
+): Promise<{ surahs: Surah[]; ayat: SourceText[] }> => {
+  const edition = (id: string) =>
+    fetchJson<{ data: AlQuranFull }>(
+      `https://api.alquran.cloud/v1/quran/${id}`,
+      `quran-${id}.json`,
+      refresh
+    ).then(({ data }) => data.surahs);
+
+  const [arabic, english, audio] = await Promise.all([
+    edition("quran-uthmani"),
+    edition("en.sahih"),
+    edition("ar.alafasy"),
+  ]);
+
+  const flat = (surahs: AlQuranFull["surahs"]) =>
+    surahs.flatMap((s) => s.ayahs);
+  const [ar, en, au] = [flat(arabic), flat(english), flat(audio)];
+
+  if (arabic.length !== SURAH_COUNT || ar.length !== AYAH_COUNT)
+    throw new Error(
+      `alquran.cloud: expected ${SURAH_COUNT} surahs and ${AYAH_COUNT} ayat, got ${arabic.length} and ${ar.length}`
+    );
+  if (en.length !== AYAH_COUNT || au.length !== AYAH_COUNT)
+    throw new Error(
+      "alquran.cloud: translation or audio edition is incomplete"
+    );
+
+  const basmalah = clean(ar[0].text);
+
+  const ayat = arabic.flatMap((surah) =>
+    surah.ayahs.map((ayah): SourceText => {
+      // Editions are aligned by the ayah's number in the whole Quran.
+      const i = ayah.number - 1;
+      return {
+        key: `quran:${surah.number}:${ayah.numberInSurah}`,
+        kind: "ayah",
+        arabic: stripBasmalah(surah.number, clean(ayah.text), basmalah),
+        translation: clean(en[i].text),
+        translationBy: "Sahih International",
+        citation: `Quran ${surah.number}:${ayah.numberInSurah}`,
+        citationAr: `${surah.name}: ${arNum(ayah.numberInSurah)}`,
+        hadithRef: null,
+        hadithRefAr: null,
+        sourceUrl: `https://quran.com/${surah.number}/${ayah.numberInSurah}`,
+        audioSrc: au[i].audio ?? null,
+        repeat: null,
+        number: ayah.numberInSurah,
+        surah: surah.number,
+      };
+    })
   );
 
-  const byId = (id: string) => {
-    const edition = data.find((e) => e.edition.identifier === id);
-    if (!edition) throw new Error(`alquran.cloud: missing edition ${id}`);
-    return edition;
+  return {
+    surahs: arabic.map(({ ayahs, ...surah }) => ({
+      number: surah.number,
+      name: surah.name,
+      englishName: surah.englishName,
+      englishNameTranslation: surah.englishNameTranslation,
+      revelationType: surah.revelationType,
+      ayahCount: ayahs.length,
+    })),
+    ayat,
   };
-  const arabic = byId("quran-uthmani");
-  const english = byId("en.sahih");
-  const audio = byId("ar.alafasy");
-
-  return arabic.ayahs.map((ayah, i) => ({
-    key: `quran:${surah}:${ayah.numberInSurah}`,
-    kind: "ayah",
-    arabic: clean(ayah.text),
-    translation: clean(english.ayahs[i].text),
-    translationBy: "Sahih International",
-    citation: `Quran ${surah}:${ayah.numberInSurah}`,
-    citationAr: `${arabic.name}: ${arNum(ayah.numberInSurah)}`,
-    hadithRef: null,
-    hadithRefAr: null,
-    sourceUrl: `https://quran.com/${surah}/${ayah.numberInSurah}`,
-    audioSrc: audio.ayahs[i].audio ?? null,
-    repeat: null,
-    number: ayah.numberInSurah,
-  }));
 };
+
+/** The ayat of one surah, in order. */
+export const surahAyat = (ayat: SourceText[], surah: number) =>
+  ayat.filter((a) => a.surah === surah);
 
 /* ---------- Hadith: fawazahmed0/hadith-api (via jsDelivr) ---------- */
 
