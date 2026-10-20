@@ -69,6 +69,8 @@ faqih/
     |-- arabic-text.tsx
     |-- auth-controls.tsx
     |-- feed-wrapper.tsx
+    |-- language-switcher.tsx
+    |-- locale-provider.tsx
     |-- mobile-header.tsx
     |-- mobile-sidebar.tsx
     |-- promo.tsx
@@ -79,6 +81,8 @@ faqih/
     |-- user-progress.tsx
   |- config/
     |-- index.ts
+  |- content/
+    |-- references/
   |- db/
     |-- drizzle.ts
     |-- queries.ts
@@ -86,11 +90,17 @@ faqih/
   |- docs/
   |- lib/
     |-- admin.ts
+    |-- arabic.ts
     |-- auth.ts
+    |-- exercises.ts
+    |-- i18n.ts
+    |-- locale.ts
     |-- stripe.ts
     |-- utils.ts
   |- public/
   |- scripts/
+    |-- content/
+    |-- import-content.ts
     |-- prod.ts
   |- store/
     |-- use-exit-modal.ts
