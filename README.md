@@ -73,11 +73,13 @@ faqih/
     |-- locale-provider.tsx
     |-- mobile-header.tsx
     |-- mobile-sidebar.tsx
+    |-- mode-provider.tsx
     |-- promo.tsx
     |-- quests.tsx
     |-- sidebar-item.tsx
     |-- sidebar.tsx
     |-- sticky-wrapper.tsx
+    |-- tour.tsx
     |-- user-progress.tsx
   |- config/
     |-- index.ts
@@ -95,6 +97,9 @@ faqih/
     |-- exercises.ts
     |-- i18n.ts
     |-- locale.ts
+    |-- mode.ts
+    |-- preferences.ts
+    |-- progress.ts
     |-- stripe.ts
     |-- utils.ts
   |- public/
@@ -250,6 +255,7 @@ Useful resources and dependencies that are used in Lingo.
 - Elevenlabs AI: https://elevenlabs.io/
 - Flagpack: https://flagpack.xyz/
 <!--- DEPENDENCIES_START --->
+- [@clerk/localizations](https://www.npmjs.com/package/@clerk/localizations): 4.5.6
 - [@clerk/nextjs](https://www.npmjs.com/package/@clerk/nextjs): ^7.2.8
 - [@eslint/eslintrc](https://www.npmjs.com/package/@eslint/eslintrc): ^3
 - [@neondatabase/serverless](https://www.npmjs.com/package/@neondatabase/serverless): ^1.1.0
