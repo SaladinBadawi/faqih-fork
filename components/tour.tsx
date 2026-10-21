@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { Baby, BookOpen } from "lucide-react";
 import Image from "next/image";
@@ -28,28 +28,57 @@ import { cn } from "@/lib/utils";
 // A short welcome tour on the first visit: what Faqih is, how units,
 // lessons and exams work, and kids or full mode. Skip ends it at any step;
 // Settings can show it again.
-export const Tour = ({ open: initiallyOpen }: { open: boolean }) => {
+//
+// The component stays mounted while the dialog closes. Unmounting a Radix
+// dialog mid-close (e.g. remounting it with a new key on refresh) can leave
+// `pointer-events: none` on <body>, so nothing on the page can be clicked.
+export const Tour = ({ open: show }: { open: boolean }) => {
   const router = useRouter();
   const t = useMessages();
   const currentMode = useMode();
-  const [open, setOpen] = useState(initiallyOpen);
+  const [open, setOpen] = useState(show);
   const [step, setStep] = useState(0);
   const [mode, setMode] = useState<Mode>(currentMode);
+  const refreshAfterClose = useRef(false);
+
+  // "Show the tour again" in Settings clears the cookie and refreshes, so the
+  // server sends show=true again: reopen from the first step.
+  const [shown, setShown] = useState(show);
+  if (show !== shown) {
+    setShown(show);
+    if (show) {
+      setOpen(true);
+      setStep(0);
+    }
+  }
 
   const steps = t.tour.steps;
   const isLast = step === steps.length - 1;
 
   const finish = (chosen?: Mode) => {
     setPreferenceCookie(TOUR_COOKIE, "1");
-    if (chosen && chosen !== currentMode)
+    // Only a new mode changes what the server renders (courses, menu).
+    if (chosen && chosen !== currentMode) {
       setPreferenceCookie(MODE_COOKIE, chosen);
+      refreshAfterClose.current = true;
+    }
     setOpen(false);
-    router.refresh();
+  };
+
+  // Runs once the close animation is over.
+  const onClosed = (event: Event) => {
+    event.preventDefault();
+    // Belt and braces: never leave the page unclickable.
+    document.body.style.pointerEvents = "";
+    if (refreshAfterClose.current) {
+      refreshAfterClose.current = false;
+      router.refresh();
+    }
   };
 
   return (
     <Dialog open={open} onOpenChange={(next) => !next && finish()}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md" onCloseAutoFocus={onClosed}>
         <DialogHeader>
           <div className="mb-5 flex w-full items-center justify-center">
             <Image src="/mascot.svg" alt="" height={80} width={80} />

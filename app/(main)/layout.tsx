@@ -10,8 +10,7 @@ const MainLayout = async ({ children }: PropsWithChildren) => {
 
   return (
     <>
-      {/* Keyed so "show the tour again" in Settings reopens it. */}
-      <Tour key={String(showTour)} open={showTour} />
+      <Tour open={showTour} />
       <MobileHeader />
       <Sidebar className="hidden lg:flex" />
       <main className="h-full pt-[50px] lg:ps-[256px] lg:pt-0">
