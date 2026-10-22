@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { useMessages } from "@/components/locale-provider";
+import { useReadAloud } from "@/components/read-aloud";
 import { type Answer, type ExerciseStatus, shuffle } from "@/lib/exercises";
 import { isArabic } from "@/lib/utils";
 
@@ -10,6 +11,8 @@ import { WordChip } from "./word-chip";
 
 type OrderExerciseProps = {
   words: string[]; // in the correct order
+  /** Recitation per word ("s:a:w") or ayah ("s:a"), played when tapped. */
+  recitations?: (string | null)[];
   seed: number;
   status: ExerciseStatus;
   onAnswer: (answer: Answer) => void;
@@ -18,11 +21,19 @@ type OrderExerciseProps = {
 // Tap the words of an ayah in order. Tapping a placed word puts it back.
 export const OrderExercise = ({
   words,
+  recitations,
   seed,
   status,
   onAnswer,
 }: OrderExerciseProps) => {
   const t = useMessages();
+  const readAloud = useReadAloud();
+
+  // Hear the word (or ayah) on the chip as recitation, if read-aloud is on.
+  const recite = (i: number) => {
+    const ref = recitations?.[i];
+    if (readAloud.enabled && ref) readAloud.play([{ kind: "recite", ref }]);
+  };
 
   // Word positions, shuffled. Never start in the right order.
   const [bank] = useState(() => {
@@ -60,7 +71,10 @@ export const OrderExercise = ({
             text={words[i]}
             tone={status}
             disabled={locked}
-            onClick={() => update(placed.filter((p) => p !== i))}
+            onClick={() => {
+              recite(i);
+              update(placed.filter((p) => p !== i));
+            }}
           />
         ))}
       </div>
@@ -72,7 +86,10 @@ export const OrderExercise = ({
             text={words[i]}
             invisible={placed.includes(i)}
             disabled={locked}
-            onClick={() => update([...placed, i])}
+            onClick={() => {
+              recite(i);
+              update([...placed, i]);
+            }}
           />
         ))}
       </div>

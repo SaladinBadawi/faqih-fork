@@ -41,6 +41,7 @@ export const Challenge = ({
           onClick={() => onSelect(option.id)}
           status={status}
           audioSrc={option.audioSrc}
+          recitation={option.recitation}
           disabled={disabled}
           type={type}
         />

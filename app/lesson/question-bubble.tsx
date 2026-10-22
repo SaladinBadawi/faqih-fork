@@ -26,6 +26,7 @@ export const QuestionBubble = ({ question }: QuestionBubbleProps) => {
 
       <div
         dir="auto"
+        aria-live="polite"
         className={cn(
           "relative whitespace-pre-line rounded-xl border-2 px-4 py-2 text-sm lg:text-base",
           isArabic(question) && "font-arabic text-lg leading-loose lg:text-2xl"

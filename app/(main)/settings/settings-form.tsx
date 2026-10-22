@@ -1,15 +1,25 @@
 "use client";
 
-import { Baby, BookOpen, Check, Compass, Languages } from "lucide-react";
+import {
+  Baby,
+  BookOpen,
+  Check,
+  Compass,
+  Languages,
+  Volume2,
+  VolumeX,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import { useLocale, useMessages } from "@/components/locale-provider";
 import { useMode } from "@/components/mode-provider";
+import { useReadAloud } from "@/components/read-aloud";
 import { Button } from "@/components/ui/button";
 import { LOCALES, LOCALE_COOKIE, messages } from "@/lib/i18n";
 import {
   MODE_COOKIE,
   type Mode,
+  READ_ALOUD_COOKIE,
   TOUR_COOKIE,
   clearPreferenceCookie,
   setPreferenceCookie,
@@ -52,6 +62,12 @@ export const SettingsForm = () => {
   const t = useMessages();
   const locale = useLocale();
   const mode = useMode();
+  const readAloud = useReadAloud().enabled;
+
+  const setReadAloud = (on: boolean) => {
+    setPreferenceCookie(READ_ALOUD_COOKIE, on ? "1" : "0");
+    router.refresh();
+  };
 
   const setMode = (next: Mode) => {
     setPreferenceCookie(MODE_COOKIE, next);
@@ -79,6 +95,25 @@ export const SettingsForm = () => {
           icon={BookOpen}
           title={t.settings.full}
           description={t.settings.fullDescription}
+        />
+      </section>
+
+      <section className="flex flex-col gap-y-3">
+        <h2 className="text-lg font-bold text-neutral-700">
+          {t.settings.readAloud}
+        </h2>
+        <Choice
+          selected={readAloud}
+          onClick={() => setReadAloud(true)}
+          icon={Volume2}
+          title={t.settings.readAloudOn}
+          description={t.settings.readAloudDescription}
+        />
+        <Choice
+          selected={!readAloud}
+          onClick={() => setReadAloud(false)}
+          icon={VolumeX}
+          title={t.settings.readAloudOff}
         />
       </section>
 

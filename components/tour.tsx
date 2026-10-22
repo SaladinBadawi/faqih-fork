@@ -2,12 +2,13 @@
 
 import { useRef, useState } from "react";
 
-import { Baby, BookOpen } from "lucide-react";
+import { Baby, BookOpen, Volume2 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 import { useMessages } from "@/components/locale-provider";
 import { useMode } from "@/components/mode-provider";
+import { useReadAloud } from "@/components/read-aloud";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -20,6 +21,7 @@ import {
 import {
   MODE_COOKIE,
   type Mode,
+  READ_ALOUD_COOKIE,
   TOUR_COOKIE,
   setPreferenceCookie,
 } from "@/lib/mode";
@@ -39,6 +41,9 @@ export const Tour = ({ open: show }: { open: boolean }) => {
   const [open, setOpen] = useState(show);
   const [step, setStep] = useState(0);
   const [mode, setMode] = useState<Mode>(currentMode);
+  const currentReadAloud = useReadAloud().enabled;
+  // Follows the mode picked below (on for kids) until the learner sets it.
+  const [readAloud, setReadAloud] = useState(currentReadAloud);
   const refreshAfterClose = useRef(false);
 
   // "Show the tour again" in Settings clears the cookie and refreshes, so the
@@ -57,9 +62,13 @@ export const Tour = ({ open: show }: { open: boolean }) => {
 
   const finish = (chosen?: Mode) => {
     setPreferenceCookie(TOUR_COOKIE, "1");
-    // Only a new mode changes what the server renders (courses, menu).
+    // Only a new mode or read-aloud choice changes what the server renders.
     if (chosen && chosen !== currentMode) {
       setPreferenceCookie(MODE_COOKIE, chosen);
+      refreshAfterClose.current = true;
+    }
+    if (chosen && readAloud !== currentReadAloud) {
+      setPreferenceCookie(READ_ALOUD_COOKIE, readAloud ? "1" : "0");
       refreshAfterClose.current = true;
     }
     setOpen(false);
@@ -107,7 +116,10 @@ export const Tour = ({ open: show }: { open: boolean }) => {
                   key={value}
                   type="button"
                   aria-pressed={mode === value}
-                  onClick={() => setMode(value)}
+                  onClick={() => {
+                    setMode(value);
+                    setReadAloud(value === "kids");
+                  }}
                   className={cn(
                     "flex flex-col items-center gap-y-2 rounded-xl border-2 border-b-4 p-4 font-bold text-neutral-700 hover:bg-black/5",
                     mode === value && "border-sky-300 bg-sky-100 text-sky-600"
@@ -118,6 +130,16 @@ export const Tour = ({ open: show }: { open: boolean }) => {
                 </button>
               ))}
             </div>
+            <label className="mt-2 flex items-center justify-center gap-x-2 font-bold text-neutral-700">
+              <input
+                type="checkbox"
+                checked={readAloud}
+                onChange={(e) => setReadAloud(e.target.checked)}
+                className="h-5 w-5 accent-sky-500"
+              />
+              <Volume2 className="h-5 w-5 text-sky-500" />
+              {t.settings.readAloud}
+            </label>
           </div>
         )}
 

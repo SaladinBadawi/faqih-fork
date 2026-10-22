@@ -11,7 +11,11 @@ import {
 } from "drizzle-orm/pg-core";
 
 import { MAX_HEARTS } from "@/constants";
-import { CHALLENGE_TYPES, type ChallengePayload } from "@/lib/exercises";
+import {
+  CHALLENGE_TYPES,
+  type ChallengePayload,
+  type ReadAloud,
+} from "@/lib/exercises";
 
 export const tracksEnum = pgEnum("track", [
   "kids",
@@ -105,6 +109,8 @@ export const challenges = pgTable("challenges", {
   prompt: text("prompt"), // overrides the default title shown above the question
   // Type-specific data (word order, pairs, typed answer...); see lib/exercises.
   payload: jsonb("payload").$type<ChallengePayload>(),
+  // Ayat shown in the question, recited when it's read aloud (lib/recitation).
+  readAloud: jsonb("read_aloud").$type<ReadAloud>(),
   sourceTextId: integer("source_text_id").references(() => sourceTexts.id, {
     onDelete: "set null",
   }),
@@ -174,6 +180,9 @@ export const challengeOptions = pgTable("challenge_options", {
   correct: boolean("correct").notNull(),
   imageSrc: text("image_src"),
   audioSrc: text("audio_src"),
+  // The ayah ("s:a") or word ("s:a:w") this option shows, played as
+  // recitation when it's tapped (lib/recitation). Null: not Quran text.
+  recitation: text("recitation"),
 });
 
 export const challengeOptionsRelations = relations(

@@ -25,14 +25,22 @@ const MATCH_PAIRS = 4;
 const EXCERPT_WORDS = 5;
 const PASSAGE_EXCERPT_WORDS = 8;
 
-// The words of an ayah. Waqf (pause) marks that stand alone are kept with
-// the word before them, so a learner never has to place a bare mark.
-export const ayahWords = (text: string) =>
-  words(text).reduce<string[]>((out, w) => {
-    if (!/\p{L}/u.test(w) && out.length > 0) out[out.length - 1] += ` ${w}`;
-    else out.push(w);
-    return out;
-  }, []);
+// The words of an ayah. Marks that stand alone are kept with a word, so a
+// learner never has to place a bare mark: waqf (pause) marks with the word
+// before them, a leading hizb mark (۞) with the word after it. The result
+// lines up with Quran.com's word positions, used for word-by-word audio.
+export const ayahWords = (text: string) => {
+  const out: string[] = [];
+  let leading = "";
+  for (const w of words(text)) {
+    if (/\p{L}/u.test(w)) {
+      out.push(leading ? `${leading} ${w}` : w);
+      leading = "";
+    } else if (out.length > 0) out[out.length - 1] += ` ${w}`;
+    else leading = leading ? `${leading} ${w}` : w;
+  }
+  return out;
+};
 
 const excerpt = (text: string, max = EXCERPT_WORDS) => {
   const w = ayahWords(text);
