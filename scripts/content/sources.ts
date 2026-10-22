@@ -21,6 +21,7 @@ export type SourceText = {
   // Not stored: helpers for building challenges.
   number: number;
   surah?: number;
+  juz?: number;
 };
 
 const CACHE_DIR = path.join(process.cwd(), "content", "cache");
@@ -71,6 +72,7 @@ type AlQuranFull = {
       numberInSurah: number;
       text: string;
       audio?: string;
+      juz: number;
     }[];
   })[];
 };
@@ -141,6 +143,7 @@ export const fetchQuran = async (
         repeat: null,
         number: ayah.numberInSurah,
         surah: surah.number,
+        juz: ayah.juz,
       };
     })
   );

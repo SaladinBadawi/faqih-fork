@@ -13,6 +13,7 @@ import {
 } from "./content/courses";
 import { withExams } from "./content/exams";
 import { buildFullQuran } from "./content/full-quran";
+import { buildJuzExams } from "./content/juz-exams";
 import { buildKidsShortSurahs } from "./content/kids";
 import { buildRecitationIndex, withRecitations } from "./content/recitations";
 import {
@@ -245,6 +246,7 @@ const main = async () => {
     for (const course of [
       buildKidsShortSurahs(quran.surahs, quran.ayat, lang),
       buildFullQuran(quran.surahs, quran.ayat, lang),
+      buildJuzExams(quran.surahs, quran.ayat, lang),
       // These have no exam builder of their own: exams sample their lessons.
       withExams(buildFatiha(fatiha, lang)),
       withExams(buildNawawi(nawawi, 10, lang)),
