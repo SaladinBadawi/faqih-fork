@@ -157,8 +157,8 @@
   },
   {
     "title": "Kids lessons: Al-Fatiha and the last 10 surahs",
-    "body": "Listen, repeat, order and complete lessons for Al-Fatiha and An-Nas to Al-Fil.\n\n**Done when:** every surah has lessons and an exam, each with its source, ready for scholarly review.",
-    "status": "Ready",
+    "body": "Listen, repeat, order and complete lessons for Al-Fatiha and An-Nas to Al-Fil.\n\n**Done when:** every surah has lessons and an exam, each with its source, ready for scholarly review.\n\n**Status:** built. The \"Kids: Short Surahs\" course (Arabic and English) has lessons and an exam for every surah, each challenge with its source. Waiting for scholarly review.",
+    "status": "Scholarly review",
     "phase": "M3",
     "path": "Kids",
     "audience": "Kids",
@@ -414,6 +414,32 @@
     "type": "Content",
     "start": "2026-10-20",
     "target": "2027-02-28"
+  },
+  {
+    "title": "Richer surah exams: bigger and mixed for full mode, simple for kids",
+    "body": "Surah exams grow with the surah (one question per 10 ayat, 10 to 25; Al-Baqarah 26 instead of 8) and spread over the whole surah. Full mode mixes harder, exam-only kinds: type the missing word, which ayah comes before, passages, long word and ayah orderings. Exams use their own wrong answers, different from the lessons'. Kids exams keep to simple kinds they know from lessons, with no typing.\n\n**Done when:** merged and the content re-imported.\n\nPull request: https://github.com/aliabusaleh/faqih/pull/14",
+    "status": "Code review",
+    "phase": "M5",
+    "path": "Full Quran",
+    "audience": "Adults",
+    "priority": "P1",
+    "size": "M",
+    "type": "Feature",
+    "start": "2026-10-22",
+    "target": "2026-10-31"
+  },
+  {
+    "title": "Juz' exams: one exam per juz'",
+    "body": "A \"Juz' Exams\" course for full mode: one 20-question exam per juz', spread across every surah in it, including \"which surah is this ayah from?\" (never asked for an ayah that appears in more than one surah).\n\n**Done when:** merged and the content re-imported.\n\nPull request: https://github.com/aliabusaleh/faqih/pull/14",
+    "status": "Code review",
+    "phase": "M5",
+    "path": "Full Quran",
+    "audience": "Adults",
+    "priority": "P1",
+    "size": "M",
+    "type": "Feature",
+    "start": "2026-10-22",
+    "target": "2026-10-31"
   },
   {
     "title": "Hifz difficulty levels",
