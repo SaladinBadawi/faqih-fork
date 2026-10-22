@@ -1,4 +1,8 @@
-import type { ChallengePayload, ChallengeType } from "@/lib/exercises";
+import type {
+  ChallengePayload,
+  ChallengeType,
+  ReadAloud,
+} from "@/lib/exercises";
 
 import type { SourceText } from "./sources";
 
@@ -13,11 +17,18 @@ import type { SourceText } from "./sources";
 
 export type Language = "ar" | "en";
 
-export type OptionSpec = { text: string; correct: boolean };
+export type OptionSpec = {
+  text: string;
+  correct: boolean;
+  /** Ayah ("s:a") or word ("s:a:w") recited when tapped; see recitations.ts. */
+  recitation?: string;
+};
 
 export type ChallengeSpec = {
   type?: ChallengeType; // ASSIST unless set
   payload?: ChallengePayload;
+  /** Ayat shown in the question, recited when it's read aloud. */
+  readAloud?: ReadAloud;
   prompt: string;
   question: string;
   sourceKey: string;

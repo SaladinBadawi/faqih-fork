@@ -30,6 +30,27 @@ exam, mostly multi-ayah questions (`scripts/content/exams.ts`). Other
 courses get an exam sampled from the unit's lessons. Units can be taken in
 any order; passing a unit's exam clears it (see `lib/progress.ts`).
 
+## Read aloud and recitation
+
+Lessons can be heard as well as read (Settings → Read aloud; on by default in
+kids mode).
+
+- **Quran is only ever recited by a qari**, never by a synthetic voice.
+  `scripts/content/recitations.ts` marks which text is exactly an ayah
+  (`challenges.read_aloud`, `challenge_options.recitation`, ORDER
+  `recitations`) or exactly one word of an ayah. Fragments (half an ayah,
+  MATCH excerpts) get no audio.
+- Ayah audio comes from [EveryAyah](https://www.everyayah.com) at runtime
+  (`lib/recitation.ts`): al-Husary's teaching recitation (_muallim_) in kids
+  mode, Alafasy in full mode. Free to use with attribution.
+- Word audio is Quran.com's word-by-word recitation
+  (`audio.qurancdn.com/wbw/SSS_AAA_WWW.mp3`). Word positions come from
+  `ayahWords`, which matches Quran.com's word positions (checked on Al-Fatiha,
+  Al-Baqarah, Al-Kahf, Ya-Sin, Al-Ikhlas and An-Nas). **Confirm the licence
+  before a public launch.**
+- The app's own words (instructions, "أحسنت!") use the browser's speech
+  voice. With no voice for the language installed, they are skipped.
+
 ## Rules
 
 - Every course is built twice: an Arabic course and an English course. A

@@ -26,7 +26,11 @@ export const OPTION_TYPES: readonly ChallengeType[] = [
 /** Option types whose options are long texts, shown one per row. */
 export const LIST_TYPES: readonly ChallengeType[] = ["ASSIST", "LISTEN"];
 
-export type OrderPayload = { words: string[] }; // in the correct order
+export type OrderPayload = {
+  words: string[]; // in the correct order
+  /** Recitation per chip ("s:a:w" or "s:a", see lib/recitation), or null. */
+  recitations?: (string | null)[];
+};
 export type CompleteWordPayload = {
   before: string;
   after: string;
@@ -43,6 +47,9 @@ export type ChallengePayload =
   | MatchPayload;
 
 export type ExerciseStatus = "correct" | "wrong" | "none";
+
+/** The ayat shown in a question ("s:a"), recited when it is read aloud. */
+export type ReadAloud = { ayat: string[] };
 
 /** What an exercise reports to the lesson after every change. */
 export type Answer = { ready: boolean; correct: boolean };

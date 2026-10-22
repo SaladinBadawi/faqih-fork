@@ -14,6 +14,7 @@ import {
 import { withExams } from "./content/exams";
 import { buildFullQuran } from "./content/full-quran";
 import { buildKidsShortSurahs } from "./content/kids";
+import { buildRecitationIndex, withRecitations } from "./content/recitations";
 import {
   type SourceText,
   type Surah,
@@ -163,6 +164,7 @@ const insertCourse = async (
             lessonId: lessonIds.get(l + 1)!,
             type: challenge.type ?? ("ASSIST" as const),
             payload: challenge.payload ?? null,
+            readAloud: challenge.readAloud ?? null,
             prompt: challenge.prompt,
             question: challenge.question,
             sourceTextId,
@@ -193,6 +195,7 @@ const insertCourse = async (
         challengeId: challengeIds.get(`${row.lessonId}:${row.order}`)!,
         text: o.text,
         correct: o.correct,
+        recitation: o.recitation ?? null,
       }))
     );
     for (const batch of batches(optionRows))
@@ -233,6 +236,10 @@ const main = async () => {
   // Cascades to units, lessons, challenges, options and progress.
   await db.delete(schema.courses);
 
+  // Which question and option texts are whole ayat or words, to be heard
+  // as recitation (Arabic courses only).
+  const recitations = buildRecitationIndex(quran.ayat);
+
   // One course per language; nothing mixes Arabic and English.
   for (const lang of ["ar", "en"] as const)
     for (const course of [
@@ -243,7 +250,7 @@ const main = async () => {
       withExams(buildNawawi(nawawi, 10, lang)),
       withExams(buildMorningEvening(morningEvening, lang)),
     ])
-      await insertCourse(course, sourceIds);
+      await insertCourse(withRecitations(course, recitations), sourceIds);
 
   console.log("Done. All lessons are drafts until reviewed.");
 };

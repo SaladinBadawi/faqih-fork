@@ -114,10 +114,18 @@ part-time).** Full Quran adds ≈ 3–4 weeks, and Tajweed adds ≈ 3–4 weeks.
 - **Welcome tour** on the first visit, with Skip on every step and a
   kids/full choice at the end. Settings can show it again.
 
+- **Read aloud** (Settings and tour; on by default in kids mode): each
+  question's instruction is spoken and its ayat recited when it opens, with
+  a 🔊 replay button; tapping an option or a word chip recites that ayah or
+  word; "أحسنت!" / "حاول مرة أخرى" after each answer. Quran is only ever
+  recited by a qari (al-Husary _muallim_ for kids, Alafasy otherwise), never
+  synthesised. Questions are announced to screen readers (`aria-live`).
+
 **Left:**
 
-- Repeat-N-times audio and audio-first prompts for kids who can't read yet.
+- Repeat-N-times audio for kids who can't read yet.
 - Rewards and stickers for kids.
+- Audio for MATCH items and ayah fragments.
 
 ### M3 — Kids track (3–4 weeks, runs alongside M2; content is the bottleneck)
 

@@ -5,6 +5,7 @@ import { Amiri_Quran, Noto_Naskh_Arabic, Nunito } from "next/font/google";
 
 import { LocaleProvider } from "@/components/locale-provider";
 import { ModeProvider } from "@/components/mode-provider";
+import { ReadAloudProvider } from "@/components/read-aloud";
 import { ExitModal } from "@/components/modals/exit-modal";
 import { HeartsModal } from "@/components/modals/hearts-modal";
 import { PracticeModal } from "@/components/modals/practice-modal";
@@ -12,7 +13,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { APP_NAME, features, siteConfig } from "@/config";
 import { dir, messages } from "@/lib/i18n";
 import { getLocale } from "@/lib/locale";
-import { getMode } from "@/lib/preferences";
+import { getMode, isReadAloudOn } from "@/lib/preferences";
 import { cn } from "@/lib/utils";
 
 import "./globals.css";
@@ -48,7 +49,11 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const [locale, mode] = await Promise.all([getLocale(), getMode()]);
+  const [locale, mode, readAloud] = await Promise.all([
+    getLocale(),
+    getMode(),
+    isReadAloudOn(),
+  ]);
 
   const app = (
     <html lang={locale} dir={dir(locale)}>
@@ -63,11 +68,13 @@ export default async function RootLayout({
       >
         <LocaleProvider locale={locale}>
           <ModeProvider mode={mode}>
-            <Toaster theme="light" richColors closeButton />
-            <ExitModal />
-            <HeartsModal />
-            <PracticeModal />
-            {children}
+            <ReadAloudProvider enabled={readAloud}>
+              <Toaster theme="light" richColors closeButton />
+              <ExitModal />
+              <HeartsModal />
+              <PracticeModal />
+              {children}
+            </ReadAloudProvider>
           </ModeProvider>
         </LocaleProvider>
       </body>

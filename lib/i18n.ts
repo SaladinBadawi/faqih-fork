@@ -59,6 +59,11 @@ const en = {
     full: "Full",
     fullDescription: "Every course, the whole Quran, exams and hearts.",
     tour: "Show the tour again",
+    readAloud: "Read aloud",
+    readAloudOn: "On",
+    readAloudOff: "Off",
+    readAloudDescription:
+      "Reads each question and the option you tap. Ayat and their words are always recited by a qari, never by a computer voice.",
   },
   tour: {
     skip: "Skip",
@@ -118,7 +123,8 @@ const en = {
     totalXp: "Total XP",
     heartsLeft: "Hearts left",
     error: "Something went wrong. Please try again.",
-    examPassed: "Exam passed! The next unit is open.",
+    examPassed: "Exam passed! This unit is cleared.",
+    listenAgain: "Listen again",
     prompts: {
       LISTEN: "Listen and choose the ayah",
       TRUE_FALSE: "True or false?",
@@ -197,6 +203,11 @@ const ar: Messages = {
     full: "الكامل",
     fullDescription: "كل الدورات، القرآن كاملًا، الاختبارات والقلوب.",
     tour: "اعرض الجولة مرة أخرى",
+    readAloud: "القراءة بصوت",
+    readAloudOn: "مُفعّلة",
+    readAloudOff: "متوقفة",
+    readAloudDescription:
+      "يقرأ كل سؤال والخيار الذي تضغطه. الآيات وكلماتها يتلوها قارئ دائمًا، ولا يقرؤها صوت حاسوبي.",
   },
   tour: {
     skip: "تخطَّ",
@@ -256,7 +267,8 @@ const ar: Messages = {
     totalXp: "مجموع النقاط",
     heartsLeft: "القلوب المتبقية",
     error: "حدث خطأ، حاول مرة أخرى.",
-    examPassed: "نجحت في الاختبار! فُتحت الوحدة التالية.",
+    examPassed: "نجحت في الاختبار! أتممت هذه الوحدة.",
+    listenAgain: "استمع مرة أخرى",
     prompts: {
       LISTEN: "استمع واختر الآية",
       TRUE_FALSE: "صح أم خطأ؟",

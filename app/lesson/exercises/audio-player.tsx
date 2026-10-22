@@ -1,38 +1,31 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 
 import { Snail, Volume2 } from "lucide-react";
 
 import { useMessages } from "@/components/locale-provider";
+import { useReadAloud } from "@/components/read-aloud";
 
 const SLOW_RATE = 0.75;
 
-// Plays the ayah's recitation, at normal speed or slowly, for LISTEN.
-export const AudioPlayer = ({ src }: { src: string }) => {
+// Plays the ayah's recitation, at normal speed or slowly, for LISTEN. Goes
+// through the lesson's sound queue, so it never overlaps other sounds.
+export const AudioPlayer = ({ url }: { url: string }) => {
   const t = useMessages();
-  const audio = useRef<HTMLAudioElement>(null);
+  const { enabled, play } = useReadAloud();
 
-  const play = (rate: number) => {
-    const el = audio.current;
-    if (!el) return;
-    el.currentTime = 0;
-    el.playbackRate = rate;
-    // The browser may block autoplay before the first tap; the buttons work.
-    el.play().catch(() => undefined);
-  };
-
-  // Play once when a new ayah is shown.
+  // Play once when a new ayah is shown. With read-aloud on, the lesson
+  // already reads the instruction and then plays this ayah.
   useEffect(() => {
-    audio.current?.play().catch(() => undefined);
-  }, [src]);
+    if (!enabled) play([{ kind: "audio", url }]);
+  }, [enabled, play, url]);
 
   return (
     <div className="mb-6 flex items-center justify-center gap-x-4">
-      <audio ref={audio} src={src} preload="auto" />
       <button
         type="button"
-        onClick={() => play(1)}
+        onClick={() => play([{ kind: "audio", url }])}
         aria-label={t.lesson.play}
         className="flex h-20 w-20 items-center justify-center rounded-2xl border-b-4 border-sky-600 bg-sky-500 text-white hover:bg-sky-500/90 active:border-b-0"
       >
@@ -40,7 +33,7 @@ export const AudioPlayer = ({ src }: { src: string }) => {
       </button>
       <button
         type="button"
-        onClick={() => play(SLOW_RATE)}
+        onClick={() => play([{ kind: "audio", url, rate: SLOW_RATE }])}
         aria-label={t.lesson.playSlow}
         className="flex h-14 w-14 items-center justify-center rounded-2xl border-b-4 border-sky-600 bg-sky-500 text-white hover:bg-sky-500/90 active:border-b-0"
       >

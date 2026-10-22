@@ -12,6 +12,12 @@ export const DEFAULT_MODE: Mode = "full";
 // Set once the welcome tour is finished or skipped.
 export const TOUR_COOKIE = "tour_done";
 
+// Read questions and options aloud: "1" on, "0" off. Unset: on in kids mode.
+export const READ_ALOUD_COOKIE = "read_aloud";
+
+export const readAloudOn = (cookie: string | undefined, mode: Mode) =>
+  cookie === undefined ? mode === "kids" : cookie === "1";
+
 const YEAR_IN_SECONDS = 31_536_000;
 
 export const isMode = (value: unknown): value is Mode =>

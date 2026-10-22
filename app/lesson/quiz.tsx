@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 
+import { Volume2 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import Confetti from "react-confetti";
@@ -11,7 +12,8 @@ import { toast } from "sonner";
 import { upsertChallengeProgress } from "@/actions/challenge-progress";
 import { reduceHearts } from "@/actions/user-progress";
 import { useMessages } from "@/components/locale-provider";
-import { useIsKids } from "@/components/mode-provider";
+import { useIsKids, useMode } from "@/components/mode-provider";
+import { type Step, isSpeakable, useReadAloud } from "@/components/read-aloud";
 import { MAX_HEARTS } from "@/constants";
 import {
   challengeOptions,
@@ -28,6 +30,7 @@ import {
   type OrderPayload,
   usesOptions,
 } from "@/lib/exercises";
+import { recitationAudio } from "@/lib/recitation";
 import { useHeartsModal } from "@/store/use-hearts-modal";
 import { usePracticeModal } from "@/store/use-practice-modal";
 
@@ -79,6 +82,8 @@ export const Quiz = ({
   const { width, height } = useWindowSize();
   const t = useMessages();
   const isKids = useIsKids();
+  const mode = useMode();
+  const { enabled: readAloudOn, play, stop } = useReadAloud();
 
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -118,6 +123,56 @@ export const Quiz = ({
   const optionBased =
     !!challenge && usesOptions(challenge.type, challenge.payload);
   const ready = optionBased ? !!selectedOption : answer.ready;
+
+  const prompts: Partial<Record<string, string>> = t.lesson.prompts;
+  // The title is an instruction ("ما الآية التالية؟"), except for old SELECT
+  // challenges without a prompt, where it is the question itself.
+  const instruction =
+    challenge &&
+    (challenge.prompt ??
+      prompts[challenge.type] ??
+      (challenge.type === "ASSIST" ? t.lesson.defaultPrompt : undefined));
+  const title = instruction ?? challenge?.question;
+
+  // LISTEN plays the challenge's own ayah ("quran:s:a" -> "s:a").
+  const listenRef =
+    challenge?.type === "LISTEN"
+      ? /^quran:(\d+:\d+)$/.exec(challenge.sourceText?.key ?? "")?.[1]
+      : undefined;
+
+  // What "read aloud" says when a question opens: the instruction in the
+  // app's voice, then any ayat in the question as real recitation. Quran
+  // text is never spoken by the synthetic voice (see isSpeakable).
+  const openingSteps = useMemo<Step[]>(() => {
+    if (!challenge) return [];
+    const steps: Step[] = [];
+    if (instruction) steps.push({ kind: "speak", text: instruction });
+    const ayat = challenge.readAloud?.ayat ?? (listenRef ? [listenRef] : []);
+    for (const ref of ayat) {
+      if (steps.length) steps.push({ kind: "wait", ms: 300 });
+      steps.push({ kind: "recite", ref });
+    }
+    const question = challenge.question.replace(/\n⬇\n/g, ". ");
+    if (!ayat.length && question && isSpeakable(question))
+      steps.push({ kind: "speak", text: question });
+    return steps;
+  }, [challenge, instruction, listenRef]);
+
+  useEffect(() => {
+    if (readAloudOn && openingSteps.length) play(openingSteps);
+  }, [openingSteps, play, readAloudOn]);
+
+  // Leaving the lesson stops any sound.
+  useEffect(() => stop, [stop]);
+
+  // Spoken "أحسنت!" / "حاول مرة أخرى" after the chime.
+  const encourage = (text: string) => {
+    if (readAloudOn)
+      play([
+        { kind: "wait", ms: 600 },
+        { kind: "speak", text },
+      ]);
+  };
 
   const resetAnswer = () => {
     setStatus("none");
@@ -167,6 +222,7 @@ export const Quiz = ({
             }
 
             void correctControls.play();
+            encourage(t.lesson.correct);
             setStatus("correct");
             setPercentage((prev) => prev + 100 / challenges.length);
 
@@ -187,6 +243,7 @@ export const Quiz = ({
             }
 
             void incorrectControls.play();
+            encourage(t.lesson.wrong);
             setStatus("wrong");
 
             if (!response?.error) setHearts((prev) => Math.max(prev - 1, 0));
@@ -249,12 +306,6 @@ export const Quiz = ({
     );
   }
 
-  const prompts: Partial<Record<string, string>> = t.lesson.prompts;
-  const title =
-    challenge.prompt ??
-    prompts[challenge.type] ??
-    (challenge.type === "ASSIST" ? t.lesson.defaultPrompt : challenge.question);
-
   const exerciseKey = `${challenge.id}:${attempt}`;
   const payload = challenge.payload;
   const selectedText = options.find((o) => o.id === selectedOption)?.text;
@@ -273,9 +324,26 @@ export const Quiz = ({
       <div className="flex-1">
         <div className="flex h-full items-center justify-center">
           <div className="flex w-full flex-col gap-y-12 px-6 lg:min-h-[350px] lg:w-[600px] lg:px-0">
-            <h1 className="text-center text-lg font-bold text-neutral-700 lg:text-start lg:text-3xl">
-              {title}
-            </h1>
+            <div className="flex items-center justify-center gap-x-3 lg:justify-start">
+              {/* Announced to screen readers on every new question. */}
+              <h1
+                aria-live="polite"
+                className="text-center text-lg font-bold text-neutral-700 lg:text-start lg:text-3xl"
+              >
+                {title}
+              </h1>
+              {/* Replay works even when read-aloud is off in Settings. */}
+              {openingSteps.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => play(openingSteps)}
+                  aria-label={t.lesson.listenAgain}
+                  className="shrink-0 rounded-xl border-2 border-b-4 p-2 text-sky-500 hover:bg-black/5 active:border-b-2"
+                >
+                  <Volume2 className="h-6 w-6" />
+                </button>
+              )}
+            </div>
 
             <div>
               {(challenge.type === "ASSIST" ||
@@ -285,8 +353,14 @@ export const Quiz = ({
               )}
 
               {challenge.type === "LISTEN" &&
-                challenge.sourceText?.audioSrc && (
-                  <AudioPlayer src={challenge.sourceText.audioSrc} />
+                (listenRef || challenge.sourceText?.audioSrc) && (
+                  <AudioPlayer
+                    url={
+                      listenRef
+                        ? recitationAudio(listenRef, mode)
+                        : challenge.sourceText!.audioSrc!
+                    }
+                  />
                 )}
 
               {challenge.type === "COMPLETE_WORD" && (
@@ -312,6 +386,7 @@ export const Quiz = ({
                 <OrderExercise
                   key={exerciseKey}
                   words={(payload as OrderPayload).words}
+                  recitations={(payload as OrderPayload).recitations}
                   seed={challenge.id}
                   status={status}
                   onAnswer={setAnswer}

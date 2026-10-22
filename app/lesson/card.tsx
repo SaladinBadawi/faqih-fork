@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useKey } from "react-use";
 
 import { useIsKids } from "@/components/mode-provider";
+import { isSpeakable, useReadAloud } from "@/components/read-aloud";
 import { challenges } from "@/db/schema";
 import { LIST_TYPES } from "@/lib/exercises";
 import { cn, isArabic } from "@/lib/utils";
@@ -13,6 +14,8 @@ type CardProps = {
   text: string;
   imageSrc: string | null;
   audioSrc: string | null;
+  /** Ayah ("s:a") or word ("s:a:w") recited when tapped (lib/recitation). */
+  recitation?: string | null;
   shortcut: string;
   selected?: boolean;
   onClick: () => void;
@@ -25,6 +28,7 @@ export const Card = ({
   text,
   imageSrc,
   audioSrc,
+  recitation,
   shortcut,
   selected,
   onClick,
@@ -36,6 +40,7 @@ export const Card = ({
   const audioRef = useRef<HTMLAudioElement>(null);
   const isList = LIST_TYPES.includes(type);
   const isKids = useIsKids();
+  const readAloud = useReadAloud();
 
   const handleClick = useCallback(() => {
     if (disabled) return;
@@ -43,9 +48,13 @@ export const Card = ({
     if (audioRef.current) {
       audioRef.current.currentTime = 0;
       void audioRef.current.play().catch(() => {});
+    } else if (readAloud.enabled) {
+      // Quran is recited; only the app's own words are spoken.
+      if (recitation) readAloud.play([{ kind: "recite", ref: recitation }]);
+      else if (isSpeakable(text)) readAloud.play([{ kind: "speak", text }]);
     }
     onClick();
-  }, [disabled, onClick]);
+  }, [disabled, onClick, readAloud, recitation, text]);
 
   useKey(shortcut, handleClick, {}, [handleClick]);
 
