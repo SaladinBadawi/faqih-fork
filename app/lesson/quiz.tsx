@@ -140,6 +140,18 @@ export const Quiz = ({
       ? /^quran:(\d+:\d+)$/.exec(challenge.sourceText?.key ?? "")?.[1]
       : undefined;
 
+  // LISTEN sources, best first; memoised so the player doesn't replay.
+  const listenAudioSrc = challenge?.sourceText?.audioSrc;
+  const listenUrls = useMemo(
+    () =>
+      listenRef
+        ? recitationAudio(listenRef, mode)
+        : listenAudioSrc
+          ? [listenAudioSrc]
+          : [],
+    [listenAudioSrc, listenRef, mode]
+  );
+
   // What "read aloud" says when a question opens: the instruction in the
   // app's voice, then any ayat in the question as real recitation. Quran
   // text is never spoken by the synthetic voice (see isSpeakable).
@@ -352,16 +364,9 @@ export const Quiz = ({
                 <QuestionBubble question={challenge.question} />
               )}
 
-              {challenge.type === "LISTEN" &&
-                (listenRef || challenge.sourceText?.audioSrc) && (
-                  <AudioPlayer
-                    url={
-                      listenRef
-                        ? recitationAudio(listenRef, mode)
-                        : challenge.sourceText!.audioSrc!
-                    }
-                  />
-                )}
+              {challenge.type === "LISTEN" && listenUrls.length > 0 && (
+                <AudioPlayer urls={listenUrls} />
+              )}
 
               {challenge.type === "COMPLETE_WORD" && (
                 <BlankSentence

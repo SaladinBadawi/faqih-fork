@@ -40,7 +40,9 @@ kids mode).
   (`challenges.read_aloud`, `challenge_options.recitation`, ORDER
   `recitations`) or exactly one word of an ayah. Fragments (half an ayah,
   MATCH excerpts) get no audio.
-- Ayah audio comes from [EveryAyah](https://www.everyayah.com) at runtime
+- Ayah audio comes from [EveryAyah](https://www.everyayah.com) at runtime,
+  served first from the QuranicAudio CDN mirror (everyayah.com itself
+  sometimes stalls), with everyayah.com as a fallback
   (`lib/recitation.ts`): al-Husary's teaching recitation (_muallim_) in kids
   mode, Alafasy in full mode. Free to use with attribution.
 - Word audio is Quran.com's word-by-word recitation

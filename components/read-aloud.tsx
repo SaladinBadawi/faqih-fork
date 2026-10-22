@@ -26,7 +26,7 @@ import { recitationAudio } from "@/lib/recitation";
 export type Step =
   | { kind: "speak"; text: string }
   | { kind: "recite"; ref: string }
-  | { kind: "audio"; url: string; rate?: number }
+  | { kind: "audio"; urls: string[]; rate?: number }
   | { kind: "wait"; ms: number };
 
 type ReadAloud = {
@@ -45,6 +45,9 @@ const ReadAloudContext = createContext<ReadAloud>({
 
 const SPEECH_LANG: Record<Locale, string> = { ar: "ar", en: "en" };
 const VOICES_TIMEOUT_MS = 1000;
+// A source that hasn't started playing by then is skipped for the next one:
+// a stalled request otherwise waits silently forever.
+const LOAD_TIMEOUT_MS = 8000;
 
 // A voice for the language, or null. Without a matching voice the browser
 // would read Arabic with an English voice, so then we say nothing.
@@ -76,6 +79,8 @@ export const ReadAloudProvider = ({
   const audio = useRef<HTMLAudioElement | null>(null);
   // Bumped on every play/stop, so an older sequence stops at its next step.
   const run = useRef(0);
+  // Bumped for every source tried, so a stale timer never stops a newer one.
+  const attempt = useRef(0);
 
   const stop = useCallback(() => {
     run.current += 1;
@@ -84,19 +89,49 @@ export const ReadAloudProvider = ({
       window.speechSynthesis.cancel();
   }, []);
 
-  const playUrl = useCallback(
-    (url: string, rate = 1) =>
-      new Promise<void>((resolve) => {
+  // Plays one source to the end. "failed": it errored or never started.
+  const playSource = useCallback(
+    (url: string, rate: number) =>
+      new Promise<"ended" | "failed" | "blocked">((resolve) => {
         audio.current ??= new Audio();
         const el = audio.current;
-        el.onended = () => resolve();
-        el.onerror = () => resolve();
+        const id = ++attempt.current;
+        const finish = (result: "ended" | "failed" | "blocked") => {
+          clearTimeout(timer);
+          if (attempt.current === id) {
+            el.onplaying = el.onended = el.onerror = null;
+            if (result === "failed") el.pause();
+          }
+          resolve(result);
+        };
+        const timer = setTimeout(() => finish("failed"), LOAD_TIMEOUT_MS);
+        el.onplaying = () => clearTimeout(timer);
+        el.onended = () => finish("ended");
+        el.onerror = () => finish("failed");
         el.src = url;
+        el.defaultPlaybackRate = rate;
         el.playbackRate = rate;
-        // Autoplay can be blocked before the first tap: just move on.
-        el.play().catch(() => resolve());
+        el.play().catch((error: unknown) =>
+          // Autoplay blocked before the first tap: don't try other sources.
+          finish(
+            error instanceof DOMException && error.name === "NotAllowedError"
+              ? "blocked"
+              : "failed"
+          )
+        );
       }),
     []
+  );
+
+  // Tries each source in turn (best first) until one plays.
+  const playUrls = useCallback(
+    async (urls: string[], rate: number, isCurrent: () => boolean) => {
+      for (const url of urls) {
+        if (!isCurrent()) return;
+        if ((await playSource(url, rate)) !== "failed") return;
+      }
+    },
+    [playSource]
   );
 
   const speak = useCallback(
@@ -123,15 +158,17 @@ export const ReadAloudProvider = ({
       void (async () => {
         for (const step of steps) {
           if (run.current !== id) return;
+          const isCurrent = () => run.current === id;
           if (step.kind === "speak") await speak(step.text);
           else if (step.kind === "recite")
-            await playUrl(recitationAudio(step.ref, mode));
-          else if (step.kind === "audio") await playUrl(step.url, step.rate);
+            await playUrls(recitationAudio(step.ref, mode), 1, isCurrent);
+          else if (step.kind === "audio")
+            await playUrls(step.urls, step.rate ?? 1, isCurrent);
           else await new Promise((r) => setTimeout(r, step.ms));
         }
       })();
     },
-    [mode, playUrl, speak, stop]
+    [mode, playUrls, speak, stop]
   );
 
   // Leaving the lesson stops the sound.

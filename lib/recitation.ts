@@ -9,7 +9,14 @@
 
 import { type Mode } from "@/lib/mode";
 
-// EveryAyah (https://everyayah.com), free to use with attribution.
+// EveryAyah recitations (https://everyayah.com, free to use with
+// attribution). Served first from the QuranicAudio mirror, a CDN that carries
+// the same files: everyayah.com itself sometimes stalls without answering.
+const AYAH_HOSTS = [
+  "https://mirrors.quranicaudio.com/everyayah",
+  "https://www.everyayah.com/data",
+];
+
 const RECITERS: Record<Mode, string> = {
   // Al-Husary's teaching recitation: slow and clear, for learning by heart.
   kids: "Husary_Muallim_128kbps",
@@ -20,18 +27,22 @@ const pad = (n: number) => String(n).padStart(3, "0");
 
 const parse = (ref: string) => ref.split(":").map(Number);
 
-/** Recitation of a whole ayah, e.g. ayahAudio("1:2", "kids"). */
+/** Recitation of a whole ayah, e.g. "1:2": one URL per host, best first. */
 export const ayahAudio = (ref: string, mode: Mode) => {
   const [surah, ayah] = parse(ref);
-  return `https://www.everyayah.com/data/${RECITERS[mode]}/${pad(surah)}${pad(ayah)}.mp3`;
+  return AYAH_HOSTS.map(
+    (host) => `${host}/${RECITERS[mode]}/${pad(surah)}${pad(ayah)}.mp3`
+  );
 };
 
 /** Recitation of one word (Quran.com word-by-word audio), e.g. "1:2:3". */
 export const wordAudio = (ref: string) => {
   const [surah, ayah, word] = parse(ref);
-  return `https://audio.qurancdn.com/wbw/${pad(surah)}_${pad(ayah)}_${pad(word)}.mp3`;
+  return [
+    `https://audio.qurancdn.com/wbw/${pad(surah)}_${pad(ayah)}_${pad(word)}.mp3`,
+  ];
 };
 
-/** Audio for a reference: an ayah ("s:a") or a word ("s:a:w"). */
+/** Audio sources for an ayah ("s:a") or a word ("s:a:w"), best first. */
 export const recitationAudio = (ref: string, mode: Mode) =>
   parse(ref).length === 3 ? wordAudio(ref) : ayahAudio(ref, mode);
