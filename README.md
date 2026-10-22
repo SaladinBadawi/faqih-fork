@@ -76,6 +76,7 @@ faqih/
     |-- mode-provider.tsx
     |-- promo.tsx
     |-- quests.tsx
+    |-- read-aloud.tsx
     |-- sidebar-item.tsx
     |-- sidebar.tsx
     |-- sticky-wrapper.tsx
@@ -100,6 +101,7 @@ faqih/
     |-- mode.ts
     |-- preferences.ts
     |-- progress.ts
+    |-- recitation.ts
     |-- stripe.ts
     |-- utils.ts
   |- public/
