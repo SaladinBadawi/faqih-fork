@@ -25,10 +25,28 @@ The kids course generates all of them from the Quran text.
 
 ## Exams
 
-Every unit ends with an exam (`kind: "exam"`). Quran units get their own
-exam, mostly multi-ayah questions (`scripts/content/exams.ts`). Other
-courses get an exam sampled from the unit's lessons. Units can be taken in
-any order; passing a unit's exam clears it (see `lib/progress.ts`).
+Every unit ends with an exam (`kind: "exam"`); passing it clears the unit
+(see `lib/progress.ts`). Units can be taken in any order.
+
+- **Quran surah exams** (`scripts/content/exams.ts`) spread over the whole
+  surah: it is split into equal segments with one question each, so a long
+  surah is covered from start to end. Size grows with the surah: one
+  question per 10 ayat, at least 10 (or two per ayah for very short surahs)
+  and at most 25, plus one ayat-to-numbers match. Exams use their own wrong
+  answers, different from the lessons'.
+  - **Full mode** mixes harder, exam-only kinds: type the missing word (no
+    options), which ayah comes before, which ayah follows a two-ayah
+    passage, complete the passage, order the words of ayat up to 15 words,
+    order 4–5 ayat, plus what comes next and listening.
+  - **Kids** keep to simple kinds they know from their lessons (next ayah,
+    listen, complete the ayah, true/false, short word order); 8 questions,
+    no typing.
+- **Juz' exams** (`scripts/content/juz-exams.ts`, course "Juz' Exams",
+  full mode): one 20-question exam per juz', spread across every surah in
+  it, adding "which surah is this ayah from?" (never asked for an ayah that
+  appears in more than one surah).
+- Other courses (Al-Fatiha, an-Nawawi, adhkar) get an exam sampled from the
+  unit's lessons.
 
 ## Read aloud and recitation
 

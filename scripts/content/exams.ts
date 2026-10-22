@@ -6,56 +6,121 @@ import {
   type Language,
   type LessonSpec,
 } from "./courses";
-import { type QuranQuestions, present } from "./quran-questions";
+import { type QuranQuestions } from "./quran-questions";
 
-// Every unit ends with an exam. Passing it opens the next unit without
-// marking this unit's lessons as done (see lib/progress).
+// Every unit ends with an exam; passing it clears the unit (lib/progress).
+//
+// Quran exams mix question kinds. Full-mode exams add harder, exam-only ones
+// the lessons never ask (type the missing word, the ayah before, passages,
+// long orderings); kids exams keep to simple kinds. Both spread over the
+// whole surah: it is split into equal segments, one question each, so a long
+// surah like Al-Baqarah is covered from start to end.
 
-const EXAM_SIZE = 8;
+const EXAM_SIZE = 8; // exams sampled from lessons, and kids exams
+const MIN_EXAM_SIZE = 10;
+const MAX_EXAM_SIZE = 25;
+const AYAT_PER_QUESTION = 10;
+// Short surahs: at most two questions per ayah, so the exam doesn't repeat.
+const MAX_QUESTIONS_PER_AYAH = 2;
+const LONG_ORDER_WORDS = 15;
 
 const examTitle = (lang: Language) =>
   lang === "ar" ? "اختبار الوحدة" : "Unit exam";
 
-// Spread questions over the whole surah: positions in a fixed shuffled order.
-const positions = (count: number, seed: string) =>
-  shuffle(
-    Array.from({ length: count }, (_, i) => i),
-    seed
-  );
+type Make = (i: number) => ChallengeSpec | null;
+
+/** The kinds an exam rotates through, by audience and language. */
+const recipe = (q: QuranQuestions, lang: Language, kids: boolean): Make[] => {
+  const ar = lang === "ar";
+  if (kids)
+    // Kids keep to simple kinds they already know from their lessons: one
+    // ayah at a time, choosing from options. No typing, no ayah before, no
+    // passages, no long orderings: those are for full mode.
+    return [
+      q.next,
+      ar ? q.listen : q.trueFalse,
+      q.complete,
+      q.trueFalse,
+      (i) => q.order(i),
+    ];
+  return [
+    q.next,
+    ar ? q.typedWord : q.complete,
+    q.previous,
+    q.passageNext,
+    (i) => q.order(i, LONG_ORDER_WORDS),
+    q.completePassage,
+    (i) => q.orderAyat(i, 4 + (i % 2)),
+    ar ? q.listen : q.trueFalse,
+  ];
+};
 
 /**
- * A surah's exam. Most questions span more than one ayah: what comes after a
- * two-ayah passage, how a passage ends, three ayat in order, ayat to their
- * numbers. Arabic exams also include listening.
+ * Picks `size` questions spread over ayat [0, count): slot k takes a
+ * position in the k-th segment and the k-th kind (falling back to other
+ * positions in its segment, then to the other kinds). Never the same kind
+ * at the same ayah twice. Returned in surah order.
+ */
+export const spreadQuestions = (
+  makers: Make[],
+  count: number,
+  size: number,
+  seed: string
+) => {
+  const used = new Set<string>();
+  const picked: { at: number; challenge: ChallengeSpec }[] = [];
+  for (let k = 0; k < size; k++) {
+    const from = Math.floor((k * count) / size);
+    const to = Math.max(from + 1, Math.floor(((k + 1) * count) / size));
+    const segment = shuffle(
+      Array.from({ length: to - from }, (_, n) => from + n),
+      `${seed}:${k}`
+    );
+    const kinds = makers.map((_, n) => (k + n) % makers.length);
+    search: for (const kind of kinds)
+      for (const at of segment) {
+        if (used.has(`${kind}:${at}`)) continue;
+        const challenge = makers[kind](at);
+        if (!challenge) continue;
+        used.add(`${kind}:${at}`);
+        picked.push({ at, challenge });
+        break search;
+      }
+  }
+  return picked.sort((a, b) => a.at - b.at).map((p) => p.challenge);
+};
+
+/**
+ * A surah's exam: size grows with the surah (kids exams stay short). Pass
+ * question makers built with their own seed (not the lessons'), so exam
+ * questions get different wrong answers from the lessons.
  */
 export const quranExam = (
   q: QuranQuestions,
   ayahCount: number,
   lang: Language,
-  seed: string
+  seed: string,
+  kids = false
 ): LessonSpec | null => {
-  const at = positions(ayahCount, seed);
-  const first = <T>(make: (i: number) => T | null, n: number) =>
-    at
-      .map(make)
-      .filter((c): c is T => c !== null)
-      .slice(0, n);
-
-  const challenges: ChallengeSpec[] = [
-    ...first(q.passageNext, 3),
-    ...first(q.completePassage, 2),
-    ...first((i) => q.orderAyat(i), 1),
-    q.match(at.slice(0, 8).sort((a, b) => a - b)),
-    ...(lang === "ar" ? first(q.listen, 1) : first(q.trueFalse, 1)),
-  ].filter(present);
+  const size = kids
+    ? EXAM_SIZE
+    : Math.min(
+        MAX_EXAM_SIZE,
+        Math.max(
+          Math.min(MIN_EXAM_SIZE, ayahCount * MAX_QUESTIONS_PER_AYAH),
+          Math.ceil(ayahCount / AYAT_PER_QUESTION)
+        )
+      );
+  const spread = spreadQuestions(recipe(q, lang, kids), ayahCount, size, seed);
+  // One ayat-to-numbers question across the whole surah.
+  const matchAt = Array.from({ length: Math.min(ayahCount, 8) }, (_, n) =>
+    Math.floor((n * ayahCount) / Math.min(ayahCount, 8))
+  );
+  const match = q.match(matchAt);
+  const challenges = [...spread, ...(match ? [match] : [])];
 
   if (challenges.length === 0) return null;
-
-  return {
-    kind: "exam",
-    title: examTitle(lang),
-    challenges: shuffle(challenges, `${seed}:order`).slice(0, EXAM_SIZE),
-  };
+  return { kind: "exam", title: examTitle(lang), challenges };
 };
 
 /**

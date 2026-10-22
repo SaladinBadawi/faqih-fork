@@ -49,7 +49,14 @@ const surahUnit = (
       });
   }
 
-  const exam = quranExam(q, ayat.length, lang, `quran:${surah.number}:exam`);
+  // The exam's own question makers: different wrong answers from lessons.
+  const examQ = quranQuestions(ayat, others, lang, "quran-exam");
+  const exam = quranExam(
+    examQ,
+    ayat.length,
+    lang,
+    `quran:${surah.number}:exam`
+  );
   const count = num(lang, surah.ayahCount);
 
   return {

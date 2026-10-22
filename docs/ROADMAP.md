@@ -153,9 +153,11 @@ part-time).** Full Quran adds ≈ 3–4 weeks, and Tajweed adds ≈ 3–4 weeks.
 
 - ✅ **The Whole Quran** course (Arabic and English meaning): 114 units in
   mushaf order, a lesson per 5 ayat mixing question types, and an exam per
-  surah whose questions span more than one ayah (what follows a two-ayah
-  passage, how a passage ends, three ayat in order, ayat ↔ numbers,
-  listening).
+  surah that grows with its length (10–25 questions, spread over the whole
+  surah) and mixes harder, exam-only kinds: type the missing word, the ayah
+  before, passages, long orderings.
+- ✅ **Juz' Exams** course: one 20-question exam per juz', across all its
+  surahs, including "which surah is this ayah from?".
 - Difficulty levels: hide 1 word → hide several words → first-letter hints →
   the whole ayah.
 - Typed Arabic answers with an on-screen Arabic keyboard. Matching ignores

@@ -55,7 +55,14 @@ const surahUnit = (
     },
   ];
 
-  const exam = quranExam(q, ayat.length, lang, `kids:${surah.number}:exam`);
+  // The exam's own question makers: different wrong answers from lessons.
+  const exam = quranExam(
+    quranQuestions(ayat, others, lang, "kids-exam"),
+    ayat.length,
+    lang,
+    `kids:${surah.number}:exam`,
+    true
+  );
 
   return {
     title: ar

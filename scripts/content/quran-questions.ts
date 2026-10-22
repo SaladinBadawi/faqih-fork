@@ -153,10 +153,13 @@ export const quranQuestions = (
     };
   };
 
-  // Tap the ayah's words in order.
-  const order = (i: number): ChallengeSpec | null => {
+  // Tap the ayah's words in order. Exams allow longer ayat.
+  const order = (
+    i: number,
+    maxWords = ORDER_MAX_WORDS
+  ): ChallengeSpec | null => {
     const w = ayahWords(own[i]);
-    if (w.length < ORDER_MIN_WORDS || w.length > ORDER_MAX_WORDS) return null;
+    if (w.length < ORDER_MIN_WORDS || w.length > maxWords) return null;
     return {
       type: "ORDER",
       payload: { words: w },
@@ -217,6 +220,55 @@ export const quranQuestions = (
       question: "",
       sourceKey: ayat[i].key,
       options: options(answer, wrong, seed),
+    };
+  };
+
+  // Recall with no options: one word is hidden and must be typed. Arabic
+  // only; matched leniently (lib/arabic). Hides a different word from the
+  // missing-word lesson, which always hides the longest.
+  const typedWord = (i: number): ChallengeSpec | null => {
+    if (!ar) return null;
+    const w = ayahWords(own[i]);
+    if (w.length < ORDER_MIN_WORDS) return null;
+    const lengths = w.map((x) => normalizeArabic(x).length);
+    const longest = lengths.indexOf(Math.max(...lengths));
+    const candidates = w
+      .map((_, k) => k)
+      .filter((k) => k !== longest && lengths[k] >= 3);
+    if (candidates.length === 0) return null;
+    const [hide] = shuffle(candidates, seedOf(ayat[i].key, "typed"));
+    return {
+      type: "COMPLETE_WORD",
+      payload: {
+        before: w.slice(0, hide).join(" "),
+        after: w.slice(hide + 1).join(" "),
+        answer: w[hide],
+        mode: "type",
+      },
+      prompt: "اكتب الكلمة الناقصة",
+      question: "",
+      sourceKey: ayat[i].key,
+      options: [],
+    };
+  };
+
+  // Which ayah comes before this one?
+  const previous = (i: number): ChallengeSpec | null => {
+    if (i < 1) return null;
+    const seed = seedOf(ayat[i - 1].key, "previous");
+    // If this ayah appears more than once, each ayah before it is right.
+    const right = own
+      .slice(1)
+      .flatMap((o, k) => (o === own[i] ? [own[k]] : []));
+    const wrong = distractors(own, rest, [own[i - 1], ...right, own[i]], seed);
+    if (!wrong) return null;
+    return {
+      prompt: ar
+        ? "ما الآية التي قبل هذه الآية؟"
+        : "Which ayah comes before this one? (meaning)",
+      question: own[i],
+      sourceKey: ayat[i - 1].key,
+      options: options(own[i - 1], wrong, seed),
     };
   };
 
@@ -344,8 +396,10 @@ export const quranQuestions = (
 
   return {
     next,
+    previous,
     complete,
     order,
+    typedWord,
     listen,
     completeWord,
     trueFalse,
