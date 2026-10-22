@@ -100,11 +100,13 @@ part-time).** Full Quran adds ≈ 3–4 weeks, and Tajweed adds ≈ 3–4 weeks.
 - The kids course uses every type. `LISTEN` and `COMPLETE_WORD` are Arabic
   only, so the English course has no translation questions.
 
-- **Exams and unlocking** (`lib/progress.ts`): every unit ends with an
-  exam. Units open in order; the next one opens when this one is completed
-  **or its exam is passed**. Passing the exam doesn't mark the skipped
-  lessons as done: they stay open to learn. Inside an open unit, lessons open
-  one by one, but the exam is always open, so a learner can test out.
+- **Exams and free order** (`lib/progress.ts`): every unit ends with an
+  exam, and **every surah is open**: learners start anywhere, with a "Jump
+  to" picker on the learn page. A surah is **cleared** when its exam is
+  passed or all its lessons are done; moving past it without either leaves
+  it unfinished. Inside a surah that isn't cleared, lessons open one by one,
+  but the exam is always open, so a learner can test out. Once cleared, all
+  its lessons are open to practise.
 - **Kids / full mode**, a per-device setting (Settings page and tour):
   - Kids: only kids courses, no hearts, no shop, leaderboard or quests, bigger
     cards and buttons, no keyboard-shortcut badges.

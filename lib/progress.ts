@@ -1,12 +1,12 @@
 // Which lessons a learner can open. Pure, so it can be tested without a DB.
 //
 // Rules:
-// - Units (surahs) open in order. The first unit is always open.
-// - The next unit opens when this one is completed, or when its exam is
-//   passed. Passing the exam does NOT mark the unit's lessons as done: a
-//   learner who tests out of a surah can still come back and learn it.
-// - Inside an open unit, lessons open one after another, but the exam is
-//   always open, so a learner who already knows the surah can test out.
+// - Every unit (surah) is open: learners pick any surah, in any order.
+// - A unit is cleared when its exam is passed or all its lessons are done.
+//   Moving on to another surah without either leaves it unfinished.
+// - Inside a unit that isn't cleared, lessons open one after another, but
+//   the exam is always open, so a learner who knows the surah can test out.
+// - Once a unit is cleared, all its lessons are open to practise.
 
 export type LessonKind = "lesson" | "exam";
 
@@ -23,10 +23,12 @@ export type LessonState = {
 };
 
 export type UnitState = {
-  unlocked: boolean;
+  /** All lessons, including the exam, are done. */
   completed: boolean;
-  /** The exam was passed, but some lessons are not done yet. */
-  testedOut: boolean;
+  /** The exam is passed or all lessons are done. */
+  cleared: boolean;
+  /** Cleared by passing the exam, with lessons still to learn. */
+  passedExam: boolean;
 };
 
 type UnitInput = { lessons: LessonInput[] };
@@ -36,39 +38,37 @@ export type UnitProgress<U extends UnitInput> = Omit<U, "lessons"> &
 
 export const computeProgress = <U extends UnitInput>(
   units: U[]
-): UnitProgress<U>[] => {
-  let previousOpensNext = true;
-
-  return units.map((unit) => {
-    const unlocked = previousOpensNext;
-    const completed =
-      unit.lessons.length > 0 && unit.lessons.every((l) => l.completed);
+): UnitProgress<U>[] =>
+  units.map((unit) => {
+    const lessons = unit.lessons.filter((l) => l.kind === "lesson");
     const exam = unit.lessons.find((l) => l.kind === "exam");
     const examPassed = !!exam?.completed;
-    previousOpensNext = unlocked && (completed || examPassed);
+    const lessonsDone = lessons.length > 0 && lessons.every((l) => l.completed);
+    const completed =
+      unit.lessons.length > 0 && unit.lessons.every((l) => l.completed);
+    const cleared = examPassed || completed || (lessonsDone && !exam);
 
-    const next = unit.lessons.find((l) => l.kind === "lesson" && !l.completed);
+    const next = lessons.find((l) => !l.completed);
 
     return {
       ...unit,
-      unlocked,
       completed,
-      testedOut: unlocked && examPassed && !completed,
+      cleared,
+      passedExam: examPassed && !completed,
       lessons: unit.lessons.map((lesson) => {
-        const current = unlocked && lesson.id === next?.id;
+        const current = lesson.id === next?.id;
         const open =
-          unlocked && (lesson.completed || current || lesson.kind === "exam");
+          cleared || lesson.completed || current || lesson.kind === "exam";
         return { ...lesson, current, locked: !open };
       }),
     };
   });
-};
 
-/** The lesson "Continue" opens: the first one still to do in an open unit. */
+/** The lesson "Continue" opens: the next lesson of the first unit not cleared. */
 export const firstOpenLesson = <L extends LessonInput & LessonState>(
-  units: { unlocked: boolean; lessons: L[] }[]
+  units: { cleared: boolean; lessons: L[] }[]
 ) =>
   units
-    .filter((u) => u.unlocked)
+    .filter((u) => !u.cleared)
     .flatMap((u) => u.lessons)
     .find((l) => !l.locked && !l.completed);

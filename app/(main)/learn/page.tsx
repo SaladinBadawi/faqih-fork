@@ -14,6 +14,7 @@ import {
 import { getMode } from "@/lib/preferences";
 
 import { Header } from "./header";
+import { UnitJump } from "./unit-jump";
 import { Unit } from "./unit";
 
 const LearnPage = async () => {
@@ -53,15 +54,28 @@ const LearnPage = async () => {
       </StickyWrapper>
       <FeedWrapper>
         <Header title={userProgress.activeCourse.title} />
+        {/* Any surah can be learned in any order: jump straight to one. */}
+        {units.length > 1 && (
+          <UnitJump
+            units={units.map((unit) => ({
+              order: unit.order,
+              title: unit.title,
+              cleared: unit.cleared,
+            }))}
+          />
+        )}
         {units.map((unit) => (
-          <div key={unit.id} className="mb-10">
+          <div
+            key={unit.id}
+            id={`unit-${unit.order}`}
+            className="mb-10 scroll-mt-24"
+          >
             <Unit
               title={unit.title}
               description={unit.description}
               lessons={unit.lessons}
-              unlocked={unit.unlocked}
               completed={unit.completed}
-              testedOut={unit.testedOut}
+              passedExam={unit.passedExam}
             />
           </div>
         ))}

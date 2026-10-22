@@ -9,18 +9,16 @@ type UnitProps = {
   description: string;
   lessons: (typeof lessons.$inferSelect &
     LessonState & { completed: boolean; percentage: number })[];
-  unlocked: boolean;
   completed: boolean;
-  testedOut: boolean;
+  passedExam: boolean;
 };
 
 export const Unit = ({
   title,
   description,
   lessons,
-  unlocked,
   completed,
-  testedOut,
+  passedExam,
 }: UnitProps) => {
   // Lessons first, then the exam, which closes the unit.
   const steps = lessons.filter((l) => l.kind === "lesson");
@@ -34,10 +32,9 @@ export const Unit = ({
       <UnitBanner
         title={title}
         description={description}
-        locked={!unlocked}
         completed={completed}
-        testedOut={testedOut}
-        continueLessonId={unlocked ? next?.id : undefined}
+        passedExam={passedExam}
+        continueLessonId={next?.id}
       />
 
       <div className="relative flex flex-col items-center">

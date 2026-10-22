@@ -45,9 +45,9 @@ const en = {
     continue: "Continue",
     start: "Start",
     exam: "Exam",
-    locked: "Locked",
     unitDone: "Completed",
-    testedOut: "Exam passed: the lessons are still here to learn",
+    passedExam: "Exam passed: cleared. The lessons are still here to practise",
+    jumpTo: "Jump to",
   },
   settings: {
     title: "Settings",
@@ -73,11 +73,11 @@ const en = {
       },
       {
         title: "Surahs, lessons and exams",
-        body: "Each surah is a unit. Its lessons open one after another, and an exam closes it.",
+        body: "Each surah is a unit. Start with any surah you like: its lessons open one after another, and an exam closes it.",
       },
       {
         title: "Already know a surah?",
-        body: "Take its exam straight away. Passing opens the next surah. The lessons you skipped stay unfinished, so you can come back to them.",
+        body: "Take its exam straight away. Passing it clears the surah. A surah you move past without its exam stays unfinished.",
       },
       {
         title: "Kids or full",
@@ -184,9 +184,9 @@ const ar: Messages = {
     continue: "تابع",
     start: "ابدأ",
     exam: "اختبار",
-    locked: "مقفلة",
     unitDone: "مكتملة",
-    testedOut: "اجتزت الاختبار، والدروس باقية لتتعلّمها",
+    passedExam: "اجتزت الاختبار: أتممتها، والدروس باقية للتدرّب",
+    jumpTo: "انتقل إلى",
   },
   settings: {
     title: "الإعدادات",
@@ -211,11 +211,11 @@ const ar: Messages = {
       },
       {
         title: "سور ودروس واختبارات",
-        body: "كل سورة وحدة، تُفتح دروسها واحدًا تلو الآخر، ويُختم كلٌّ منها باختبار.",
+        body: "كل سورة وحدة، وابدأ بأي سورة تشاء: تُفتح دروسها واحدًا تلو الآخر، وتُختم باختبار.",
       },
       {
         title: "تحفظ السورة من قبل؟",
-        body: "خُض اختبارها مباشرة. إن نجحت فُتحت لك السورة التالية، وتبقى الدروس التي تخطّيتها غير مكتملة لتعود إليها متى شئت.",
+        body: "خُض اختبارها مباشرة، فإن نجحت أتممت السورة. والسورة التي تتجاوزها دون اختبارها تبقى غير مكتملة.",
       },
       {
         title: "للأطفال أم كامل؟",
