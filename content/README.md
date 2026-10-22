@@ -27,8 +27,8 @@ The kids course generates all of them from the Quran text.
 
 Every unit ends with an exam (`kind: "exam"`). Quran units get their own
 exam, mostly multi-ayah questions (`scripts/content/exams.ts`). Other
-courses get an exam sampled from the unit's lessons. Passing an exam opens
-the next unit without marking the unit's lessons as done.
+courses get an exam sampled from the unit's lessons. Units can be taken in
+any order; passing a unit's exam clears it (see `lib/progress.ts`).
 
 ## Rules
 
