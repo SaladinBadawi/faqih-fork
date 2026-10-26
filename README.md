@@ -48,6 +48,7 @@ Here is the folder structure of this app.
 faqih/
   |- actions/
     |-- challenge-progress.ts
+    |-- reminders.ts
     |-- user-progress.ts
     |-- user-subscription.ts
   |- app/
@@ -63,6 +64,7 @@ faqih/
     |-- icon1.png
     |-- icon2.png
     |-- layout.tsx
+    |-- manifest.ts
   |- components/
     |-- modals/
     |-- ui/
@@ -102,6 +104,7 @@ faqih/
     |-- preferences.ts
     |-- progress.ts
     |-- recitation.ts
+    |-- reminders.ts
     |-- stripe.ts
     |-- utils.ts
   |- public/
@@ -269,6 +272,7 @@ Useful resources and dependencies that are used in Lingo.
 - [@types/node](https://www.npmjs.com/package/@types/node): ^25.8.0
 - [@types/react](https://www.npmjs.com/package/@types/react): ^19.2.14
 - [@types/react-dom](https://www.npmjs.com/package/@types/react-dom): ^19.2.3
+- [@types/web-push](https://www.npmjs.com/package/@types/web-push): 3.6.4
 - [@vercel/config](https://www.npmjs.com/package/@vercel/config): ^0.5.0
 - [autoprefixer](https://www.npmjs.com/package/autoprefixer): ^10.5.0
 - [class-variance-authority](https://www.npmjs.com/package/class-variance-authority): ^0.7.1
@@ -299,6 +303,7 @@ Useful resources and dependencies that are used in Lingo.
 - [tailwindcss-animate](https://www.npmjs.com/package/tailwindcss-animate): ^1.0.7
 - [tsx](https://www.npmjs.com/package/tsx): ^4.22.3
 - [typescript](https://www.npmjs.com/package/typescript): ^6
+- [web-push](https://www.npmjs.com/package/web-push): 3.6.7
 - [zustand](https://www.npmjs.com/package/zustand): ^5.0.13
 
 <!--- DEPENDENCIES_END --->
