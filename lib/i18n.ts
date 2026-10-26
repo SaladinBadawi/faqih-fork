@@ -25,6 +25,7 @@ const en = {
     tagline: "Learn Quran, Hadith & Sirah",
     hero: "Learn the Quran, Hadith and Sirah — a few minutes a day.",
     tracks: ["Quran", "Hadith", "Sirah", "Adhkar", "Fiqh"],
+    soon: "Soon",
   },
   auth: {
     login: "Login",
@@ -195,6 +196,7 @@ const ar: Messages = {
     tagline: "تعلّم القرآن والحديث والسيرة",
     hero: "تعلّم القرآن والحديث والسيرة — دقائق قليلة كل يوم.",
     tracks: ["القرآن", "الحديث", "السيرة", "الأذكار", "الفقه"],
+    soon: "قريبًا",
   },
   auth: {
     login: "تسجيل الدخول",

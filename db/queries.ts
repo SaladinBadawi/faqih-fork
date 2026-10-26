@@ -34,6 +34,15 @@ export const getCourses = cache(async () => {
   return data.filter((course) => courseInMode(course.track, mode));
 });
 
+/** Tracks that have at least one course in the visitor's language. */
+export const getAvailableTracks = cache(async () => {
+  const rows = await db
+    .selectDistinct({ track: courses.track })
+    .from(courses)
+    .where(eq(courses.language, await getLocale()));
+  return new Set(rows.map((r) => r.track));
+});
+
 // Draft lessons are hidden unless features.showDrafts is on.
 const visibleLessons = features.showDrafts
   ? undefined
