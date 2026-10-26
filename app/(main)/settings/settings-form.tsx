@@ -26,6 +26,8 @@ import {
 } from "@/lib/mode";
 import { cn } from "@/lib/utils";
 
+import { ReminderSettings } from "./reminder-settings";
+
 const Choice = ({
   selected,
   onClick,
@@ -116,6 +118,8 @@ export const SettingsForm = () => {
           title={t.settings.readAloudOff}
         />
       </section>
+
+      <ReminderSettings />
 
       <section className="flex flex-col gap-y-3">
         <h2 className="text-lg font-bold text-neutral-700">

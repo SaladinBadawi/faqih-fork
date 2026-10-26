@@ -8,6 +8,8 @@ const isPublicRoute = createRouteMatcher([
   "/sign-in(.*)",
   "/sign-up(.*)",
   "/api/webhooks/stripe",
+  // Protected by CRON_SECRET instead of a login.
+  "/api/cron/(.*)",
 ]);
 
 // Local dev login: everyone is the local dev user, so nothing to protect.

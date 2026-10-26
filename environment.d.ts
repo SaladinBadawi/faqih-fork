@@ -15,6 +15,13 @@ declare global {
 
       NEXT_PUBLIC_SHOW_DRAFTS?: string;
 
+      // Daily wird reminders (web push). Generate the keys once with
+      // `npx web-push generate-vapid-keys`; see docs/SETUP.md.
+      NEXT_PUBLIC_VAPID_PUBLIC_KEY?: string;
+      VAPID_PRIVATE_KEY?: string;
+      VAPID_SUBJECT?: string; // e.g. "mailto:team@example.com"
+      CRON_SECRET?: string;
+
       // "local" enables local dev login (development only)
 
       NEXT_PUBLIC_DEV_AUTH?: string;

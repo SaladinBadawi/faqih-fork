@@ -49,6 +49,7 @@ const en = {
     passedExam: "Exam passed: cleared. The lessons are still here to practise",
     jumpTo: "Jump to",
     practiseAgain: "practise again",
+    todaysWird: "Today's wird",
     searchUnits: "Search by name or number",
     noResults: "Nothing found",
   },
@@ -65,8 +66,25 @@ const en = {
     readAloud: "Read aloud",
     readAloudOn: "On",
     readAloudOff: "Off",
+    reminder: "Daily reminder",
+    reminderDescription:
+      "A notification on this device at the time you choose, to do your daily wird.",
+    reminderOn: "Reminder on",
+    reminderOff: "Turn on the reminder",
+    reminderTime: "Time",
+    reminderSaved: "Daily reminder saved.",
+    reminderUnsupported:
+      "This browser can't show reminders. Try Chrome, Edge, Firefox or Safari.",
+    reminderIos:
+      "On iPhone, first add Faqih to your Home Screen (Share → Add to Home Screen), then open it from there to turn on reminders.",
+    reminderDenied:
+      "Notifications are blocked for this site. Allow them in your browser settings, then come back here.",
     readAloudDescription:
       "Reads each question and the option you tap. Ayat and their words are always recited by a qari, never by a computer voice.",
+  },
+  reminder: {
+    title: "Your daily wird",
+    body: "A few minutes with the Quran: today's lesson is ready.",
   },
   tour: {
     skip: "Skip",
@@ -197,6 +215,7 @@ const ar: Messages = {
     passedExam: "اجتزت الاختبار: أتممتها، والدروس باقية للتدرّب",
     jumpTo: "انتقل إلى",
     practiseAgain: "تدرّب مرة أخرى",
+    todaysWird: "وِرد اليوم",
     searchUnits: "ابحث بالاسم أو الرقم",
     noResults: "لا نتائج",
   },
@@ -212,8 +231,25 @@ const ar: Messages = {
     readAloud: "القراءة بصوت",
     readAloudOn: "مُفعّلة",
     readAloudOff: "متوقفة",
+    reminder: "التذكير اليومي",
+    reminderDescription:
+      "إشعار على هذا الجهاز في الوقت الذي تختاره، لتقرأ وِردك اليومي.",
+    reminderOn: "التذكير مُفعّل",
+    reminderOff: "فعّل التذكير",
+    reminderTime: "الوقت",
+    reminderSaved: "تم حفظ التذكير اليومي.",
+    reminderUnsupported:
+      "هذا المتصفح لا يدعم التذكيرات. جرّب Chrome أو Edge أو Firefox أو Safari.",
+    reminderIos:
+      "على الآيفون، أضف فقيه أولًا إلى الشاشة الرئيسية (مشاركة ← إضافة إلى الشاشة الرئيسية)، ثم افتحه من هناك لتفعيل التذكير.",
+    reminderDenied:
+      "الإشعارات محظورة لهذا الموقع. اسمح بها من إعدادات المتصفح ثم ارجع إلى هنا.",
     readAloudDescription:
       "يقرأ كل سؤال والخيار الذي تضغطه. الآيات وكلماتها يتلوها قارئ دائمًا، ولا يقرؤها صوت حاسوبي.",
+  },
+  reminder: {
+    title: "وِردك اليومي",
+    body: "دقائق مع القرآن: درس اليوم بانتظارك.",
   },
   tour: {
     skip: "تخطَّ",

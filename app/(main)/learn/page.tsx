@@ -15,10 +15,17 @@ import { getLastUnitId, getMode } from "@/lib/preferences";
 
 import { Header } from "./header";
 import { ScrollToUnit } from "./scroll-to-unit";
+import { TodaysWird } from "./todays-wird";
 import { UnitJump } from "./unit-jump";
 import { Unit } from "./unit";
 
-const LearnPage = async () => {
+type LearnPageProps = {
+  // ?wird=1: opened from the daily reminder.
+  searchParams: Promise<{ wird?: string }>;
+};
+
+const LearnPage = async ({ searchParams }: LearnPageProps) => {
+  const fromReminder = (await searchParams).wird === "1";
   const userProgressData = getUserProgress();
   const courseProgressData = getCourseProgress();
   const unitsData = getUnits();
@@ -45,6 +52,8 @@ const LearnPage = async () => {
     redirect("/courses");
 
   const isPro = !!userSubscription?.isActive;
+  const wird = courseProgress.activeLesson;
+  const wirdUnit = units.find((u) => u.id === wird?.unitId);
 
   return (
     <div className="flex flex-row-reverse gap-[48px] px-6">
@@ -62,6 +71,14 @@ const LearnPage = async () => {
       </StickyWrapper>
       <FeedWrapper>
         <Header title={userProgress.activeCourse.title} />
+        {wird && wirdUnit && (
+          <TodaysWird
+            lessonId={wird.id}
+            unitTitle={wirdUnit.title}
+            lessonTitle={wird.title}
+            highlight={fromReminder}
+          />
+        )}
         {/* Back to the surah of the last lesson, not the top of the list. */}
         <ScrollToUnit
           order={units.find((u) => u.id === lastUnitId)?.order ?? null}
