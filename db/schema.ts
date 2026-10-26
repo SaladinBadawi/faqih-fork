@@ -8,6 +8,7 @@ import {
   serial,
   text,
   timestamp,
+  unique,
 } from "drizzle-orm/pg-core";
 
 import { MAX_HEARTS } from "@/constants";
@@ -233,6 +234,29 @@ export const userProgressRelations = relations(userProgress, ({ one }) => ({
   activeCourse: one(courses, {
     fields: [userProgress.activeCourseId],
     references: [courses.id],
+  }),
+}));
+
+// Questions a learner answered wrong. When hearts run out, a short review
+// of the latest ones earns hearts back (app/lesson/review). A row is removed
+// once the question is answered right in a review.
+export const mistakes = pgTable(
+  "mistakes",
+  {
+    id: serial("id").primaryKey(),
+    userId: text("user_id").notNull(),
+    challengeId: integer("challenge_id")
+      .references(() => challenges.id, { onDelete: "cascade" })
+      .notNull(),
+    lastWrongAt: timestamp("last_wrong_at").notNull().defaultNow(),
+  },
+  (table) => [unique().on(table.userId, table.challengeId)]
+);
+
+export const mistakesRelations = relations(mistakes, ({ one }) => ({
+  challenge: one(challenges, {
+    fields: [mistakes.challengeId],
+    references: [challenges.id],
   }),
 }));
 

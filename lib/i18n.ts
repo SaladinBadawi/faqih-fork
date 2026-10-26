@@ -82,6 +82,9 @@ const en = {
     readAloudDescription:
       "Reads each question and the option you tap. Ayat and their words are always recited by a qari, never by a computer voice.",
   },
+  review: {
+    done: "Your hearts are back. Carry on with your lesson!",
+  },
   reminder: {
     title: "Your daily wird",
     body: "A few minutes with the Quran: today's lesson is ready.",
@@ -172,8 +175,9 @@ const en = {
     keepLearning: "Keep learning",
     endSession: "End session",
     heartsTitle: "You ran out of hearts!",
-    heartsBody: "Practice an earlier lesson or refill hearts in the shop.",
-    heartsAction: "Go to shop",
+    heartsBody:
+      "Review the questions you just missed: every right answer gives a heart back, then you're back in your lesson.",
+    heartsAction: "Review and earn hearts",
     noThanks: "No thanks",
     practiceTitle: "Practice lesson",
     practiceBody:
@@ -246,6 +250,9 @@ const ar: Messages = {
       "الإشعارات محظورة لهذا الموقع. اسمح بها من إعدادات المتصفح ثم ارجع إلى هنا.",
     readAloudDescription:
       "يقرأ كل سؤال والخيار الذي تضغطه. الآيات وكلماتها يتلوها قارئ دائمًا، ولا يقرؤها صوت حاسوبي.",
+  },
+  review: {
+    done: "عادت إليك قلوبك. تابع درسك!",
   },
   reminder: {
     title: "وِردك اليومي",
@@ -337,8 +344,9 @@ const ar: Messages = {
     keepLearning: "تابع التعلّم",
     endSession: "إنهاء الجلسة",
     heartsTitle: "نفدت قلوبك!",
-    heartsBody: "راجع درسًا سابقًا أو استعد القلوب من المتجر.",
-    heartsAction: "اذهب إلى المتجر",
+    heartsBody:
+      "راجع الأسئلة التي أخطأت فيها للتو: كل إجابة صحيحة تعيد لك قلبًا، ثم تعود إلى درسك.",
+    heartsAction: "راجع واستعد قلوبك",
     noThanks: "لا، شكرًا",
     practiceTitle: "درس مراجعة",
     practiceBody:

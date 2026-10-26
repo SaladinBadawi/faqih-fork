@@ -18,11 +18,14 @@ import { useHeartsModal } from "@/store/use-hearts-modal";
 export const HeartsModal = () => {
   const router = useRouter();
   const t = useMessages();
-  const { isOpen, close } = useHeartsModal();
+  const { isOpen, close, lessonId } = useHeartsModal();
 
+  // Earn hearts back by reviewing mistakes, never by waiting or paying.
   const onClick = () => {
     close();
-    router.push("/store");
+    router.push(
+      lessonId ? `/lesson/review?from=${lessonId}` : "/lesson/review"
+    );
   };
 
   return (

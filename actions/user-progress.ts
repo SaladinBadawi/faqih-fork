@@ -11,7 +11,12 @@ import {
   getUserProgress,
   getUserSubscription,
 } from "@/db/queries";
-import { challengeProgress, challenges, userProgress } from "@/db/schema";
+import {
+  challengeProgress,
+  challenges,
+  mistakes,
+  userProgress,
+} from "@/db/schema";
 import { getAuth, getCurrentUser } from "@/lib/auth";
 import { getMode } from "@/lib/preferences";
 
@@ -72,6 +77,15 @@ export const reduceHearts = async (challengeId: number) => {
   if (!challenge) throw new Error("Challenge not found.");
 
   const lessonId = challenge.lessonId;
+
+  // Remember the mistake: reviewing it later earns a heart back.
+  await db
+    .insert(mistakes)
+    .values({ userId, challengeId })
+    .onConflictDoUpdate({
+      target: [mistakes.userId, mistakes.challengeId],
+      set: { lastWrongAt: new Date() },
+    });
 
   const existingChallengeProgress = await db.query.challengeProgress.findFirst({
     where: and(

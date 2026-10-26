@@ -1,6 +1,6 @@
 import { cache } from "react";
 
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 import { features } from "@/config";
 import { getAuth } from "@/lib/auth";
@@ -14,6 +14,7 @@ import {
   challengeProgress,
   courses,
   lessons,
+  mistakes,
   units,
   userProgress,
   userSubscription,
@@ -141,6 +142,49 @@ export const getCourseProgress = cache(async () => {
     (lastUnit && firstOpenLesson([lastUnit])) ?? firstOpenLesson(units);
 
   return { activeLesson, activeLessonId: activeLesson?.id };
+});
+
+// A hearts review: the learner's latest mistakes (topped up with questions
+// they already completed, if they have fewer), each with what the quiz needs.
+const REVIEW_SIZE = 3;
+
+export const getReviewChallenges = cache(async () => {
+  const { userId } = await getAuth();
+  if (!userId) return [];
+
+  const details = {
+    challengeOptions: true,
+    sourceText: true,
+    lesson: { columns: { reviewStatus: true } },
+  } as const;
+
+  const recent = await db.query.mistakes.findMany({
+    where: eq(mistakes.userId, userId),
+    orderBy: (m, { desc }) => [desc(m.lastWrongAt)],
+    limit: REVIEW_SIZE,
+    with: { challenge: { with: details } },
+  });
+  const picked = recent.map((m) => m.challenge);
+
+  if (picked.length < REVIEW_SIZE) {
+    const done = await db.query.challengeProgress.findMany({
+      where: and(
+        eq(challengeProgress.userId, userId),
+        eq(challengeProgress.completed, true)
+      ),
+      orderBy: (p, { desc }) => [desc(p.id)],
+      limit: REVIEW_SIZE * 2,
+      with: { challenge: { with: details } },
+    });
+    for (const { challenge } of done)
+      if (
+        picked.length < REVIEW_SIZE &&
+        !picked.some((c) => c.id === challenge.id)
+      )
+        picked.push(challenge);
+  }
+
+  return picked.map((challenge) => ({ ...challenge, completed: false }));
 });
 
 export const getLesson = cache(async (id?: number) => {

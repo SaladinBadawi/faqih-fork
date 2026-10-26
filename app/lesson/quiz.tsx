@@ -10,6 +10,7 @@ import { useAudio, useWindowSize, useMount } from "react-use";
 import { toast } from "sonner";
 
 import { upsertChallengeProgress } from "@/actions/challenge-progress";
+import { reviewAnswer } from "@/actions/review";
 import { reduceHearts } from "@/actions/user-progress";
 import { useMessages } from "@/components/locale-provider";
 import { useIsKids, useMode } from "@/components/mode-provider";
@@ -52,7 +53,12 @@ type QuizProps = {
   initialHearts: number;
   initialLessonId: number;
   /** Remembered on the device, so the learn page returns to this surah. */
-  unitId: number;
+  unitId?: number;
+  /**
+   * A hearts review (app/lesson/review): each right answer gives a heart
+   * back, a wrong one costs nothing, and the end returns to the lesson.
+   */
+  review?: { returnHref: string };
   reviewStatus: (typeof lessons.$inferSelect)["reviewStatus"];
   isExam?: boolean;
   initialLessonChallenges: (typeof challenges.$inferSelect & {
@@ -72,6 +78,7 @@ export const Quiz = ({
   initialHearts,
   initialLessonId,
   unitId,
+  review,
   reviewStatus,
   isExam,
   initialLessonChallenges,
@@ -182,7 +189,7 @@ export const Quiz = ({
   useEffect(() => stop, [stop]);
 
   useEffect(() => {
-    setPreferenceCookie(LAST_UNIT_COOKIE, String(unitId));
+    if (unitId) setPreferenceCookie(LAST_UNIT_COOKIE, String(unitId));
   }, [unitId]);
 
   // Spoken "أحسنت!" / "حاول مرة أخرى" after the chime.
@@ -232,12 +239,34 @@ export const Quiz = ({
       isCorrect = correctOption.id === selectedOption;
     }
 
+    if (review) {
+      // Review: a right answer earns a heart back; a wrong one costs nothing.
+      if (!isCorrect) {
+        void incorrectControls.play();
+        encourage(t.lesson.wrong);
+        setStatus("wrong");
+        return;
+      }
+      startTransition(() => {
+        reviewAnswer(challenge.id)
+          .then(({ hearts }) => {
+            void correctControls.play();
+            encourage(t.lesson.correct);
+            setStatus("correct");
+            setHearts(hearts);
+            setPercentage((prev) => prev + 100 / challenges.length);
+          })
+          .catch(() => toast.error(t.lesson.error));
+      });
+      return;
+    }
+
     if (isCorrect) {
       startTransition(() => {
         upsertChallengeProgress(challenge.id)
           .then((response) => {
             if (response?.error === "hearts") {
-              openHeartsModal();
+              openHeartsModal(lessonId);
               return;
             }
 
@@ -258,7 +287,7 @@ export const Quiz = ({
         reduceHearts(challenge.id)
           .then((response) => {
             if (response?.error === "hearts") {
-              openHeartsModal();
+              openHeartsModal(lessonId);
               return;
             }
 
@@ -303,11 +332,18 @@ export const Quiz = ({
           />
 
           <h1 className="text-lg font-bold text-neutral-700 lg:text-3xl">
-            {isExam ? t.lesson.examPassed : t.lesson.finished}
+            {review
+              ? t.review.done
+              : isExam
+                ? t.lesson.examPassed
+                : t.lesson.finished}
           </h1>
 
           <div className="flex w-full items-center gap-x-4">
-            <ResultCard variant="points" value={challenges.length * 10} />
+            {/* A review earns hearts, not points. */}
+            {!review && (
+              <ResultCard variant="points" value={challenges.length * 10} />
+            )}
             {!isKids && (
               <ResultCard
                 variant="hearts"
@@ -318,9 +354,9 @@ export const Quiz = ({
         </div>
 
         <Footer
-          lessonId={lessonId}
+          lessonId={review ? undefined : lessonId}
           status="completed"
-          onCheck={() => router.push("/learn")}
+          onCheck={() => router.push(review?.returnHref ?? "/learn")}
         />
       </>
     );

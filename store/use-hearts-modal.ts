@@ -2,12 +2,14 @@ import { create } from "zustand";
 
 type HeartsModalState = {
   isOpen: boolean;
-  open: () => void;
+  /** The lesson to return to after the hearts review. */
+  lessonId?: number;
+  open: (lessonId?: number) => void;
   close: () => void;
 };
 
 export const useHeartsModal = create<HeartsModalState>((set) => ({
   isOpen: false,
-  open: () => set({ isOpen: true }),
+  open: (lessonId) => set({ isOpen: true, lessonId }),
   close: () => set({ isOpen: false }),
 }));

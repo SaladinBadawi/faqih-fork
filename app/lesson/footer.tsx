@@ -51,7 +51,7 @@ export const Footer = ({
           </div>
         )}
 
-        {status === "completed" && (
+        {status === "completed" && lessonId && (
           <Button
             variant="default"
             className={responsiveSize}

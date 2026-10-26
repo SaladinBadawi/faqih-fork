@@ -143,6 +143,19 @@
     "target": "2026-11-15"
   },
   {
+    "title": "Earn hearts back by reviewing mistakes",
+    "body": "Hearts never make a learner wait or pay. When they run out, the hearts modal offers a short review of the questions they just got wrong (their 3 latest mistakes, every wrong answer is remembered); each right answer gives a heart back, a wrong one costs nothing, and then they return to their lesson.\n\n**Done when:** merged; running out of hearts mid-lesson leads to a review and back to the same lesson.",
+    "status": "Code review",
+    "phase": "M2",
+    "path": "Full Quran",
+    "audience": "Adults",
+    "priority": "P1",
+    "size": "M",
+    "type": "Feature",
+    "start": "2026-10-26",
+    "target": "2026-11-07"
+  },
+  {
     "title": "Audio for MATCH items and ayah fragments",
     "body": "Recite MATCH items and partial ayat when tapped.\n\n**Done when:** every tappable Quran text in an exercise plays its recitation.",
     "status": "Backlog",
