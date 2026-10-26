@@ -35,19 +35,24 @@ type ReadAloud = {
   /** Play steps in order, stopping anything already playing. */
   play: (steps: Step[]) => void;
   stop: () => void;
+  /** Start downloading audio that is likely to play soon (best source). */
+  preload: (refs: string[]) => void;
 };
 
 const ReadAloudContext = createContext<ReadAloud>({
   enabled: false,
   play: () => undefined,
   stop: () => undefined,
+  preload: () => undefined,
 });
 
 const SPEECH_LANG: Record<Locale, string> = { ar: "ar", en: "en" };
 const VOICES_TIMEOUT_MS = 1000;
 // A source that hasn't started playing by then is skipped for the next one:
-// a stalled request otherwise waits silently forever.
-const LOAD_TIMEOUT_MS = 8000;
+// a stalled request otherwise waits silently forever. Healthy hosts start in
+// about a second.
+const LOAD_TIMEOUT_MS = 4000;
+const MAX_PRELOADED = 12;
 
 // A voice for the language, or null. Without a matching voice the browser
 // would read Arabic with an English voice, so then we say nothing.
@@ -81,6 +86,8 @@ export const ReadAloudProvider = ({
   const run = useRef(0);
   // Bumped for every source tried, so a stale timer never stops a newer one.
   const attempt = useRef(0);
+  // Audio elements kept alive while they download, by URL (latest few).
+  const preloaded = useRef(new Map<string, HTMLAudioElement>());
 
   const stop = useCallback(() => {
     run.current += 1;
@@ -174,7 +181,27 @@ export const ReadAloudProvider = ({
   // Leaving the lesson stops the sound.
   useEffect(() => stop, [stop]);
 
-  const value = useMemo(() => ({ enabled, play, stop }), [enabled, play, stop]);
+  const preload = useCallback(
+    (refs: string[]) => {
+      for (const ref of refs) {
+        const [url] = recitationAudio(ref, mode);
+        if (!url || preloaded.current.has(url)) continue;
+        const el = new Audio();
+        el.preload = "auto";
+        el.src = url;
+        preloaded.current.set(url, el);
+      }
+      // Keep only the most recent ones.
+      for (const url of [...preloaded.current.keys()].slice(0, -MAX_PRELOADED))
+        preloaded.current.delete(url);
+    },
+    [mode]
+  );
+
+  const value = useMemo(
+    () => ({ enabled, play, stop, preload }),
+    [enabled, play, stop, preload]
+  );
 
   return (
     <ReadAloudContext.Provider value={value}>
