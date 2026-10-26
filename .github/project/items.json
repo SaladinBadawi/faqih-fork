@@ -156,6 +156,19 @@
     "target": "2026-11-07"
   },
   {
+    "title": "Read the ayat first, then the questions",
+    "body": "Every lesson opens on the ayat it covers (with qari recitation, and the next ayah for \"what comes next\"), so learners don't guess. Listening questions get a \"Can't listen now\" button that skips them without points or hearts.\n\n**Done when:** merged and the content re-imported.",
+    "status": "Code review",
+    "phase": "M2",
+    "path": "Full Quran",
+    "audience": "All learners",
+    "priority": "P1",
+    "size": "M",
+    "type": "Feature",
+    "start": "2026-10-26",
+    "target": "2026-11-07"
+  },
+  {
     "title": "Audio for MATCH items and ayah fragments",
     "body": "Recite MATCH items and partial ayat when tapped.\n\n**Done when:** every tappable Quran text in an exercise plays its recitation.",
     "status": "Backlog",

@@ -9,7 +9,10 @@ import Confetti from "react-confetti";
 import { useAudio, useWindowSize, useMount } from "react-use";
 import { toast } from "sonner";
 
-import { upsertChallengeProgress } from "@/actions/challenge-progress";
+import {
+  skipListening,
+  upsertChallengeProgress,
+} from "@/actions/challenge-progress";
 import { reviewAnswer } from "@/actions/review";
 import { reduceHearts } from "@/actions/user-progress";
 import { useMessages } from "@/components/locale-provider";
@@ -47,6 +50,7 @@ import { Header } from "./header";
 import { QuestionBubble } from "./question-bubble";
 import { ResultCard } from "./result-card";
 import { SourceNote } from "./source-note";
+import { Study } from "./study";
 
 type QuizProps = {
   initialPercentage: number;
@@ -59,6 +63,8 @@ type QuizProps = {
    * back, a wrong one costs nothing, and the end returns to the lesson.
    */
   review?: { returnHref: string };
+  /** Read first: the texts the lesson is about, shown before the questions. */
+  studyTexts?: (typeof sourceTexts.$inferSelect)[];
   reviewStatus: (typeof lessons.$inferSelect)["reviewStatus"];
   isExam?: boolean;
   initialLessonChallenges: (typeof challenges.$inferSelect & {
@@ -79,6 +85,7 @@ export const Quiz = ({
   initialLessonId,
   unitId,
   review,
+  studyTexts = [],
   reviewStatus,
   isExam,
   initialLessonChallenges,
@@ -110,7 +117,11 @@ export const Quiz = ({
   const [percentage, setPercentage] = useState(() => {
     return initialPercentage === 100 ? 0 : initialPercentage;
   });
-  const [challenges] = useState(initialLessonChallenges);
+  const [challenges, setChallenges] = useState(initialLessonChallenges);
+  // Lessons open on what they're about; exams and reviews go straight in.
+  const [studying, setStudying] = useState(
+    () => !review && !isExam && studyTexts.length > 0
+  );
   const [activeIndex, setActiveIndex] = useState(() => {
     const uncompletedIndex = challenges.findIndex(
       (challenge) => !challenge.completed
@@ -182,8 +193,8 @@ export const Quiz = ({
   }, [challenge, instruction, listenRef]);
 
   useEffect(() => {
-    if (readAloudOn && openingSteps.length) play(openingSteps);
-  }, [openingSteps, play, readAloudOn]);
+    if (readAloudOn && !studying && openingSteps.length) play(openingSteps);
+  }, [openingSteps, play, readAloudOn, studying]);
 
   // Leaving the lesson stops any sound.
   useEffect(() => stop, [stop]);
@@ -206,6 +217,27 @@ export const Quiz = ({
     setSelectedOption(undefined);
     setAnswer({ ready: false, correct: false });
     setAttempt((a) => a + 1);
+  };
+
+  // "Can't listen now": skip this and the lesson's other listening
+  // questions, without points or hearts, and carry on.
+  const onCantListen = () => {
+    const ids = challenges
+      .slice(activeIndex)
+      .filter((c) => c.type === "LISTEN" && !c.completed)
+      .map((c) => c.id);
+    startTransition(() => {
+      skipListening(ids)
+        .then(() => {
+          stop();
+          setPercentage((prev) =>
+            Math.min(100, prev + (ids.length * 100) / challenges.length)
+          );
+          setChallenges((prev) => prev.filter((c) => !ids.includes(c.id)));
+          resetAnswer();
+        })
+        .catch(() => toast.error(t.lesson.error));
+    });
   };
 
   const onNext = () => {
@@ -366,6 +398,27 @@ export const Quiz = ({
   const payload = challenge.payload;
   const selectedText = options.find((o) => o.id === selectedOption)?.text;
 
+  if (studying)
+    return (
+      <>
+        <Header
+          hearts={hearts}
+          percentage={percentage}
+          hasActiveSubscription={!!userSubscription?.isActive}
+          hideHearts={isKids}
+        />
+        <div className="flex flex-1 justify-center overflow-y-auto pt-8">
+          <Study
+            texts={studyTexts}
+            onStart={() => {
+              stop();
+              setStudying(false);
+            }}
+          />
+        </div>
+      </>
+    );
+
   return (
     <>
       {incorrectAudio}
@@ -409,7 +462,19 @@ export const Quiz = ({
               )}
 
               {challenge.type === "LISTEN" && listenUrls.length > 0 && (
-                <AudioPlayer urls={listenUrls} />
+                <>
+                  <AudioPlayer urls={listenUrls} />
+                  {status === "none" && (
+                    <button
+                      type="button"
+                      disabled={pending}
+                      onClick={onCantListen}
+                      className="mx-auto mb-6 block text-sm font-bold text-sky-500 hover:underline"
+                    >
+                      {t.lesson.cantListen}
+                    </button>
+                  )}
+                </>
               )}
 
               {challenge.type === "COMPLETE_WORD" && (

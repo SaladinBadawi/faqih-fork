@@ -56,6 +56,9 @@ const surahUnit = (
   ];
 
   // The exam's own question makers: different wrong answers from lessons.
+  // Each kids lesson practises the whole surah: read it all first.
+  const study = ayat.map((a) => a.key);
+
   const exam = quranExam(
     quranQuestions(ayat, others, lang, "kids-exam"),
     ayat.length,
@@ -72,9 +75,10 @@ const surahUnit = (
       ? `نحفظ ${surah.name} آيةً آية`
       : `Learn ${surah.englishName} ayah by ayah`,
     // A lesson with no challenges could never be completed.
-    lessons: [...lessons, ...(exam ? [exam] : [])].filter(
-      (l) => l.challenges.length > 0
-    ),
+    lessons: [
+      ...lessons.map((lesson) => ({ ...lesson, study })),
+      ...(exam ? [exam] : []),
+    ].filter((l) => l.challenges.length > 0),
   };
 };
 

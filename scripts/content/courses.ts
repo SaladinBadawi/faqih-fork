@@ -38,6 +38,11 @@ export type ChallengeSpec = {
 export type LessonSpec = {
   title: string;
   kind?: "lesson" | "exam"; // "lesson" unless set
+  /**
+   * Source keys shown before the questions ("read first"), in order. Unset:
+   * the texts the lesson's questions are about, in order of first use.
+   */
+  study?: string[];
   /** Group heading on the learn page, e.g. "الحزب ١ · الربع الثاني". */
   section?: string;
   challenges: ChallengeSpec[];
@@ -217,7 +222,8 @@ export const buildFatiha = (ayat: SourceText[], lang: Language): CourseSpec => {
             title: ar ? "أرقام الآيات" : "Ayah numbers",
             challenges: ayat.map(number),
           },
-        ],
+          // Every lesson is about the whole surah: read it all first.
+        ].map((lesson) => ({ ...lesson, study: ayat.map((a) => a.key) })),
       },
     ],
   };

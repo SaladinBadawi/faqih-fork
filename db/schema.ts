@@ -81,6 +81,8 @@ export const lessons = pgTable("lessons", {
   kind: lessonKindEnum("kind").notNull().default("lesson"),
   // Group heading on the learn page (e.g. the hizb quarter a lesson is in).
   section: text("section"),
+  // Source keys shown before the questions ("read first"), in order.
+  study: jsonb("study").$type<string[]>(),
   reviewStatus: reviewStatusEnum("review_status").notNull().default("draft"),
   unitId: integer("unit_id")
     .references(() => units.id, {

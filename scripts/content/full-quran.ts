@@ -62,6 +62,9 @@ const surahUnit = (
     if (challenges.length > 0)
       lessons.push({
         title: ar ? `الآيات ${range}` : `Ayat ${range}`,
+        // Read first: the lesson's ayat, plus the next one, which "what comes
+        // next" asks about for the last ayah.
+        study: ayat.slice(from, to + 1).map((a) => a.key),
         // Grouped on the learn page by the hizb quarter the lesson starts in.
         section: hizbQuarter ? hizbSection(hizbQuarter, lang) : undefined,
         challenges,

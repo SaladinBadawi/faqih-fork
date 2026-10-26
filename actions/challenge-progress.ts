@@ -1,6 +1,6 @@
 "use server";
 
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 import { MAX_HEARTS } from "@/constants";
@@ -88,4 +88,45 @@ export const upsertChallengeProgress = async (challengeId: number) => {
   revalidatePath("/quests");
   revalidatePath("/leaderboard");
   revalidatePath(`/lesson/${lessonId}`);
+};
+
+/**
+ * "Can't listen now": the listening questions are marked done without
+ * points or hearts, so the lesson can still be finished. Only LISTEN
+ * questions can be skipped this way.
+ */
+export const skipListening = async (challengeIds: number[]) => {
+  const { userId } = await getAuth();
+  if (!userId) throw new Error("Unauthorized.");
+  if (challengeIds.length === 0) return;
+
+  const listening = await db.query.challenges.findMany({
+    where: and(
+      inArray(challenges.id, challengeIds),
+      eq(challenges.type, "LISTEN")
+    ),
+    columns: { id: true, lessonId: true },
+  });
+
+  for (const { id } of listening) {
+    const existing = await db.query.challengeProgress.findFirst({
+      where: and(
+        eq(challengeProgress.userId, userId),
+        eq(challengeProgress.challengeId, id)
+      ),
+    });
+    if (existing)
+      await db
+        .update(challengeProgress)
+        .set({ completed: true })
+        .where(eq(challengeProgress.id, existing.id));
+    else
+      await db
+        .insert(challengeProgress)
+        .values({ challengeId: id, userId, completed: true });
+  }
+
+  revalidatePath("/learn");
+  for (const lessonId of new Set(listening.map((c) => c.lessonId)))
+    revalidatePath(`/lesson/${lessonId}`);
 };
