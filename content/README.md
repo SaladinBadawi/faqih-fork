@@ -23,6 +23,21 @@ Besides picking an option (`ASSIST`, `SELECT`), a challenge can be `LISTEN`,
 type-specific data lives in `challenges.payload` (see `lib/exercises.ts`).
 The kids course generates all of them from the Quran text.
 
+## Read first
+
+Every lesson opens on the texts it is about (`lessons.study`, source keys in
+order), so learners answer from what they've just read and heard instead of
+guessing. Exams skip it.
+
+- Quran lessons: the lesson's ayat plus the next one (which "what comes next"
+  asks about); kids and Al-Fatiha lessons: the whole surah.
+- Other courses: the texts the lesson's questions use, in order.
+- Ayat are recited by a qari (never a synthetic voice); adhkar play their
+  recording. With read-aloud on (kids by default) they play automatically.
+
+Listening questions have a "Can't listen now" button: it skips the lesson's
+listening questions without points or hearts.
+
 ## Exams
 
 Every unit ends with an exam (`kind: "exam"`); passing it clears the unit

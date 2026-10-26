@@ -148,6 +148,13 @@ const insertCourse = async (
           title: lesson.title,
           kind: lesson.kind ?? "lesson",
           section: lesson.section ?? null,
+          // Exams are tests: nothing to read first.
+          study:
+            (lesson.kind ?? "lesson") === "exam"
+              ? null
+              : (lesson.study ?? [
+                  ...new Set(lesson.challenges.map((c) => c.sourceKey)),
+                ]),
           order: l + 1,
           reviewStatus: "draft" as const,
         }))

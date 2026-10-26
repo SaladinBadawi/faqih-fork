@@ -1,6 +1,6 @@
 import { cache } from "react";
 
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 
 import { features } from "@/config";
 import { getAuth } from "@/lib/auth";
@@ -15,6 +15,7 @@ import {
   courses,
   lessons,
   mistakes,
+  sourceTexts,
   units,
   userProgress,
   userSubscription,
@@ -231,7 +232,18 @@ export const getLesson = cache(async (id?: number) => {
     return { ...challenge, completed };
   });
 
-  return { ...data, challenges: normalizedChallenges };
+  // The texts to read before the questions, in the lesson's order.
+  const study = data.study ?? [];
+  const texts = study.length
+    ? await db.query.sourceTexts.findMany({
+        where: inArray(sourceTexts.key, study),
+      })
+    : [];
+  const studyTexts = study
+    .map((key) => texts.find((t) => t.key === key))
+    .filter((t) => t !== undefined);
+
+  return { ...data, challenges: normalizedChallenges, studyTexts };
 });
 
 export const getUserSubscription = cache(async () => {

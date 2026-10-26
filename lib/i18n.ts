@@ -85,6 +85,13 @@ const en = {
   review: {
     done: "Your hearts are back. Carry on with your lesson!",
   },
+  study: {
+    title: "Read first",
+    intro:
+      "Read and listen to what this lesson is about, then answer the questions.",
+    playAll: "Listen to all",
+    start: "Start the questions",
+  },
   reminder: {
     title: "Your daily wird",
     body: "A few minutes with the Quran: today's lesson is ready.",
@@ -149,6 +156,7 @@ const en = {
     error: "Something went wrong. Please try again.",
     examPassed: "Exam passed! This unit is cleared.",
     listenAgain: "Listen again",
+    cantListen: "Can't listen now",
     prompts: {
       LISTEN: "Listen and choose the ayah",
       TRUE_FALSE: "True or false?",
@@ -254,6 +262,12 @@ const ar: Messages = {
   review: {
     done: "عادت إليك قلوبك. تابع درسك!",
   },
+  study: {
+    title: "اقرأ أولًا",
+    intro: "اقرأ واستمع إلى ما يتناوله هذا الدرس، ثم أجب عن الأسئلة.",
+    playAll: "استمع للكل",
+    start: "ابدأ الأسئلة",
+  },
   reminder: {
     title: "وِردك اليومي",
     body: "دقائق مع القرآن: درس اليوم بانتظارك.",
@@ -318,6 +332,7 @@ const ar: Messages = {
     error: "حدث خطأ، حاول مرة أخرى.",
     examPassed: "نجحت في الاختبار! أتممت هذه الوحدة.",
     listenAgain: "استمع مرة أخرى",
+    cantListen: "لا أستطيع الاستماع الآن",
     prompts: {
       LISTEN: "استمع واختر الآية",
       TRUE_FALSE: "صح أم خطأ؟",
