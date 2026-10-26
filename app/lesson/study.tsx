@@ -37,7 +37,7 @@ export const Study = ({ texts, onStart }: StudyProps) => {
   const t = useMessages();
   const locale = useLocale();
   const ar = locale === "ar";
-  const { enabled, play } = useReadAloud();
+  const { enabled, play, preload } = useReadAloud();
 
   const playAll = useMemo(
     () =>
@@ -47,6 +47,13 @@ export const Study = ({ texts, onStart }: StudyProps) => {
         .flatMap((s, i) => (i ? [{ kind: "wait", ms: 400 } as Step, s] : [s])),
     [texts]
   );
+
+  // Start downloading the recitations, so "Listen to all" starts quickly.
+  useEffect(() => {
+    preload(
+      texts.map((t) => ayahRef(t.key)).filter((r): r is string => r !== null)
+    );
+  }, [preload, texts]);
 
   // With read-aloud on (kids by default), recite them all straight away.
   useEffect(() => {

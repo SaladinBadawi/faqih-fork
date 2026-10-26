@@ -9,30 +9,44 @@
 
 import { type Mode } from "@/lib/mode";
 
-// EveryAyah recitations (https://everyayah.com, free to use with
-// attribution). Served first from the QuranicAudio mirror, a CDN that carries
-// the same files: everyayah.com itself sometimes stalls without answering.
-const AYAH_HOSTS = [
-  "https://mirrors.quranicaudio.com/everyayah",
-  "https://www.everyayah.com/data",
-];
+// Where each reciter is served, fastest and most reliable first. Hosts
+// sometimes hang without answering (everyayah.com often, the QuranicAudio
+// mirror now and then), so each source gets a few seconds before the next is
+// tried (components/read-aloud). Quran.com's own CDN only has Alafasy.
+// EveryAyah recitations are free to use with attribution.
+const QURAN_COM = "https://verses.quran.com";
+const QURANIC_AUDIO = "https://mirrors.quranicaudio.com/everyayah";
+const EVERYAYAH = "https://www.everyayah.com/data";
 
-const RECITERS: Record<Mode, string> = {
-  // Al-Husary's teaching recitation: slow and clear, for learning by heart.
-  kids: "Husary_Muallim_128kbps",
-  full: "Alafasy_128kbps",
-};
+/** Hosts the app connects to early, so the first ayah plays sooner. */
+export const AUDIO_ORIGINS = [
+  QURAN_COM,
+  "https://mirrors.quranicaudio.com",
+  "https://audio.qurancdn.com",
+];
 
 const pad = (n: number) => String(n).padStart(3, "0");
 
 const parse = (ref: string) => ref.split(":").map(Number);
 
-/** Recitation of a whole ayah, e.g. "1:2": one URL per host, best first. */
+const alafasy = (file: string) => [
+  `${QURAN_COM}/Alafasy/mp3/${file}`,
+  `${QURANIC_AUDIO}/Alafasy_128kbps/${file}`,
+  `${EVERYAYAH}/Alafasy_128kbps/${file}`,
+];
+
+/** Recitation of a whole ayah, e.g. "1:2": its sources, best first. */
 export const ayahAudio = (ref: string, mode: Mode) => {
   const [surah, ayah] = parse(ref);
-  return AYAH_HOSTS.map(
-    (host) => `${host}/${RECITERS[mode]}/${pad(surah)}${pad(ayah)}.mp3`
-  );
+  const file = `${pad(surah)}${pad(ayah)}.mp3`;
+  if (mode === "full") return alafasy(file);
+  // Kids: al-Husary's teaching recitation (slow and clear, for learning by
+  // heart). If both of its hosts fail, Alafasy: a qari is better than silence.
+  return [
+    `${QURANIC_AUDIO}/Husary_Muallim_128kbps/${file}`,
+    `${EVERYAYAH}/Husary_Muallim_128kbps/${file}`,
+    alafasy(file)[0],
+  ];
 };
 
 /** Recitation of one word (Quran.com word-by-word audio), e.g. "1:2:3". */
