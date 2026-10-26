@@ -106,9 +106,24 @@ export const Study = ({ texts, onStart }: StudyProps) => {
                     ﴿{formatNumber(locale, number)}﴾
                   </span>
                 )}
+                {/* Hadith and adhkar: everything their questions ask about,
+                    i.e. the number, who recorded it, how many times it is said. */}
                 {!ref && (
                   <span className="mt-2 block text-sm text-neutral-500">
-                    {ar ? (text.citationAr ?? text.citation) : text.citation}
+                    {[
+                      ar ? (text.citationAr ?? text.citation) : text.citation,
+                      text.kind === "hadith" &&
+                        ((ar ? text.hadithRefAr : text.hadithRef) ??
+                          t.source.referencePending),
+                      text.kind === "dhikr" &&
+                        text.repeat &&
+                        t.study.repeat(
+                          text.repeat,
+                          formatNumber(locale, text.repeat)
+                        ),
+                    ]
+                      .filter(Boolean)
+                      .join(" · ")}
                   </span>
                 )}
               </p>
