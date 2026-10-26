@@ -11,9 +11,10 @@ import {
   getUserProgress,
   getUserSubscription,
 } from "@/db/queries";
-import { getMode } from "@/lib/preferences";
+import { getLastUnitId, getMode } from "@/lib/preferences";
 
 import { Header } from "./header";
+import { ScrollToUnit } from "./scroll-to-unit";
 import { UnitJump } from "./unit-jump";
 import { Unit } from "./unit";
 
@@ -23,14 +24,21 @@ const LearnPage = async () => {
   const unitsData = getUnits();
   const userSubscriptionData = getUserSubscription();
 
-  const [userProgress, units, courseProgress, userSubscription, mode] =
-    await Promise.all([
-      userProgressData,
-      unitsData,
-      courseProgressData,
-      userSubscriptionData,
-      getMode(),
-    ]);
+  const [
+    userProgress,
+    units,
+    courseProgress,
+    userSubscription,
+    mode,
+    lastUnitId,
+  ] = await Promise.all([
+    userProgressData,
+    unitsData,
+    courseProgressData,
+    userSubscriptionData,
+    getMode(),
+    getLastUnitId(),
+  ]);
   const isKids = mode === "kids";
 
   if (!courseProgress || !userProgress || !userProgress.activeCourse)
@@ -54,6 +62,10 @@ const LearnPage = async () => {
       </StickyWrapper>
       <FeedWrapper>
         <Header title={userProgress.activeCourse.title} />
+        {/* Back to the surah of the last lesson, not the top of the list. */}
+        <ScrollToUnit
+          order={units.find((u) => u.id === lastUnitId)?.order ?? null}
+        />
         {/* Any surah can be learned in any order: jump straight to one. */}
         {units.length > 1 && (
           <UnitJump

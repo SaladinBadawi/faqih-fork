@@ -48,6 +48,9 @@ const en = {
     unitDone: "Completed",
     passedExam: "Exam passed: cleared. The lessons are still here to practise",
     jumpTo: "Jump to",
+    practiseAgain: "practise again",
+    searchUnits: "Search by name or number",
+    noResults: "Nothing found",
   },
   settings: {
     title: "Settings",
@@ -193,6 +196,9 @@ const ar: Messages = {
     unitDone: "مكتملة",
     passedExam: "اجتزت الاختبار: أتممتها، والدروس باقية للتدرّب",
     jumpTo: "انتقل إلى",
+    practiseAgain: "تدرّب مرة أخرى",
+    searchUnits: "ابحث بالاسم أو الرقم",
+    noResults: "لا نتائج",
   },
   settings: {
     title: "الإعدادات",

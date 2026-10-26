@@ -1,3 +1,5 @@
+import { Fragment } from "react";
+
 import { type lessons } from "@/db/schema";
 import { type LessonState } from "@/lib/progress";
 
@@ -26,6 +28,8 @@ export const Unit = ({
   // "Continue" opens this unit's next lesson, else its exam.
   const next =
     steps.find((l) => l.current) ?? (exam?.completed ? undefined : exam);
+  // Long surahs span several hizb quarters: show a heading where each starts.
+  const grouped = new Set(steps.map((l) => l.section)).size > 1;
 
   return (
     <>
@@ -39,16 +43,25 @@ export const Unit = ({
 
       <div className="relative flex flex-col items-center">
         {steps.map((lesson, i) => (
-          <LessonButton
-            key={lesson.id}
-            id={lesson.id}
-            index={i}
-            totalCount={steps.length - 1}
-            current={lesson.current}
-            locked={lesson.locked}
-            completed={lesson.completed}
-            percentage={lesson.percentage}
-          />
+          <Fragment key={lesson.id}>
+            {grouped &&
+              lesson.section &&
+              lesson.section !== steps[i - 1]?.section && (
+                <h4 className="mt-10 w-full border-b-2 pb-2 text-center text-sm font-bold text-neutral-500">
+                  {lesson.section}
+                </h4>
+              )}
+            <LessonButton
+              id={lesson.id}
+              index={i}
+              totalCount={steps.length - 1}
+              current={lesson.current}
+              locked={lesson.locked}
+              completed={lesson.completed}
+              percentage={lesson.percentage}
+              label={lesson.title}
+            />
+          </Fragment>
         ))}
 
         {exam && (
@@ -59,6 +72,7 @@ export const Unit = ({
             locked={exam.locked}
             completed={exam.completed}
             percentage={exam.percentage}
+            label={exam.title}
             exam
           />
         )}
