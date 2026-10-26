@@ -91,6 +91,8 @@ const en = {
       "Read and listen to what this lesson is about, then answer the questions.",
     playAll: "Listen to all",
     start: "Start the questions",
+    repeat: (n: number, count: string) =>
+      n === 1 ? "Said once" : `Said ${count} times`,
   },
   reminder: {
     title: "Your daily wird",
@@ -267,6 +269,15 @@ const ar: Messages = {
     intro: "اقرأ واستمع إلى ما يتناوله هذا الدرس، ثم أجب عن الأسئلة.",
     playAll: "استمع للكل",
     start: "ابدأ الأسئلة",
+    // Arabic counted nouns: 3-10 take the plural (مرات), 11+ the singular.
+    repeat: (n: number, count: string) =>
+      n === 1
+        ? "يُقال مرة واحدة"
+        : n === 2
+          ? "يُقال مرتين"
+          : n <= 10
+            ? `يُقال ${count} مرات`
+            : `يُقال ${count} مرة`,
   },
   reminder: {
     title: "وِردك اليومي",
