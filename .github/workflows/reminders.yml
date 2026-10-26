@@ -1,0 +1,31 @@
+# Sends the daily wird reminders that are due (web push), by calling the app's
+# /api/cron/reminders route every 15 minutes. GitHub may start scheduled runs
+# a few minutes late; the route allows for that (lib/reminders.ts).
+#
+# One-time setup (GitHub → Settings → Secrets and variables → Actions):
+#   APP_URL      the deployed app, e.g. https://faqih-beige.vercel.app
+#   CRON_SECRET  the same value as CRON_SECRET in the app's environment
+name: Daily wird reminders
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Send due reminders
+        env:
+          APP_URL: ${{ secrets.APP_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          if [ -z "$APP_URL" ] || [ -z "$CRON_SECRET" ]; then
+            echo "::notice::Add the APP_URL and CRON_SECRET repository secrets to send reminders."
+            exit 0
+          fi
+          curl --fail --silent --show-error --max-time 60 \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            "${APP_URL%/}/api/cron/reminders"

@@ -236,6 +236,22 @@ export const userProgressRelations = relations(userProgress, ({ one }) => ({
   }),
 }));
 
+// Daily wird reminders: one row per device that turned them on (Settings).
+// The reminder cron (app/api/cron/reminders) sends a web push once a day at
+// reminderTime in the device's own time zone.
+export const pushSubscriptions = pgTable("push_subscriptions", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  endpoint: text("endpoint").notNull().unique(),
+  p256dh: text("p256dh").notNull(),
+  auth: text("auth").notNull(),
+  reminderTime: text("reminder_time").notNull(), // "HH:MM", local time
+  timeZone: text("time_zone").notNull(), // IANA, e.g. "Asia/Jerusalem"
+  locale: text("locale").notNull(), // "ar" | "en"
+  lastSentOn: text("last_sent_on"), // local date "YYYY-MM-DD"
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 export const userSubscription = pgTable("user_subscription", {
   id: serial("id").primaryKey(),
   userId: text("user_id").notNull().unique(),

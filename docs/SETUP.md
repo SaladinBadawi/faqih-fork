@@ -57,3 +57,33 @@ against the database in the `DATABASE_URL` repository secret.
 - It only updates the schema. If the change also needs new or rebuilt lessons,
   run `npm run content:import` yourself (it resets progress).
 - You can also run it by hand from the Actions tab ("Run workflow").
+
+## Daily wird reminders (web push)
+
+Learners turn on a daily reminder in Settings and pick a time. It is a web
+push notification, sent at that time in the device's own time zone, and it
+opens the learn page on "today's wird".
+
+One-time setup:
+
+1. Generate the push keys:
+   ```bash
+   npx web-push generate-vapid-keys
+   ```
+2. In Vercel (Project → Settings → Environment Variables), add:
+   - `NEXT_PUBLIC_VAPID_PUBLIC_KEY`: the public key
+   - `VAPID_PRIVATE_KEY`: the private key
+   - `VAPID_SUBJECT`: a contact, e.g. `mailto:team@example.com`
+   - `CRON_SECRET`: any long random string, e.g. `openssl rand -hex 32`
+     Then redeploy, since the public key is built into the page.
+3. In GitHub (Settings → Secrets and variables → Actions), add:
+   - `APP_URL`: the deployed app, e.g. `https://faqih-beige.vercel.app`
+   - `CRON_SECRET`: the same value as in Vercel
+
+The **Daily wird reminders** Action (`.github/workflows/reminders.yml`) then
+calls `/api/cron/reminders` every 15 minutes and sends the reminders that are
+due. Until the secrets are set it skips quietly. Subscriptions are stored in
+the `push_subscriptions` table (added by the db-push Action).
+
+On iPhone and iPad, web push only works after the learner adds Faqih to the
+Home Screen and opens it from there; Settings explains this.
