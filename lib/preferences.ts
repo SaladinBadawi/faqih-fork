@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 
 import {
   DEFAULT_MODE,
+  LAST_UNIT_COOKIE,
   MODE_COOKIE,
   READ_ALOUD_COOKIE,
   TOUR_COOKIE,
@@ -19,7 +20,10 @@ export const isTourDone = async () =>
   (await cookies()).get(TOUR_COOKIE)?.value === "1";
 
 export const isReadAloudOn = async () =>
-  readAloudOn(
-    (await cookies()).get(READ_ALOUD_COOKIE)?.value,
-    await getMode()
-  );
+  readAloudOn((await cookies()).get(READ_ALOUD_COOKIE)?.value, await getMode());
+
+/** The unit of the last lesson opened on this device, if any. */
+export const getLastUnitId = async () => {
+  const value = Number((await cookies()).get(LAST_UNIT_COOKIE)?.value);
+  return Number.isInteger(value) && value > 0 ? value : null;
+};

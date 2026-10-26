@@ -147,6 +147,7 @@ const insertCourse = async (
           unitId: unitRow.id,
           title: lesson.title,
           kind: lesson.kind ?? "lesson",
+          section: lesson.section ?? null,
           order: l + 1,
           reviewStatus: "draft" as const,
         }))

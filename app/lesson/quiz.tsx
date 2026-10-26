@@ -30,6 +30,7 @@ import {
   type OrderPayload,
   usesOptions,
 } from "@/lib/exercises";
+import { LAST_UNIT_COOKIE, setPreferenceCookie } from "@/lib/mode";
 import { recitationAudio } from "@/lib/recitation";
 import { useHeartsModal } from "@/store/use-hearts-modal";
 import { usePracticeModal } from "@/store/use-practice-modal";
@@ -50,6 +51,8 @@ type QuizProps = {
   initialPercentage: number;
   initialHearts: number;
   initialLessonId: number;
+  /** Remembered on the device, so the learn page returns to this surah. */
+  unitId: number;
   reviewStatus: (typeof lessons.$inferSelect)["reviewStatus"];
   isExam?: boolean;
   initialLessonChallenges: (typeof challenges.$inferSelect & {
@@ -68,6 +71,7 @@ export const Quiz = ({
   initialPercentage,
   initialHearts,
   initialLessonId,
+  unitId,
   reviewStatus,
   isExam,
   initialLessonChallenges,
@@ -177,6 +181,10 @@ export const Quiz = ({
   // Leaving the lesson stops any sound.
   useEffect(() => stop, [stop]);
 
+  useEffect(() => {
+    setPreferenceCookie(LAST_UNIT_COOKIE, String(unitId));
+  }, [unitId]);
+
   // Spoken "أحسنت!" / "حاول مرة أخرى" after the chime.
   const encourage = (text: string) => {
     if (readAloudOn)
@@ -268,8 +276,8 @@ export const Quiz = ({
   if (!challenge) {
     return (
       <>
-        {/* Mounted only on the finish screen, so it plays exactly once there. */}
-        <audio src="/finish.mp3" autoPlay />
+        {/* No music (ma'azif): just the short "correct" sound, once. */}
+        <audio src="/correct.wav" autoPlay />
         <Confetti
           recycle={false}
           numberOfPieces={500}

@@ -15,6 +15,22 @@ import { type SourceText, type Surah, surahAyat } from "./sources";
 
 const AYAT_PER_LESSON = 5;
 
+const QUARTERS_AR = [
+  "الربع الأول",
+  "الربع الثاني",
+  "الربع الثالث",
+  "الربع الرابع",
+];
+
+// "الحزب ٣ · الربع الثاني": the hizb quarter (1-240) as the mushaf divides it.
+const hizbSection = (hizbQuarter: number, lang: Language) => {
+  const hizb = Math.ceil(hizbQuarter / 4);
+  const quarter = ((hizbQuarter - 1) % 4) + 1;
+  return lang === "ar"
+    ? `الحزب ${num(lang, hizb)} · ${QUARTERS_AR[quarter - 1]}`
+    : `Hizb ${hizb} · quarter ${quarter}`;
+};
+
 const surahUnit = (
   surah: Surah,
   ayat: SourceText[],
@@ -42,9 +58,12 @@ const surahUnit = (
     const challenges = Array.from({ length: to - from }, (_, k) =>
       forAyah(from + k)
     ).flat();
+    const { hizbQuarter } = ayat[from];
     if (challenges.length > 0)
       lessons.push({
         title: ar ? `الآيات ${range}` : `Ayat ${range}`,
+        // Grouped on the learn page by the hizb quarter the lesson starts in.
+        section: hizbQuarter ? hizbSection(hizbQuarter, lang) : undefined,
         challenges,
       });
   }

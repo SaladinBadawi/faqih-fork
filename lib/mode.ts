@@ -12,6 +12,10 @@ export const DEFAULT_MODE: Mode = "full";
 // Set once the welcome tour is finished or skipped.
 export const TOUR_COOKIE = "tour_done";
 
+// The unit (surah) of the last lesson opened on this device, so the learn
+// page and "Continue" go back to it instead of the first surah.
+export const LAST_UNIT_COOKIE = "last_unit";
+
 // Read questions and options aloud: "1" on, "0" off. Unset: on in kids mode.
 export const READ_ALOUD_COOKIE = "read_aloud";
 

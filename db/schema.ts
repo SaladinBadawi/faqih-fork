@@ -78,6 +78,8 @@ export const lessons = pgTable("lessons", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
   kind: lessonKindEnum("kind").notNull().default("lesson"),
+  // Group heading on the learn page (e.g. the hizb quarter a lesson is in).
+  section: text("section"),
   reviewStatus: reviewStatusEnum("review_status").notNull().default("draft"),
   unitId: integer("unit_id")
     .references(() => units.id, {

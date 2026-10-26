@@ -6,7 +6,7 @@ import { features } from "@/config";
 import { getAuth } from "@/lib/auth";
 import { getLocale } from "@/lib/locale";
 import { courseInMode } from "@/lib/mode";
-import { getMode } from "@/lib/preferences";
+import { getLastUnitId, getMode } from "@/lib/preferences";
 import { computeProgress, firstOpenLesson } from "@/lib/progress";
 
 import db from "./drizzle";
@@ -134,7 +134,11 @@ export const getCourseById = cache(async (courseId: number) => {
 });
 
 export const getCourseProgress = cache(async () => {
-  const activeLesson = firstOpenLesson(await getUnits());
+  const [units, lastUnitId] = await Promise.all([getUnits(), getLastUnitId()]);
+  // Carry on in the surah the learner was last in, unless it is cleared.
+  const lastUnit = units.find((u) => u.id === lastUnitId && !u.cleared);
+  const activeLesson =
+    (lastUnit && firstOpenLesson([lastUnit])) ?? firstOpenLesson(units);
 
   return { activeLesson, activeLessonId: activeLesson?.id };
 });

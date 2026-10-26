@@ -38,6 +38,8 @@ export type ChallengeSpec = {
 export type LessonSpec = {
   title: string;
   kind?: "lesson" | "exam"; // "lesson" unless set
+  /** Group heading on the learn page, e.g. "الحزب ١ · الربع الثاني". */
+  section?: string;
   challenges: ChallengeSpec[];
 };
 export type UnitSpec = {

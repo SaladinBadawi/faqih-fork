@@ -22,6 +22,7 @@ export type SourceText = {
   number: number;
   surah?: number;
   juz?: number;
+  hizbQuarter?: number;
 };
 
 const CACHE_DIR = path.join(process.cwd(), "content", "cache");
@@ -73,6 +74,7 @@ type AlQuranFull = {
       text: string;
       audio?: string;
       juz: number;
+      hizbQuarter: number; // 1-240 across the mushaf
     }[];
   })[];
 };
@@ -144,6 +146,7 @@ export const fetchQuran = async (
         number: ayah.numberInSurah,
         surah: surah.number,
         juz: ayah.juz,
+        hizbQuarter: ayah.hizbQuarter,
       };
     })
   );

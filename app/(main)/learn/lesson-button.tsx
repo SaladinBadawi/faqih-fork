@@ -10,6 +10,29 @@ import { cn } from "@/lib/utils";
 
 import "react-circular-progressbar/dist/styles.css";
 
+const LessonLabel = ({
+  text,
+  exam,
+  completed,
+}: {
+  text: string;
+  exam?: boolean;
+  completed?: boolean;
+}) => (
+  <span
+    className={cn(
+      "mt-1 block max-w-[140px] text-center text-sm font-bold leading-tight",
+      exam
+        ? "text-amber-600"
+        : completed
+          ? "text-green-600"
+          : "text-neutral-500"
+    )}
+  >
+    {text}
+  </span>
+);
+
 type LessonButtonProps = {
   id: number;
   index: number;
@@ -20,6 +43,8 @@ type LessonButtonProps = {
   /** The unit's exam: always open in an open unit, see lib/progress. */
   exam?: boolean;
   percentage: number;
+  /** What the lesson covers, shown under the button ("الآيات ١١–١٥"). */
+  label: string;
 };
 
 export const LessonButton = ({
@@ -31,6 +56,7 @@ export const LessonButton = ({
   completed,
   exam,
   percentage,
+  label,
 }: LessonButtonProps) => {
   const t = useMessages();
   const cycleLength = 8;
@@ -63,7 +89,9 @@ export const LessonButton = ({
     <Link
       href={href}
       aria-disabled={locked}
-      aria-label={exam ? t.learn.exam : undefined}
+      aria-label={label}
+      // A finished lesson can always be practised again.
+      title={isCompleted ? `${label} · ${t.learn.practiseAgain}` : label}
       style={{ pointerEvents: locked ? "none" : "auto" }}
     >
       <div
@@ -109,6 +137,7 @@ export const LessonButton = ({
                 />
               </Button>
             </CircularProgressbarWithChildren>
+            <LessonLabel text={label} />
           </div>
         ) : (
           <div className="flex flex-col items-center gap-y-1">
@@ -132,11 +161,7 @@ export const LessonButton = ({
                 )}
               />
             </Button>
-            {exam && (
-              <span className="text-sm font-bold text-amber-600">
-                {t.learn.exam}
-              </span>
-            )}
+            <LessonLabel text={label} exam={exam} completed={isCompleted} />
           </div>
         )}
       </div>
