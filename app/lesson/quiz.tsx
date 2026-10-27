@@ -65,6 +65,8 @@ type QuizProps = {
   review?: { returnHref: string };
   /** Read first: the texts the lesson is about, shown before the questions. */
   studyTexts?: (typeof sourceTexts.$inferSelect)[];
+  /** The next lesson: "Continue" goes there, and it is preloaded. */
+  nextLesson?: { id: number; study: string[] } | null;
   reviewStatus: (typeof lessons.$inferSelect)["reviewStatus"];
   isExam?: boolean;
   initialLessonChallenges: (typeof challenges.$inferSelect & {
@@ -86,6 +88,7 @@ export const Quiz = ({
   unitId,
   review,
   studyTexts = [],
+  nextLesson,
   reviewStatus,
   isExam,
   initialLessonChallenges,
@@ -219,6 +222,20 @@ export const Quiz = ({
       ...refsOf(challenges[activeIndex + 1]),
     ]);
   }, [activeIndex, challenges, preload, readAloudOn]);
+
+  // Near the end of the lesson, get the next one ready: its page, and the
+  // recitation of the ayat it opens with ("Read first"), so moving on from
+  // ayat 6-10 to 11-15 doesn't wait for the network.
+  const nearEnd = challenges.length - activeIndex <= 2;
+  useEffect(() => {
+    if (!nearEnd || !nextLesson || review) return;
+    router.prefetch(`/lesson/${nextLesson.id}`);
+    preload(
+      nextLesson.study
+        .map((key) => /^quran:(\d+:\d+)$/.exec(key)?.[1])
+        .filter((ref): ref is string => !!ref)
+    );
+  }, [nearEnd, nextLesson, preload, review, router]);
 
   // Leaving the lesson stops any sound.
   useEffect(() => stop, [stop]);
@@ -412,7 +429,12 @@ export const Quiz = ({
         <Footer
           lessonId={review ? undefined : lessonId}
           status="completed"
-          onCheck={() => router.push(review?.returnHref ?? "/learn")}
+          onCheck={() =>
+            router.push(
+              review?.returnHref ??
+                (nextLesson ? `/lesson/${nextLesson.id}` : "/learn")
+            )
+          }
         />
       </>
     );
