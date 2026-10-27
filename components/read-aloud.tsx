@@ -23,11 +23,15 @@ import { recitationAudio } from "@/lib/recitation";
 // own words: instructions, "أحسنت!", and non-Arabic text like English
 // meanings.
 
-export type Step =
+export type Step = (
   | { kind: "speak"; text: string }
   | { kind: "recite"; ref: string }
   | { kind: "audio"; urls: string[]; rate?: number }
-  | { kind: "wait"; ms: number };
+  | { kind: "wait"; ms: number }
+) & {
+  /** Called as the step starts, e.g. to highlight the ayah being recited. */
+  onStart?: () => void;
+};
 
 type ReadAloud = {
   /** Read-aloud is on (Settings; on by default in kids mode). */
@@ -159,6 +163,7 @@ export const ReadAloudProvider = ({
         for (const step of steps) {
           if (run.current !== id) return;
           const isCurrent = () => run.current === id;
+          step.onStart?.();
           if (step.kind === "speak") await speak(step.text);
           else if (step.kind === "recite")
             await playUrls(recitationAudio(step.ref, mode), 1, isCurrent);
