@@ -16,6 +16,9 @@ export const TOUR_COOKIE = "tour_done";
 // page and "Continue" go back to it instead of the first surah.
 export const LAST_UNIT_COOKIE = "last_unit";
 
+// The juz' last shown on the learn page (the whole Quran is split by juz').
+export const LAST_JUZ_COOKIE = "last_juz";
+
 // Read mode: the last surah or juz' opened on this device ("surah/2",
 // "juz/30"), so the read page can offer to continue from there.
 export const LAST_READ_COOKIE = "last_read";

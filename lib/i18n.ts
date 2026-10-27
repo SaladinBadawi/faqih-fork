@@ -54,6 +54,10 @@ const en = {
     todaysWird: "Today's wird",
     searchUnits: "Search by name or number",
     noResults: "Nothing found",
+    juz: (n: string) => `Juz' ${n}`,
+    allAjza: "All ajza'",
+    previousJuz: "Previous juz'",
+    nextJuz: "Next juz'",
   },
   settings: {
     title: "Settings",
@@ -254,6 +258,10 @@ const ar: Messages = {
     todaysWird: "وِرد اليوم",
     searchUnits: "ابحث بالاسم أو الرقم",
     noResults: "لا نتائج",
+    juz: (n: string) => `الجزء ${n}`,
+    allAjza: "كل الأجزاء",
+    previousJuz: "الجزء السابق",
+    nextJuz: "الجزء التالي",
   },
   settings: {
     title: "الإعدادات",
