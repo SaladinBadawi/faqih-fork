@@ -6,11 +6,16 @@ import { type LessonState } from "@/lib/progress";
 import { LessonButton } from "./lesson-button";
 import { UnitBanner } from "./unit-banner";
 
+type UnitLesson = typeof lessons.$inferSelect &
+  LessonState & { completed: boolean; percentage: number };
+
 type UnitProps = {
   title: string;
   description: string;
-  lessons: (typeof lessons.$inferSelect &
-    LessonState & { completed: boolean; percentage: number })[];
+  lessons: UnitLesson[];
+  // When only part of the unit is shown (one juz' of a long surah), all of
+  // it, so "Continue" still finds the next lesson.
+  allLessons?: UnitLesson[];
   completed: boolean;
   passedExam: boolean;
 };
@@ -19,6 +24,7 @@ export const Unit = ({
   title,
   description,
   lessons,
+  allLessons = lessons,
   completed,
   passedExam,
 }: UnitProps) => {
@@ -26,8 +32,10 @@ export const Unit = ({
   const steps = lessons.filter((l) => l.kind === "lesson");
   const exam = lessons.find((l) => l.kind === "exam");
   // "Continue" opens this unit's next lesson, else its exam.
+  const allExam = allLessons.find((l) => l.kind === "exam");
   const next =
-    steps.find((l) => l.current) ?? (exam?.completed ? undefined : exam);
+    allLessons.find((l) => l.kind === "lesson" && l.current) ??
+    (allExam?.completed ? undefined : allExam);
   // Long surahs span several hizb quarters: show a heading where each starts.
   const grouped = new Set(steps.map((l) => l.section)).size > 1;
 

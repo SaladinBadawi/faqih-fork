@@ -3,6 +3,7 @@
 import { useMemo, useRef, useState } from "react";
 
 import { CheckCircle2, Search } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 import { useLocale, useMessages } from "@/components/locale-provider";
 import { normalizeArabic } from "@/lib/arabic";
@@ -10,7 +11,13 @@ import { formatNumber } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 type UnitJumpProps = {
-  units: { order: number; title: string; cleared: boolean }[];
+  // juz: the juz' the unit starts in, when the page shows one at a time.
+  units: {
+    order: number;
+    title: string;
+    cleared: boolean;
+    juz: number | null;
+  }[];
 };
 
 const MAX_RESULTS = 12;
@@ -23,6 +30,7 @@ export const UnitJump = ({ units }: UnitJumpProps) => {
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const input = useRef<HTMLInputElement>(null);
+  const router = useRouter();
 
   const results = useMemo(() => {
     const q = query.trim();
@@ -42,10 +50,11 @@ export const UnitJump = ({ units }: UnitJumpProps) => {
       .slice(0, MAX_RESULTS);
   }, [query, units]);
 
-  const go = (order: number) => {
-    document
-      .getElementById(`unit-${order}`)
-      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+  const go = ({ order, juz }: UnitJumpProps["units"][number]) => {
+    const target = document.getElementById(`unit-${order}`);
+    // In another juz': open that juz' at the surah.
+    if (!target && juz) router.push(`/learn?juz=${juz}#unit-${order}`);
+    target?.scrollIntoView({ behavior: "smooth", block: "start" });
     setQuery("");
     setOpen(false);
     input.current?.blur();
@@ -67,7 +76,7 @@ export const UnitJump = ({ units }: UnitJumpProps) => {
           // Let a click on a result land before the list closes.
           onBlur={() => setTimeout(() => setOpen(false), 150)}
           onKeyDown={(e) => {
-            if (e.key === "Enter" && results[0]) go(results[0].order);
+            if (e.key === "Enter" && results[0]) go(results[0]);
             if (e.key === "Escape") setOpen(false);
           }}
           placeholder={`${t.learn.jumpTo}: ${t.learn.searchUnits}`}
@@ -95,7 +104,7 @@ export const UnitJump = ({ units }: UnitJumpProps) => {
               <button
                 type="button"
                 onMouseDown={(e) => e.preventDefault()}
-                onClick={() => go(unit.order)}
+                onClick={() => go(unit)}
                 className="flex w-full items-center gap-x-3 rounded-lg px-3 py-2 text-start hover:bg-sky-100"
               >
                 <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border-2 text-sm font-bold text-neutral-500">

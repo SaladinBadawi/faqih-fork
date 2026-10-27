@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 
 import {
   DEFAULT_MODE,
+  LAST_JUZ_COOKIE,
   LAST_READ_COOKIE,
   LAST_UNIT_COOKIE,
   MODE_COOKIE,
@@ -33,4 +34,10 @@ export const getLastUnitId = async () => {
 export const getLastRead = async () => {
   const value = (await cookies()).get(LAST_READ_COOKIE)?.value ?? "";
   return /^(surah|juz)\/\d+$/.test(value) ? value : null;
+};
+
+/** The juz' last shown on the learn page on this device, if any. */
+export const getLastJuz = async () => {
+  const value = Number((await cookies()).get(LAST_JUZ_COOKIE)?.value);
+  return Number.isInteger(value) && value > 0 ? value : null;
 };

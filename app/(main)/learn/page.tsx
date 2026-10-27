@@ -11,21 +11,24 @@ import {
   getUserProgress,
   getUserSubscription,
 } from "@/db/queries";
-import { getLastUnitId, getMode } from "@/lib/preferences";
+import { splitByJuz } from "@/lib/juz";
+import { getLastJuz, getLastUnitId, getMode } from "@/lib/preferences";
 
 import { Header } from "./header";
+import { JuzPicker } from "./juz-picker";
 import { ScrollToUnit } from "./scroll-to-unit";
 import { TodaysWird } from "./todays-wird";
 import { UnitJump } from "./unit-jump";
 import { Unit } from "./unit";
 
 type LearnPageProps = {
-  // ?wird=1: opened from the daily reminder.
-  searchParams: Promise<{ wird?: string }>;
+  // ?wird=1: opened from the daily reminder. ?juz=n: the juz' to show.
+  searchParams: Promise<{ wird?: string; juz?: string }>;
 };
 
 const LearnPage = async ({ searchParams }: LearnPageProps) => {
-  const fromReminder = (await searchParams).wird === "1";
+  const params = await searchParams;
+  const fromReminder = params.wird === "1";
   const userProgressData = getUserProgress();
   const courseProgressData = getCourseProgress();
   const unitsData = getUnits();
@@ -38,6 +41,7 @@ const LearnPage = async ({ searchParams }: LearnPageProps) => {
     userSubscription,
     mode,
     lastUnitId,
+    lastJuz,
   ] = await Promise.all([
     userProgressData,
     unitsData,
@@ -45,6 +49,7 @@ const LearnPage = async ({ searchParams }: LearnPageProps) => {
     userSubscriptionData,
     getMode(),
     getLastUnitId(),
+    getLastJuz(),
   ]);
   const isKids = mode === "kids";
 
@@ -54,6 +59,19 @@ const LearnPage = async ({ searchParams }: LearnPageProps) => {
   const isPro = !!userSubscription?.isActive;
   const wird = courseProgress.activeLesson;
   const wirdUnit = units.find((u) => u.id === wird?.unitId);
+
+  // The whole Quran is too long for one page: show it one juz' at a time.
+  // Which one: the link's, else the last one shown here, else today's wird's.
+  const byJuz = splitByJuz(units);
+  const hasJuz = (n: number | null): n is number =>
+    !!byJuz && byJuz.ajza.some((j) => j.juz === n);
+  const wirdJuz = wirdUnit ? (byJuz?.firstJuz(wirdUnit) ?? null) : null;
+  const juz =
+    [Number(params.juz), lastJuz, wirdJuz].find(hasJuz) ?? byJuz?.ajza[0].juz;
+  const shown =
+    byJuz && juz
+      ? byJuz.unitsIn(juz)
+      : units.map((unit) => ({ ...unit, allLessons: unit.lessons }));
 
   return (
     <div className="flex flex-row-reverse gap-[48px] px-6">
@@ -90,10 +108,12 @@ const LearnPage = async ({ searchParams }: LearnPageProps) => {
               order: unit.order,
               title: unit.title,
               cleared: unit.cleared,
+              juz: byJuz?.firstJuz(unit) ?? null,
             }))}
           />
         )}
-        {units.map((unit) => (
+        {byJuz && juz && <JuzPicker ajza={byJuz.ajza} selected={juz} />}
+        {shown.map((unit) => (
           <div
             key={unit.id}
             id={`unit-${unit.order}`}
@@ -103,6 +123,7 @@ const LearnPage = async ({ searchParams }: LearnPageProps) => {
               title={unit.title}
               description={unit.description}
               lessons={unit.lessons}
+              allLessons={unit.allLessons}
               completed={unit.completed}
               passedExam={unit.passedExam}
             />
