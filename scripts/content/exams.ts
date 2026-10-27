@@ -111,13 +111,12 @@ export const quranExam = (
           Math.ceil(ayahCount / AYAT_PER_QUESTION)
         )
       );
-  const spread = spreadQuestions(recipe(q, lang, kids), ayahCount, size, seed);
-  // One ayat-to-numbers question across the whole surah.
-  const matchAt = Array.from({ length: Math.min(ayahCount, 8) }, (_, n) =>
-    Math.floor((n * ayahCount) / Math.min(ayahCount, 8))
+  const challenges = spreadQuestions(
+    recipe(q, lang, kids),
+    ayahCount,
+    size,
+    seed
   );
-  const match = q.match(matchAt);
-  const challenges = [...spread, ...(match ? [match] : [])];
 
   if (challenges.length === 0) return null;
   return { kind: "exam", title: examTitle(lang), challenges };
