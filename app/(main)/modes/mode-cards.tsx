@@ -13,6 +13,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 
 import { upsertUserProgress } from "@/actions/user-progress";
+import { InviteCard } from "@/components/invite";
 import { useMessages } from "@/components/locale-provider";
 import { cn } from "@/lib/utils";
 
@@ -100,6 +101,8 @@ export const ModeCards = ({ modes }: { modes: Mode[] }) => {
           );
         })}
       </ul>
+
+      <InviteCard />
     </div>
   );
 };

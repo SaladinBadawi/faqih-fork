@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { UserMenu } from "@/components/auth-controls";
+import { InviteButton } from "@/components/invite";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { useMessages } from "@/components/locale-provider";
 import { useIsKids } from "@/components/mode-provider";
@@ -66,6 +67,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
       </div>
 
       <div className="flex flex-col items-start gap-y-3 p-4">
+        <InviteButton />
         <LanguageSwitcher />
         <UserMenu />
       </div>

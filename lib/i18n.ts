@@ -129,6 +129,15 @@ const en = {
       },
     ],
   },
+  invite: {
+    title: "Invite friends",
+    body: "Share Faqih with family and friends, so they can learn with you.",
+    text: "Learn the Quran with me on Faqih: a few minutes a day, free.",
+    share: "Share",
+    whatsapp: "WhatsApp",
+    copy: "Copy link",
+    copied: "Link copied.",
+  },
   modes: {
     title: "Learning modes",
     description: "Choose how you want to learn today.",
@@ -349,6 +358,15 @@ const ar: Messages = {
         body: "وضع الأطفال بسيط: قصار السور، أزرار كبيرة، ولا قلوب. يمكنك تغييره متى شئت من الإعدادات.",
       },
     ],
+  },
+  invite: {
+    title: "ادعُ أصدقاءك",
+    body: "شارك فقيه مع أهلك وأصدقائك ليتعلّموا معك.",
+    text: "تعلّم القرآن معي على فقيه: دقائق قليلة كل يوم، ومجانًا.",
+    share: "مشاركة",
+    whatsapp: "واتساب",
+    copy: "نسخ الرابط",
+    copied: "تم نسخ الرابط.",
   },
   modes: {
     title: "أنماط التعلّم",
