@@ -183,6 +183,20 @@ export const buildFatiha = (ayat: SourceText[], lang: Language): CourseSpec => {
     ),
   });
 
+  // Closes every lesson: the surah's ayat in order.
+  const chips = ayat.map((a) => excerpt(text(a), 8));
+  const putInOrder: ChallengeSpec | null =
+    new Set(chips).size === chips.length
+      ? {
+          type: "ORDER",
+          payload: { words: chips },
+          prompt: ar ? "رتّب آيات السورة" : "Put the ayat in order (meaning)",
+          question: "",
+          sourceKey: ayat[0].key,
+          options: [],
+        }
+      : null;
+
   return {
     slug: `quran-al-fatiha-${lang}`,
     language: lang,
@@ -204,8 +218,15 @@ export const buildFatiha = (ayat: SourceText[], lang: Language): CourseSpec => {
             title: ar ? "أكمل الآية" : "Complete the ayah",
             challenges: halves.map(complete),
           },
-          // Every lesson is about the whole surah: read it all first.
-        ].map((lesson) => ({ ...lesson, study: ayat.map((a) => a.key) })),
+          // Every lesson is about the whole surah: read it all first, and
+          // end by putting its ayat in order.
+        ].map((lesson) => ({
+          ...lesson,
+          study: ayat.map((a) => a.key),
+          challenges: putInOrder
+            ? [...lesson.challenges, putInOrder]
+            : lesson.challenges,
+        })),
       },
     ],
   };

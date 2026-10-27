@@ -55,9 +55,12 @@ const surahUnit = (
   for (let from = 0; from < ayat.length; from += AYAT_PER_LESSON) {
     const to = Math.min(from + AYAT_PER_LESSON, ayat.length);
     const range = `${num(lang, from + 1)}–${num(lang, to)}`;
-    const challenges = Array.from({ length: to - from }, (_, k) =>
-      forAyah(from + k)
-    ).flat();
+    // Then, to close the lesson, its ayat in order (2 or more).
+    const putInOrder = to - from >= 2 ? q.orderAyat(from, to - from) : null;
+    const challenges = [
+      ...Array.from({ length: to - from }, (_, k) => forAyah(from + k)).flat(),
+      ...(putInOrder ? [putInOrder] : []),
+    ];
     const { hizbQuarter } = ayat[from];
     if (challenges.length > 0)
       lessons.push({
