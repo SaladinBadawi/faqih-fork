@@ -15,7 +15,7 @@ import { type SourceText } from "./sources";
 // recitation of a fragment doesn't exist, and Quran text is never given to a
 // synthetic voice.
 //
-// Only Arabic courses: English courses show the meaning, not the Quran.
+// Every course: Quran text is Arabic in English courses too.
 
 const ELLIPSIS = " …";
 
@@ -97,18 +97,13 @@ const attachToChallenge = (
 export const withRecitations = (
   course: CourseSpec,
   index: Index
-): CourseSpec =>
-  course.language !== "ar"
-    ? course
-    : {
-        ...course,
-        units: course.units.map((unit) => ({
-          ...unit,
-          lessons: unit.lessons.map((lesson) => ({
-            ...lesson,
-            challenges: lesson.challenges.map((c) =>
-              attachToChallenge(c, index)
-            ),
-          })),
-        })),
-      };
+): CourseSpec => ({
+  ...course,
+  units: course.units.map((unit) => ({
+    ...unit,
+    lessons: unit.lessons.map((lesson) => ({
+      ...lesson,
+      challenges: lesson.challenges.map((c) => attachToChallenge(c, index)),
+    })),
+  })),
+});

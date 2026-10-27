@@ -43,9 +43,7 @@ const surahUnit = (
   // Each ayah gets a "what comes next" question and one more, taking turns
   // between the other kinds so a lesson mixes skills. If a kind doesn't fit
   // an ayah (too long to order, no audio...), "complete the ayah" stands in.
-  const turns = ar
-    ? [q.complete, q.completeWord, q.listen, q.order]
-    : [q.complete, q.order, q.trueFalse, q.complete];
+  const turns = [q.complete, q.completeWord, q.listen, q.order];
   const forAyah = (i: number): ChallengeSpec[] =>
     [q.next(i), turns[i % turns.length](i) ?? q.complete(i)].filter(
       (c): c is ChallengeSpec => c !== null
@@ -106,7 +104,7 @@ export const buildFullQuran = (
     slug: `quran-full-${lang}`,
     language: lang,
     track: "quran",
-    title: ar ? "القرآن الكريم كاملًا" : "The Whole Quran (meaning)",
+    title: ar ? "القرآن الكريم كاملًا" : "The Whole Quran",
     imageSrc: "/courses/quran.svg",
     units: surahs.map((surah) => {
       // Wrong answers come from the surah itself first, then its neighbours.

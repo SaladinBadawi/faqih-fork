@@ -134,12 +134,13 @@ const stripMarkers = (text: string) =>
 
 export const buildFatiha = (ayat: SourceText[], lang: Language): CourseSpec => {
   const ar = lang === "ar";
-  // English lessons work with the English meaning; Arabic with the Quran text.
-  const text = (a: SourceText) => (ar ? a.arabic : a.translation!);
+  // The Quran is memorised in Arabic: English lessons use the Arabic text
+  // too, and the app shows the meaning under it.
+  const text = (a: SourceText) => a.arabic;
   const all = ayat.map(text);
 
   const next = (ayah: SourceText, following: SourceText): ChallengeSpec => ({
-    prompt: ar ? "ما الآية التالية؟" : "Which ayah comes next? (meaning)",
+    prompt: ar ? "ما الآية التالية؟" : "Which ayah comes next?",
     question: text(ayah),
     sourceKey: following.key,
     options: options(
@@ -168,7 +169,7 @@ export const buildFatiha = (ayat: SourceText[], lang: Language): CourseSpec => {
     .filter((h) => h.end);
 
   const complete = (h: (typeof halves)[number]): ChallengeSpec => ({
-    prompt: ar ? "أكمل الآية" : "Complete the ayah (meaning)",
+    prompt: ar ? "أكمل الآية" : "Complete the ayah",
     question: `${h.start} …`,
     sourceKey: h.ayah.key,
     options: options(
@@ -190,7 +191,7 @@ export const buildFatiha = (ayat: SourceText[], lang: Language): CourseSpec => {
       ? {
           type: "ORDER",
           payload: { words: chips },
-          prompt: ar ? "رتّب آيات السورة" : "Put the ayat in order (meaning)",
+          prompt: ar ? "رتّب آيات السورة" : "Put the ayat in order",
           question: "",
           sourceKey: ayat[0].key,
           options: [],
@@ -208,7 +209,7 @@ export const buildFatiha = (ayat: SourceText[], lang: Language): CourseSpec => {
         title: ar ? "سورة الفاتحة" : "Al-Fatiha",
         description: ar
           ? "ترتيب الآيات وإكمالها (٧ آيات)"
-          : "The Opening, in English meaning: order and completion",
+          : "The Opening: order and completion",
         lessons: [
           {
             title: ar ? "ترتيب الآيات" : "What comes next?",
