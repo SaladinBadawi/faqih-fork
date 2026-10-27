@@ -40,6 +40,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
       <div className="flex flex-1 flex-col gap-y-2">
         <SidebarItem label={t.nav.learn} href="/learn" iconSrc="/learn.svg" />
         <SidebarItem label={t.nav.read} href="/read" iconSrc="/read.svg" />
+        <SidebarItem label={t.nav.modes} href="/modes" iconSrc="/modes.svg" />
         {/* Kids mode keeps the menu short: no points, hearts or rankings. */}
         {!isKids && (
           <>
@@ -47,11 +48,6 @@ export const Sidebar = ({ className }: SidebarProps) => {
               label={t.nav.leaderboard}
               href="/leaderboard"
               iconSrc="/leaderboard.svg"
-            />
-            <SidebarItem
-              label={t.nav.quests}
-              href="/quests"
-              iconSrc="/quests.svg"
             />
             {features.shop && (
               <SidebarItem

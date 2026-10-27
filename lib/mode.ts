@@ -1,7 +1,7 @@
 // Kids or full mode, chosen per device (a cookie, like the language).
 //
-// Kids mode: only kids courses, no hearts, no shop, leaderboard or quests,
-// and bigger, simpler lesson screens. Full mode: every other course.
+// Kids mode: only kids courses, no hearts, no shop, leaderboard, review or
+// exams, and bigger, simpler lesson screens. Full mode: every other course.
 
 export const MODES = ["kids", "full"] as const;
 export type Mode = (typeof MODES)[number];
