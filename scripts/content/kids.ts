@@ -51,8 +51,10 @@ const surahUnit = (
     },
   ];
 
-  // Each kids lesson practises the whole surah: read it all first.
+  // Each kids lesson practises the whole surah: read it all first, and end
+  // by putting its ayat in order.
   const study = ayat.map((a) => a.key);
+  const putInOrder = q.orderAyat(0, ayat.length);
 
   // The exam's own question makers: different wrong answers from lessons.
   const exam = quranExam(
@@ -72,7 +74,13 @@ const surahUnit = (
       : `Learn ${surah.englishName} ayah by ayah`,
     // A lesson with no challenges could never be completed.
     lessons: [
-      ...lessons.map((lesson) => ({ ...lesson, study })),
+      ...lessons.map((lesson) => ({
+        ...lesson,
+        study,
+        challenges: putInOrder
+          ? [...lesson.challenges, putInOrder]
+          : lesson.challenges,
+      })),
       ...(exam ? [exam] : []),
     ].filter((l) => l.challenges.length > 0),
   };
