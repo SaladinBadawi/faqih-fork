@@ -37,6 +37,7 @@ const LessonIdPage = async ({ params }: LessonIdPageProps) => {
       reviewStatus={lesson.reviewStatus}
       isExam={lesson.kind === "exam"}
       studyTexts={lesson.studyTexts}
+      meanings={lesson.meanings}
       initialLessonChallenges={lesson.challenges}
       initialHearts={userProgress.hearts}
       initialPercentage={initialPercentage}
