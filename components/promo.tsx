@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { features } from "@/config";
 
 export const Promo = () => {
-  if (!features.payments) return null;
+  // Pro is bought in the shop.
+  if (!features.payments || !features.shop) return null;
 
   return (
     <div className="space-y-4 rounded-xl border-2 p-4">

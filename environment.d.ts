@@ -29,6 +29,9 @@ declare global {
       // "true" enables Stripe subscriptions
       NEXT_PUBLIC_ENABLE_PAYMENTS?: string;
 
+      // "true" shows the shop
+      NEXT_PUBLIC_ENABLE_SHOP?: string;
+
       // stripe api key and webhook
       STRIPE_API_SECRET_KEY?: string;
       STRIPE_WEBHOOK_SECRET?: string;

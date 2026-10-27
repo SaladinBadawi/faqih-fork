@@ -5,6 +5,7 @@ import { FeedWrapper } from "@/components/feed-wrapper";
 import { Quests } from "@/components/quests";
 import { StickyWrapper } from "@/components/sticky-wrapper";
 import { UserProgress } from "@/components/user-progress";
+import { features } from "@/config";
 import { getUserProgress, getUserSubscription } from "@/db/queries";
 import { getMessages } from "@/lib/locale";
 import { getMode } from "@/lib/preferences";
@@ -12,8 +13,9 @@ import { getMode } from "@/lib/preferences";
 import { Items } from "./items";
 
 const ShopPage = async () => {
-  // Not part of kids mode (no points, hearts or rankings).
-  if ((await getMode()) === "kids") redirect("/learn");
+  // Hidden for now (config features.shop), and not part of kids mode (no
+  // points, hearts or rankings).
+  if (!features.shop || (await getMode()) === "kids") redirect("/learn");
 
   const userProgressData = getUserProgress();
   const userSubscriptionData = getUserSubscription();

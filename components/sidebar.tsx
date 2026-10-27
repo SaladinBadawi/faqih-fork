@@ -7,7 +7,7 @@ import { UserMenu } from "@/components/auth-controls";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { useMessages } from "@/components/locale-provider";
 import { useIsKids } from "@/components/mode-provider";
-import { APP_NAME } from "@/config";
+import { APP_NAME, features } from "@/config";
 import { cn } from "@/lib/utils";
 
 import { SidebarItem } from "./sidebar-item";
@@ -53,7 +53,13 @@ export const Sidebar = ({ className }: SidebarProps) => {
               href="/quests"
               iconSrc="/quests.svg"
             />
-            <SidebarItem label={t.nav.shop} href="/shop" iconSrc="/shop.svg" />
+            {features.shop && (
+              <SidebarItem
+                label={t.nav.shop}
+                href="/shop"
+                iconSrc="/shop.svg"
+              />
+            )}
           </>
         )}
         <SidebarItem
