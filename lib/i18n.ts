@@ -81,6 +81,8 @@ const en = {
     reminderSaved: "Daily reminder saved.",
     reminderUnsupported:
       "This browser can't show reminders. Try Chrome, Edge, Firefox or Safari.",
+    reminderNotConfigured:
+      "Reminders aren't set up on the server yet. They'll be here soon.",
     reminderIos:
       "On iPhone, first add Faqih to your Home Screen (Share → Add to Home Screen), then open it from there to turn on reminders.",
     reminderDenied:
@@ -305,6 +307,8 @@ const ar: Messages = {
     reminderSaved: "تم حفظ التذكير اليومي.",
     reminderUnsupported:
       "هذا المتصفح لا يدعم التذكيرات. جرّب Chrome أو Edge أو Firefox أو Safari.",
+    reminderNotConfigured:
+      "التذكيرات غير مُعدّة على الخادم بعد. ستتوفر قريبًا.",
     reminderIos:
       "على الآيفون، أضف فقيه أولًا إلى الشاشة الرئيسية (مشاركة ← إضافة إلى الشاشة الرئيسية)، ثم افتحه من هناك لتفعيل التذكير.",
     reminderDenied:

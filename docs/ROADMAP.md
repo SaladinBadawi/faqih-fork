@@ -61,7 +61,7 @@ part-time).** Full Quran adds ≈ 3–4 weeks, and Tajweed adds ≈ 3–4 weeks.
   and age range; `lessons.reviewStatus` (every import starts as `draft`); a
   `source_texts` table (Arabic, translation, citation, takhrij, link, audio);
   a `surahs` table; `challenges.sourceTextId` and `prompt`.
-- `content:import` pulls from alquran.cloud (Uthmani text from Tanzil, Sahih
+- `content:import` pulls from alquran.cloud (Tanzil simple text, Sahih
   International, Alafasy audio), fawazahmed0/hadith-api and hisnmuslim.com.
   Responses are cached in `content/cache/` (gitignored).
 - The **full Quran** (114 surahs, 6,236 ayat) is imported as source texts, so

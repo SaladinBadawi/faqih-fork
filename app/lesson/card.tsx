@@ -3,6 +3,7 @@ import { useCallback, useRef } from "react";
 import Image from "next/image";
 import { useKey } from "react-use";
 
+import { Meaning } from "@/components/meanings";
 import { useIsKids } from "@/components/mode-provider";
 import { isSpeakable, useReadAloud } from "@/components/read-aloud";
 import { challenges } from "@/db/schema";
@@ -16,6 +17,8 @@ type CardProps = {
   audioSrc: string | null;
   /** Ayah ("s:a") or word ("s:a:w") recited when tapped (lib/recitation). */
   recitation?: string | null;
+  /** English mode: the meaning shown under an Arabic ayah. */
+  meaning?: string;
   shortcut: string;
   selected?: boolean;
   onClick: () => void;
@@ -29,6 +32,7 @@ export const Card = ({
   imageSrc,
   audioSrc,
   recitation,
+  meaning,
   shortcut,
   selected,
   onClick,
@@ -101,6 +105,7 @@ export const Card = ({
           )}
         >
           {text}
+          <Meaning text={meaning} />
         </p>
 
         {/* Keyboard shortcuts mean nothing to young kids: hide them. */}

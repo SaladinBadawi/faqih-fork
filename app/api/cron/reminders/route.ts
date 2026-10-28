@@ -17,8 +17,16 @@ const GONE = new Set([404, 410]);
 
 export const GET = async (request: Request) => {
   const secret = process.env.CRON_SECRET;
-  if (!secret || request.headers.get("authorization") !== `Bearer ${secret}`)
-    return new NextResponse("Unauthorized.", { status: 401 });
+  // Say which side is missing, so the Action's log points at the fix.
+  if (!secret)
+    return new NextResponse("CRON_SECRET is not set in the app.", {
+      status: 500,
+    });
+  if (request.headers.get("authorization") !== `Bearer ${secret}`)
+    return new NextResponse(
+      "Unauthorized: CRON_SECRET does not match the app's.",
+      { status: 401 }
+    );
 
   const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
   const privateKey = process.env.VAPID_PRIVATE_KEY;

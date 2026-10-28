@@ -1,3 +1,4 @@
+import { Meaning } from "@/components/meanings";
 import { cn, isArabic } from "@/lib/utils";
 
 type BlankSentenceProps = {
@@ -5,10 +6,17 @@ type BlankSentenceProps = {
   after: string;
   /** The chosen word, shown in the blank. */
   fill?: string;
+  /** English mode: the meaning of the ayah. */
+  meaning?: string;
 };
 
 // An ayah with one word missing, for COMPLETE_WORD.
-export const BlankSentence = ({ before, after, fill }: BlankSentenceProps) => {
+export const BlankSentence = ({
+  before,
+  after,
+  fill,
+  meaning,
+}: BlankSentenceProps) => {
   const arabic = isArabic(before || after);
 
   return (
@@ -31,6 +39,7 @@ export const BlankSentence = ({ before, after, fill }: BlankSentenceProps) => {
         {fill ?? <>&nbsp;</>}
       </span>{" "}
       {after}
+      <Meaning text={meaning} />
     </p>
   );
 };

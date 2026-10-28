@@ -1,12 +1,16 @@
 import Image from "next/image";
 
+import { Meaning } from "@/components/meanings";
+
 import { cn, isArabic } from "@/lib/utils";
 
 type QuestionBubbleProps = {
   question: string;
+  /** English mode: the meaning of each ayah in the question. */
+  meanings?: string[];
 };
 
-export const QuestionBubble = ({ question }: QuestionBubbleProps) => {
+export const QuestionBubble = ({ question, meanings }: QuestionBubbleProps) => {
   return (
     <div className="mb-6 flex items-center gap-x-4">
       <Image
@@ -33,6 +37,9 @@ export const QuestionBubble = ({ question }: QuestionBubbleProps) => {
         )}
       >
         {question}
+        {meanings?.map((m) => (
+          <Meaning key={m} text={m} />
+        ))}
 
         <div
           className="absolute -left-3 top-1/2 h-0 w-0 -translate-y-1/2 rotate-90 transform border-x-8 border-t-8 border-x-transparent rtl:-right-3 rtl:left-auto rtl:-rotate-90"

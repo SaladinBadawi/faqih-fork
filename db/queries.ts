@@ -210,10 +210,17 @@ export const getLesson = cache(async (id?: number) => {
   if (!lessonId) return null;
 
   // Only lessons of the active course that are open (see lib/progress).
-  const lessonState = (await getUnits())
-    .flatMap((unit) => unit.lessons)
-    .find((lesson) => lesson.id === lessonId);
+  const courseLessons = (await getUnits()).flatMap((unit) => unit.lessons);
+  const position = courseLessons.findIndex((lesson) => lesson.id === lessonId);
+  const lessonState = courseLessons[position];
   if (!lessonState || lessonState.locked) return null;
+
+  // The lesson after this one in the course (e.g. ayat 11-15 after 6-10, or
+  // the unit's exam): "Continue" goes there, and it is preloaded.
+  const following = courseLessons[position + 1];
+  const nextLesson = following
+    ? { id: following.id, study: following.study ?? [] }
+    : null;
 
   const data = await db.query.lessons.findFirst({
     where: eq(lessons.id, lessonId),
@@ -254,7 +261,7 @@ export const getLesson = cache(async (id?: number) => {
     .map((key) => texts.find((t) => t.key === key))
     .filter((t) => t !== undefined);
 
-  return { ...data, challenges: normalizedChallenges, studyTexts };
+  return { ...data, challenges: normalizedChallenges, studyTexts, nextLesson };
 });
 
 export const getUserSubscription = cache(async () => {

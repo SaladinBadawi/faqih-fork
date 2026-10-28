@@ -1,6 +1,6 @@
 import { type CourseSpec, type Language, type LessonSpec } from "./courses";
 import { quranExam } from "./exams";
-import { present, quranQuestions } from "./quran-questions";
+import { quranQuestions } from "./quran-questions";
 import { type SourceText, type Surah, surahAyat } from "./sources";
 
 // The kids track: Al-Fatiha and the short surahs at the end of Juz Amma,
@@ -49,16 +49,14 @@ const surahUnit = (
       title: ar ? "صح أم خطأ" : "True or false",
       challenges: each(q.trueFalse),
     },
-    {
-      title: ar ? "أرقام الآيات" : "Ayah numbers",
-      challenges: [q.match(ayat.map((_, i) => i))].filter(present),
-    },
   ];
 
-  // The exam's own question makers: different wrong answers from lessons.
-  // Each kids lesson practises the whole surah: read it all first.
+  // Each kids lesson practises the whole surah: read it all first, and end
+  // by putting its ayat in order.
   const study = ayat.map((a) => a.key);
+  const putInOrder = q.orderAyat(0, ayat.length);
 
+  // The exam's own question makers: different wrong answers from lessons.
   const exam = quranExam(
     quranQuestions(ayat, others, lang, "kids-exam"),
     ayat.length,
@@ -76,7 +74,13 @@ const surahUnit = (
       : `Learn ${surah.englishName} ayah by ayah`,
     // A lesson with no challenges could never be completed.
     lessons: [
-      ...lessons.map((lesson) => ({ ...lesson, study })),
+      ...lessons.map((lesson) => ({
+        ...lesson,
+        study,
+        challenges: putInOrder
+          ? [...lesson.challenges, putInOrder]
+          : lesson.challenges,
+      })),
       ...(exam ? [exam] : []),
     ].filter((l) => l.challenges.length > 0),
   };

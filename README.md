@@ -72,13 +72,14 @@ faqih/
     |-- arabic-text.tsx
     |-- auth-controls.tsx
     |-- feed-wrapper.tsx
+    |-- invite.tsx
     |-- language-switcher.tsx
     |-- locale-provider.tsx
+    |-- meanings.tsx
     |-- mobile-header.tsx
     |-- mobile-sidebar.tsx
     |-- mode-provider.tsx
     |-- promo.tsx
-    |-- quests.tsx
     |-- read-aloud.tsx
     |-- sidebar-item.tsx
     |-- sidebar.tsx
@@ -100,6 +101,7 @@ faqih/
     |-- auth.ts
     |-- exercises.ts
     |-- i18n.ts
+    |-- juz.ts
     |-- locale.ts
     |-- mode.ts
     |-- preferences.ts

@@ -16,6 +16,7 @@ import {
 import { reviewAnswer } from "@/actions/review";
 import { reduceHearts } from "@/actions/user-progress";
 import { useMessages } from "@/components/locale-provider";
+import { MeaningsProvider } from "@/components/meanings";
 import { useIsKids, useMode } from "@/components/mode-provider";
 import { type Step, isSpeakable, useReadAloud } from "@/components/read-aloud";
 import { MAX_HEARTS } from "@/constants";
@@ -65,6 +66,8 @@ type QuizProps = {
   review?: { returnHref: string };
   /** Read first: the texts the lesson is about, shown before the questions. */
   studyTexts?: (typeof sourceTexts.$inferSelect)[];
+  /** The next lesson: "Continue" goes there, and it is preloaded. */
+  nextLesson?: { id: number; study: string[] } | null;
   reviewStatus: (typeof lessons.$inferSelect)["reviewStatus"];
   isExam?: boolean;
   initialLessonChallenges: (typeof challenges.$inferSelect & {
@@ -86,6 +89,7 @@ export const Quiz = ({
   unitId,
   review,
   studyTexts = [],
+  nextLesson,
   reviewStatus,
   isExam,
   initialLessonChallenges,
@@ -101,7 +105,7 @@ export const Quiz = ({
   const t = useMessages();
   const isKids = useIsKids();
   const mode = useMode();
-  const { enabled: readAloudOn, play, stop } = useReadAloud();
+  const { enabled: readAloudOn, play, stop, preload } = useReadAloud();
 
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -195,6 +199,44 @@ export const Quiz = ({
   useEffect(() => {
     if (readAloudOn && !studying && openingSteps.length) play(openingSteps);
   }, [openingSteps, play, readAloudOn, studying]);
+
+  // Download the audio this question and the next will play, while the
+  // learner reads: listening ayat always, and with read-aloud on, the ayat in
+  // the question and in the options they may tap.
+  useEffect(() => {
+    const refsOf = (c: (typeof challenges)[number] | undefined) => {
+      if (!c) return [];
+      const listen =
+        c.type === "LISTEN"
+          ? [/^quran:(\d+:\d+)$/.exec(c.sourceText?.key ?? "")?.[1]]
+          : [];
+      const spoken = readAloudOn
+        ? [
+            ...(c.readAloud?.ayat ?? []),
+            ...c.challengeOptions.map((o) => o.recitation),
+          ]
+        : [];
+      return [...listen, ...spoken].filter((r): r is string => !!r);
+    };
+    preload([
+      ...refsOf(challenges[activeIndex]),
+      ...refsOf(challenges[activeIndex + 1]),
+    ]);
+  }, [activeIndex, challenges, preload, readAloudOn]);
+
+  // Near the end of the lesson, get the next one ready: its page, and the
+  // recitation of the ayat it opens with ("Read first"), so moving on from
+  // ayat 6-10 to 11-15 doesn't wait for the network.
+  const nearEnd = challenges.length - activeIndex <= 2;
+  useEffect(() => {
+    if (!nearEnd || !nextLesson || review) return;
+    router.prefetch(`/lesson/${nextLesson.id}`);
+    preload(
+      nextLesson.study
+        .map((key) => /^quran:(\d+:\d+)$/.exec(key)?.[1])
+        .filter((ref): ref is string => !!ref)
+    );
+  }, [nearEnd, nextLesson, preload, review, router]);
 
   // Leaving the lesson stops any sound.
   useEffect(() => stop, [stop]);
@@ -388,7 +430,12 @@ export const Quiz = ({
         <Footer
           lessonId={review ? undefined : lessonId}
           status="completed"
-          onCheck={() => router.push(review?.returnHref ?? "/learn")}
+          onCheck={() =>
+            router.push(
+              review?.returnHref ??
+                (nextLesson ? `/lesson/${nextLesson.id}` : "/learn")
+            )
+          }
         />
       </>
     );
@@ -420,7 +467,7 @@ export const Quiz = ({
     );
 
   return (
-    <>
+    <MeaningsProvider meanings={meanings}>
       {incorrectAudio}
       {correctAudio}
       <Header
@@ -458,7 +505,12 @@ export const Quiz = ({
               {(challenge.type === "ASSIST" ||
                 challenge.type === "TRUE_FALSE" ||
                 challenge.type === "COMPLETE_AYAH") && (
-                <QuestionBubble question={challenge.question} />
+                <QuestionBubble
+                  question={challenge.question}
+                  meanings={(challenge.readAloud?.ayat ?? [])
+                    .map((ref) => meanings[ref])
+                    .filter((m): m is string => !!m)}
+                />
               )}
 
               {challenge.type === "LISTEN" && listenUrls.length > 0 && (
@@ -479,6 +531,11 @@ export const Quiz = ({
 
               {challenge.type === "COMPLETE_WORD" && (
                 <BlankSentence
+                  meaning={
+                    meanings[
+                      challenge.sourceText?.key.replace(/^quran:/, "") ?? ""
+                    ]
+                  }
                   before={(payload as CompleteWordPayload).before}
                   after={(payload as CompleteWordPayload).after}
                   fill={optionBased ? selectedText : undefined}
@@ -546,6 +603,6 @@ export const Quiz = ({
         status={status}
         onCheck={onContinue}
       />
-    </>
+    </MeaningsProvider>
   );
 };

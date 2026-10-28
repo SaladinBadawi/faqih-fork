@@ -20,6 +20,8 @@ export type SourceText = {
   repeat: number | null;
   // Not stored: helpers for building challenges.
   number: number;
+  /** The ayah in Uthmani spelling, to line up word-by-word audio. */
+  uthmani?: string;
   surah?: number;
   juz?: number;
   hizbQuarter?: number;
@@ -52,7 +54,13 @@ const clean = (s: string) => s.replace(/^﻿/, "").trim();
 
 const arNum = (n: number) => n.toLocaleString("ar-EG");
 
-/* ---------- Quran: api.alquran.cloud (Uthmani text from Tanzil) ---------- */
+/* ---------- Quran: api.alquran.cloud (Tanzil simple text) ---------- */
+
+// Faqih shows Tanzil's simple text: full diacritics in everyday (imla'i)
+// spelling, e.g. "وَبِالْيَوْمِ الْآخِرِ", which is easier for beginners and kids
+// than the Uthmani mushaf spelling ("وَبِٱلْيَوْمِ ٱلْـَٔاخِرِ"). The Uthmani
+// text is still fetched, only to line words up with Quran.com's word-by-word
+// audio, which is numbered by Uthmani words (scripts/content/recitations.ts).
 
 export const SURAH_COUNT = 114;
 export const AYAH_COUNT = 6236;
@@ -83,7 +91,7 @@ type AlQuranFull = {
 const bare = (s: string) =>
   s.replace(/[\u064B-\u065F\u0670\u06D6-\u06ED]/g, "");
 
-// The Uthmani edition prefixes the basmalah to the first ayah of every surah
+// Both editions prefix the basmalah to the first ayah of every surah
 // except Al-Fatiha (where it is ayah 1) and At-Tawbah. It isn't part of those
 // ayat, so drop it. Compared without diacritics, since its spelling varies.
 const stripBasmalah = (surah: number, text: string, basmalah: string) => {
@@ -105,7 +113,8 @@ export const fetchQuran = async (
       refresh
     ).then(({ data }) => data.surahs);
 
-  const [arabic, english, audio] = await Promise.all([
+  const [arabic, uthmaniEdition, english, audio] = await Promise.all([
+    edition("quran-simple"),
     edition("quran-uthmani"),
     edition("en.sahih"),
     edition("ar.alafasy"),
@@ -113,18 +122,28 @@ export const fetchQuran = async (
 
   const flat = (surahs: AlQuranFull["surahs"]) =>
     surahs.flatMap((s) => s.ayahs);
-  const [ar, en, au] = [flat(arabic), flat(english), flat(audio)];
+  const [ar, ut, en, au] = [
+    flat(arabic),
+    flat(uthmaniEdition),
+    flat(english),
+    flat(audio),
+  ];
 
   if (arabic.length !== SURAH_COUNT || ar.length !== AYAH_COUNT)
     throw new Error(
       `alquran.cloud: expected ${SURAH_COUNT} surahs and ${AYAH_COUNT} ayat, got ${arabic.length} and ${ar.length}`
     );
-  if (en.length !== AYAH_COUNT || au.length !== AYAH_COUNT)
+  if (
+    en.length !== AYAH_COUNT ||
+    au.length !== AYAH_COUNT ||
+    ut.length !== AYAH_COUNT
+  )
     throw new Error(
-      "alquran.cloud: translation or audio edition is incomplete"
+      "alquran.cloud: Uthmani, translation or audio edition is incomplete"
     );
 
   const basmalah = clean(ar[0].text);
+  const basmalahUthmani = clean(ut[0].text);
 
   const ayat = arabic.flatMap((surah) =>
     surah.ayahs.map((ayah): SourceText => {
@@ -134,6 +153,11 @@ export const fetchQuran = async (
         key: `quran:${surah.number}:${ayah.numberInSurah}`,
         kind: "ayah",
         arabic: stripBasmalah(surah.number, clean(ayah.text), basmalah),
+        uthmani: stripBasmalah(
+          surah.number,
+          clean(ut[i].text),
+          basmalahUthmani
+        ),
         translation: clean(en[i].text),
         translationBy: "Sahih International",
         citation: `Quran ${surah.number}:${ayah.numberInSurah}`,

@@ -19,6 +19,7 @@ import { APP_NAME, features, siteConfig } from "@/config";
 import { dir, messages } from "@/lib/i18n";
 import { getLocale } from "@/lib/locale";
 import { getMode, isReadAloudOn } from "@/lib/preferences";
+import { AUDIO_ORIGINS } from "@/lib/recitation";
 import { cn } from "@/lib/utils";
 
 import "./globals.css";
@@ -60,6 +61,10 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Open the connections to the recitation hosts early: the first ayah
+  // then plays without waiting for DNS and TLS.
+  for (const origin of AUDIO_ORIGINS) preconnect(origin);
+
   const [locale, mode, readAloud] = await Promise.all([
     getLocale(),
     getMode(),

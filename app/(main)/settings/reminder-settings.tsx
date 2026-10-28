@@ -14,6 +14,7 @@ const DEFAULT_TIME = "07:00";
 type Status =
   | "loading"
   | "unsupported"
+  | "not-configured"
   | "ios-install"
   | "denied"
   | "off"
@@ -31,8 +32,11 @@ const pushSupported = () =>
   typeof window !== "undefined" &&
   "serviceWorker" in navigator &&
   "PushManager" in window &&
-  "Notification" in window &&
-  !!process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+  "Notification" in window;
+
+// The app was built without the public push key (set in the deployment's
+// environment), so no browser can subscribe. Not the learner's browser's fault.
+const pushConfigured = () => !!process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
 
 // iPhone/iPad only allow web push for sites added to the home screen.
 const needsHomeScreen = () =>
@@ -54,6 +58,7 @@ export const ReminderSettings = () => {
 
   useEffect(() => {
     void (async () => {
+      if (!pushConfigured()) return setStatus("not-configured");
       if (!pushSupported())
         return setStatus(
           typeof window !== "undefined" && needsHomeScreen()
@@ -124,11 +129,13 @@ export const ReminderSettings = () => {
   const note =
     status === "unsupported"
       ? t.settings.reminderUnsupported
-      : status === "ios-install"
-        ? t.settings.reminderIos
-        : status === "denied"
-          ? t.settings.reminderDenied
-          : null;
+      : status === "not-configured"
+        ? t.settings.reminderNotConfigured
+        : status === "ios-install"
+          ? t.settings.reminderIos
+          : status === "denied"
+            ? t.settings.reminderDenied
+            : null;
 
   return (
     <section className="flex flex-col gap-y-3">
