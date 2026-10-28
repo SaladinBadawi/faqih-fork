@@ -74,6 +74,7 @@ faqih/
     |-- feed-wrapper.tsx
     |-- language-switcher.tsx
     |-- locale-provider.tsx
+    |-- meanings.tsx
     |-- mobile-header.tsx
     |-- mobile-sidebar.tsx
     |-- mode-provider.tsx
@@ -100,6 +101,7 @@ faqih/
     |-- auth.ts
     |-- exercises.ts
     |-- i18n.ts
+    |-- juz.ts
     |-- locale.ts
     |-- mode.ts
     |-- preferences.ts

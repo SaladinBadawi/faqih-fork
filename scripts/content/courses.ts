@@ -134,12 +134,13 @@ const stripMarkers = (text: string) =>
 
 export const buildFatiha = (ayat: SourceText[], lang: Language): CourseSpec => {
   const ar = lang === "ar";
-  // English lessons work with the English meaning; Arabic with the Quran text.
-  const text = (a: SourceText) => (ar ? a.arabic : a.translation!);
+  // The Quran is memorised in Arabic: English lessons use the Arabic text
+  // too, and the app shows the meaning under it.
+  const text = (a: SourceText) => a.arabic;
   const all = ayat.map(text);
 
   const next = (ayah: SourceText, following: SourceText): ChallengeSpec => ({
-    prompt: ar ? "ما الآية التالية؟" : "Which ayah comes next? (meaning)",
+    prompt: ar ? "ما الآية التالية؟" : "Which ayah comes next?",
     question: text(ayah),
     sourceKey: following.key,
     options: options(
@@ -168,7 +169,7 @@ export const buildFatiha = (ayat: SourceText[], lang: Language): CourseSpec => {
     .filter((h) => h.end);
 
   const complete = (h: (typeof halves)[number]): ChallengeSpec => ({
-    prompt: ar ? "أكمل الآية" : "Complete the ayah (meaning)",
+    prompt: ar ? "أكمل الآية" : "Complete the ayah",
     question: `${h.start} …`,
     sourceKey: h.ayah.key,
     options: options(
@@ -183,19 +184,19 @@ export const buildFatiha = (ayat: SourceText[], lang: Language): CourseSpec => {
     ),
   });
 
-  const numbers = ayat.map((a) => num(lang, a.number));
-  const number = (a: SourceText): ChallengeSpec => ({
-    prompt: ar
-      ? "ما رقم هذه الآية في سورة الفاتحة؟"
-      : "Which ayah of Al-Fatiha is this?",
-    question: text(a),
-    sourceKey: a.key,
-    options: options(
-      num(lang, a.number),
-      pick(numbers, num(lang, a.number), 2, `${a.key}:num:${lang}`),
-      `${a.key}:num:${lang}`
-    ),
-  });
+  // Closes every lesson: the surah's ayat in order.
+  const chips = ayat.map((a) => excerpt(text(a), 8));
+  const putInOrder: ChallengeSpec | null =
+    new Set(chips).size === chips.length
+      ? {
+          type: "ORDER",
+          payload: { words: chips },
+          prompt: ar ? "رتّب آيات السورة" : "Put the ayat in order (meaning)",
+          question: "",
+          sourceKey: ayat[0].key,
+          options: [],
+        }
+      : null;
 
   return {
     slug: `quran-al-fatiha-${lang}`,
@@ -207,8 +208,8 @@ export const buildFatiha = (ayat: SourceText[], lang: Language): CourseSpec => {
       {
         title: ar ? "سورة الفاتحة" : "Al-Fatiha",
         description: ar
-          ? "ترتيب الآيات وإكمالها وأرقامها (٧ آيات)"
-          : "The Opening, in English meaning: order, completion and numbers",
+          ? "ترتيب الآيات وإكمالها (٧ آيات)"
+          : "The Opening, in English meaning: order and completion",
         lessons: [
           {
             title: ar ? "ترتيب الآيات" : "What comes next?",
@@ -218,12 +219,15 @@ export const buildFatiha = (ayat: SourceText[], lang: Language): CourseSpec => {
             title: ar ? "أكمل الآية" : "Complete the ayah",
             challenges: halves.map(complete),
           },
-          {
-            title: ar ? "أرقام الآيات" : "Ayah numbers",
-            challenges: ayat.map(number),
-          },
-          // Every lesson is about the whole surah: read it all first.
-        ].map((lesson) => ({ ...lesson, study: ayat.map((a) => a.key) })),
+          // Every lesson is about the whole surah: read it all first, and
+          // end by putting its ayat in order.
+        ].map((lesson) => ({
+          ...lesson,
+          study: ayat.map((a) => a.key),
+          challenges: putInOrder
+            ? [...lesson.challenges, putInOrder]
+            : lesson.challenges,
+        })),
       },
     ],
   };

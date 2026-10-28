@@ -4,6 +4,7 @@ import { and, eq, inArray } from "drizzle-orm";
 
 import { features } from "@/config";
 import { getAuth } from "@/lib/auth";
+import { JUZ_COUNT, juzBounds } from "@/lib/juz";
 import { getLocale } from "@/lib/locale";
 import { courseInMode } from "@/lib/mode";
 import { getLastUnitId, getMode } from "@/lib/preferences";
@@ -16,6 +17,7 @@ import {
   lessons,
   mistakes,
   sourceTexts,
+  surahs,
   units,
   userProgress,
   userSubscription,
@@ -301,3 +303,73 @@ export const getTopTenUsers = cache(async () => {
 
   return data;
 });
+
+// Read mode: the 114 surahs, in mushaf order.
+export const getSurahs = cache(async () =>
+  db.query.surahs.findMany({ orderBy: [surahs.number] })
+);
+
+/** Read mode: a whole surah, or a juz' (which may start or end mid-surah). */
+export const getPassage = cache(async (by: "surah" | "juz", n: number) => {
+  const all = await getSurahs();
+  const ayahCount = new Map(all.map((s) => [s.number, s.ayahCount]));
+
+  // [surah, first ayah, last ayah] for each surah in the passage.
+  let parts: [number, number, number][] = [];
+  if (by === "surah" && ayahCount.has(n)) parts = [[n, 1, ayahCount.get(n)!]];
+  if (by === "juz" && n >= 1 && n <= JUZ_COUNT) {
+    const { start, end } = juzBounds(n);
+    const lastSurah = end ? (end.ayah === 1 ? end.surah - 1 : end.surah) : 114;
+    for (let surah = start.surah; surah <= lastSurah; surah++) {
+      const count = ayahCount.get(surah);
+      if (!count) continue;
+      const first = surah === start.surah ? start.ayah : 1;
+      const last = end && surah === end.surah ? end.ayah - 1 : count;
+      parts.push([surah, first, last]);
+    }
+  }
+  if (parts.length === 0) return null;
+
+  const keys = parts.flatMap(([surah, first, last]) =>
+    Array.from(
+      { length: last - first + 1 },
+      (_, i) => `quran:${surah}:${first + i}`
+    )
+  );
+  // The basmalah opens every surah but at-Tawbah; it is al-Fatiha's first ayah.
+  const rows = await db
+    .select({
+      key: sourceTexts.key,
+      arabic: sourceTexts.arabic,
+      translation: sourceTexts.translation,
+    })
+    .from(sourceTexts)
+    .where(inArray(sourceTexts.key, [...keys, "quran:1:1"]));
+  const byKey = new Map(rows.map((r) => [r.key, r]));
+  const surahOf = new Map(all.map((s) => [s.number, s]));
+
+  return {
+    basmalah: byKey.get("quran:1:1")?.arabic ?? null,
+    sections: parts.map(([surah, first, last]) => {
+      const info = surahOf.get(surah)!;
+      return {
+        surah,
+        name: info.name,
+        englishName: info.englishName,
+        englishNameTranslation: info.englishNameTranslation,
+        fromStart: first === 1,
+        ayat: Array.from({ length: last - first + 1 }, (_, i) => {
+          const row = byKey.get(`quran:${surah}:${first + i}`);
+          return {
+            ref: `${surah}:${first + i}`,
+            number: first + i,
+            arabic: row?.arabic ?? "",
+            translation: row?.translation ?? null,
+          };
+        }).filter((ayah) => ayah.arabic),
+      };
+    }),
+  };
+});
+
+export type Passage = NonNullable<Awaited<ReturnType<typeof getPassage>>>;

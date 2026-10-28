@@ -36,13 +36,7 @@ const recipe = (q: QuranQuestions, lang: Language, kids: boolean): Make[] => {
     // Kids keep to simple kinds they already know from their lessons: one
     // ayah at a time, choosing from options. No typing, no ayah before, no
     // passages, no long orderings: those are for full mode.
-    return [
-      q.next,
-      ar ? q.listen : q.trueFalse,
-      q.complete,
-      q.trueFalse,
-      (i) => q.order(i),
-    ];
+    return [q.next, q.listen, q.complete, q.trueFalse, (i) => q.order(i)];
   return [
     q.next,
     ar ? q.typedWord : q.complete,
@@ -51,7 +45,7 @@ const recipe = (q: QuranQuestions, lang: Language, kids: boolean): Make[] => {
     (i) => q.order(i, LONG_ORDER_WORDS),
     q.completePassage,
     (i) => q.orderAyat(i, 4 + (i % 2)),
-    ar ? q.listen : q.trueFalse,
+    q.listen,
   ];
 };
 
@@ -111,13 +105,12 @@ export const quranExam = (
           Math.ceil(ayahCount / AYAT_PER_QUESTION)
         )
       );
-  const spread = spreadQuestions(recipe(q, lang, kids), ayahCount, size, seed);
-  // One ayat-to-numbers question across the whole surah.
-  const matchAt = Array.from({ length: Math.min(ayahCount, 8) }, (_, n) =>
-    Math.floor((n * ayahCount) / Math.min(ayahCount, 8))
+  const challenges = spreadQuestions(
+    recipe(q, lang, kids),
+    ayahCount,
+    size,
+    seed
   );
-  const match = q.match(matchAt);
-  const challenges = [...spread, ...(match ? [match] : [])];
 
   if (challenges.length === 0) return null;
   return { kind: "exam", title: examTitle(lang), challenges };

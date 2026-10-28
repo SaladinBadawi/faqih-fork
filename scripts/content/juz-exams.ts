@@ -79,10 +79,8 @@ export const buildJuzExams = (
       );
       if (wrong.length < 2) return null;
       return {
-        prompt: ar
-          ? "من أي سورة هذه الآية؟"
-          : "Which surah is this ayah from? (meaning)",
-        question: ar ? ayah.arabic : ayah.translation!,
+        prompt: ar ? "من أي سورة هذه الآية؟" : "Which surah is this ayah from?",
+        question: ayah.arabic,
         sourceKey: ayah.key,
         options: options(name(correct), wrong.map(name), seed),
       };
@@ -108,7 +106,7 @@ export const buildJuzExams = (
       via((q, i) => q.order(i, LONG_ORDER_WORDS)),
       via((q, i) => q.completePassage(i)),
       via((q, i) => q.orderAyat(i, 4)),
-      via((q, i) => (ar ? q.listen(i) : q.trueFalse(i))),
+      via((q, i) => q.listen(i)),
     ];
 
     const challenges = spreadQuestions(
@@ -143,7 +141,7 @@ export const buildJuzExams = (
     slug: `quran-juz-exams-${lang}`,
     language: lang,
     track: "quran",
-    title: ar ? "اختبارات الأجزاء" : "Juz' Exams (meaning)",
+    title: ar ? "اختبارات الأجزاء" : "Juz' Exams",
     imageSrc: "/courses/quran.svg",
     units: units.filter((u) => u.lessons[0].challenges.length > 0),
   };

@@ -16,6 +16,7 @@ import {
 import { reviewAnswer } from "@/actions/review";
 import { reduceHearts } from "@/actions/user-progress";
 import { useMessages } from "@/components/locale-provider";
+import { MeaningsProvider } from "@/components/meanings";
 import { useIsKids, useMode } from "@/components/mode-provider";
 import { type Step, isSpeakable, useReadAloud } from "@/components/read-aloud";
 import { MAX_HEARTS } from "@/constants";
@@ -466,7 +467,7 @@ export const Quiz = ({
     );
 
   return (
-    <>
+    <MeaningsProvider meanings={meanings}>
       {incorrectAudio}
       {correctAudio}
       <Header
@@ -504,7 +505,12 @@ export const Quiz = ({
               {(challenge.type === "ASSIST" ||
                 challenge.type === "TRUE_FALSE" ||
                 challenge.type === "COMPLETE_AYAH") && (
-                <QuestionBubble question={challenge.question} />
+                <QuestionBubble
+                  question={challenge.question}
+                  meanings={(challenge.readAloud?.ayat ?? [])
+                    .map((ref) => meanings[ref])
+                    .filter((m): m is string => !!m)}
+                />
               )}
 
               {challenge.type === "LISTEN" && listenUrls.length > 0 && (
@@ -525,6 +531,11 @@ export const Quiz = ({
 
               {challenge.type === "COMPLETE_WORD" && (
                 <BlankSentence
+                  meaning={
+                    meanings[
+                      challenge.sourceText?.key.replace(/^quran:/, "") ?? ""
+                    ]
+                  }
                   before={(payload as CompleteWordPayload).before}
                   after={(payload as CompleteWordPayload).after}
                   fill={optionBased ? selectedText : undefined}
@@ -592,6 +603,6 @@ export const Quiz = ({
         status={status}
         onCheck={onContinue}
       />
-    </>
+    </MeaningsProvider>
   );
 };

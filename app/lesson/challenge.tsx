@@ -1,3 +1,4 @@
+import { useMeanings } from "@/components/meanings";
 import { challengeOptions, challenges } from "@/db/schema";
 import { LIST_TYPES } from "@/lib/exercises";
 import { cn } from "@/lib/utils";
@@ -21,6 +22,7 @@ export const Challenge = ({
   disabled,
   type,
 }: ChallengeProps) => {
+  const meaningOf = useMeanings();
   return (
     <div
       className={cn(
@@ -42,6 +44,7 @@ export const Challenge = ({
           status={status}
           audioSrc={option.audioSrc}
           recitation={option.recitation}
+          meaning={meaningOf(option.recitation)}
           disabled={disabled}
           type={type}
         />

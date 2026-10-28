@@ -1,7 +1,8 @@
 // Lenient matching for typed Arabic answers.
 //
-// Quran text is in the Uthmani script, which spells many words differently
-// from everyday (imla'i) Arabic: "ٱلْعَٰلَمِينَ" vs "العالمين", "ٱلصَّلَوٰةَ" vs
+// Faqih shows Quran text in Tanzil's simple script, but the matching also
+// accepts the Uthmani script, which spells many words differently from
+// everyday (imla'i) Arabic: "ٱلْعَٰلَمِينَ" vs "العالمين", "ٱلصَّلَوٰةَ" vs
 // "الصلاة". A learner types the everyday spelling, without diacritics. So both
 // sides are reduced to a bare skeleton before comparing:
 // - diacritics, Quranic marks and tatweel are removed

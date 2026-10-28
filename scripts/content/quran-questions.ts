@@ -89,8 +89,10 @@ export const quranQuestions = (
   seedPrefix: string
 ) => {
   const ar = lang === "ar";
-  // English lessons use the English meaning; Arabic lessons the Quran text.
-  const text = (a: SourceText) => (ar ? a.arabic : a.translation!);
+  // The Quran is memorised in Arabic: every course shows the Arabic text.
+  // English courses differ only in their instructions; the app shows the
+  // meaning under each ayah.
+  const text = (a: SourceText) => a.arabic;
   const seedOf = (key: string, kind: string) =>
     `${seedPrefix}:${key}:${kind}:${lang}`;
 
@@ -103,12 +105,10 @@ export const quranQuestions = (
   const restEnds = restHalves.map((h) => h.end).filter(Boolean);
   // Words with their bare form (no diacritics), for the missing-word question.
   const wordPool = (list: SourceText[]) =>
-    ar
-      ? list
-          .flatMap((a) => ayahWords(a.arabic))
-          .map((w) => ({ w, bare: normalizeArabic(w) }))
-          .filter(({ bare }) => bare.length > 1)
-      : [];
+    list
+      .flatMap((a) => ayahWords(a.arabic))
+      .map((w) => ({ w, bare: normalizeArabic(w) }))
+      .filter(({ bare }) => bare.length > 1);
   const ownWords = wordPool(ayat);
   const restWords = wordPool(others);
 
@@ -128,7 +128,7 @@ export const quranQuestions = (
     );
     if (!wrong) return null;
     return {
-      prompt: ar ? "ما الآية التالية؟" : "Which ayah comes next? (meaning)",
+      prompt: ar ? "ما الآية التالية؟" : "Which ayah comes next?",
       question: own[i],
       sourceKey: ayat[i + 1].key,
       options: options(own[i + 1], wrong, seed),
@@ -146,7 +146,7 @@ export const quranQuestions = (
     const wrong = distractors(ownEnds, restEnds, [end, ...right], seed);
     if (!wrong) return null;
     return {
-      prompt: ar ? "أكمل الآية" : "Complete the ayah (meaning)",
+      prompt: ar ? "أكمل الآية" : "Complete the ayah",
       question: `${start} …`,
       sourceKey: ayat[i].key,
       options: options(end, wrong, seed),
@@ -163,23 +163,22 @@ export const quranQuestions = (
     return {
       type: "ORDER",
       payload: { words: w },
-      prompt: ar ? "رتّب كلمات الآية" : "Put the words in order (meaning)",
+      prompt: ar ? "رتّب كلمات الآية" : "Put the words in order",
       question: "",
       sourceKey: ayat[i].key,
       options: [],
     };
   };
 
-  // Hear the recitation, pick the ayah. Arabic only: in English it would be
-  // a translation question.
+  // Hear the recitation, pick the ayah.
   const listen = (i: number): ChallengeSpec | null => {
-    if (!ar || !ayat[i].audioSrc) return null;
+    if (!ayat[i].audioSrc) return null;
     const seed = seedOf(ayat[i].key, "listen");
     const wrong = distractors(own, rest, [own[i]], seed);
     if (!wrong) return null;
     return {
       type: "LISTEN",
-      prompt: "استمع واختر الآية",
+      prompt: ar ? "استمع واختر الآية" : "Listen and choose the ayah",
       question: "",
       sourceKey: ayat[i].key,
       options: options(own[i], wrong, seed),
@@ -187,9 +186,8 @@ export const quranQuestions = (
   };
 
   // One word is missing; wrong choices are real words from other ayat.
-  // Arabic only. The longest word is hidden: it is the most distinctive.
+  // The longest word is hidden: it is the most distinctive.
   const completeWord = (i: number): ChallengeSpec | null => {
-    if (!ar) return null;
     const w = ayahWords(own[i]);
     if (w.length < ORDER_MIN_WORDS) return null;
     const lengths = w.map((x) => normalizeArabic(x).length);
@@ -216,7 +214,7 @@ export const quranQuestions = (
         answer,
         mode: "choose",
       },
-      prompt: "أكمل الكلمة الناقصة",
+      prompt: ar ? "أكمل الكلمة الناقصة" : "Complete the missing word",
       question: "",
       sourceKey: ayat[i].key,
       options: options(answer, wrong, seed),
@@ -224,7 +222,8 @@ export const quranQuestions = (
   };
 
   // Recall with no options: one word is hidden and must be typed. Arabic
-  // only; matched leniently (lib/arabic). Hides a different word from the
+  // mode only (English learners may have no Arabic keyboard); matched
+  // leniently (lib/arabic). Hides a different word from the
   // missing-word lesson, which always hides the longest.
   const typedWord = (i: number): ChallengeSpec | null => {
     if (!ar) return null;
@@ -265,7 +264,7 @@ export const quranQuestions = (
     return {
       prompt: ar
         ? "ما الآية التي قبل هذه الآية؟"
-        : "Which ayah comes before this one? (meaning)",
+        : "Which ayah comes before this one?",
       question: own[i],
       sourceKey: ayat[i - 1].key,
       options: options(own[i - 1], wrong, seed),
@@ -289,7 +288,7 @@ export const quranQuestions = (
       type: "TRUE_FALSE",
       prompt: ar
         ? "هل تأتي الآية الثانية بعد الأولى مباشرة؟"
-        : "Does the second ayah come right after the first? (meaning)",
+        : "Does the second ayah come right after the first?",
       question: `${own[i]}\n⬇\n${second}`,
       sourceKey: ayat[i + 1].key,
       // Always in this order: true, then false.
@@ -350,7 +349,7 @@ export const quranQuestions = (
     return {
       prompt: ar
         ? "ما الآية التي تلي هذا المقطع؟"
-        : "Which ayah comes after this passage? (meaning)",
+        : "Which ayah comes after this passage?",
       question: `${own[i]}\n${own[i + 1]}`,
       sourceKey: ayat[i + 2].key,
       options: options(own[i + 2], wrong, seed),
@@ -369,7 +368,7 @@ export const quranQuestions = (
     const wrong = distractors(ownEnds, restEnds, [end, ...right], seed);
     if (!wrong) return null;
     return {
-      prompt: ar ? "أكمل المقطع" : "Complete the passage (meaning)",
+      prompt: ar ? "أكمل المقطع" : "Complete the passage",
       question: `${own[i]}\n${start} …`,
       sourceKey: ayat[i + 1].key,
       options: options(end, wrong, seed),
@@ -387,7 +386,7 @@ export const quranQuestions = (
     return {
       type: "ORDER",
       payload: { words: chips },
-      prompt: ar ? "رتّب الآيات" : "Put the ayat in order (meaning)",
+      prompt: ar ? "رتّب الآيات" : "Put the ayat in order",
       question: "",
       sourceKey: ayat[i].key,
       options: [],
