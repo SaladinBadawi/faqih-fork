@@ -36,13 +36,7 @@ const recipe = (q: QuranQuestions, lang: Language, kids: boolean): Make[] => {
     // Kids keep to simple kinds they already know from their lessons: one
     // ayah at a time, choosing from options. No typing, no ayah before, no
     // passages, no long orderings: those are for full mode.
-    return [
-      q.next,
-      ar ? q.listen : q.trueFalse,
-      q.complete,
-      q.trueFalse,
-      (i) => q.order(i),
-    ];
+    return [q.next, q.listen, q.complete, q.trueFalse, (i) => q.order(i)];
   return [
     q.next,
     ar ? q.typedWord : q.complete,
@@ -51,7 +45,7 @@ const recipe = (q: QuranQuestions, lang: Language, kids: boolean): Make[] => {
     (i) => q.order(i, LONG_ORDER_WORDS),
     q.completePassage,
     (i) => q.orderAyat(i, 4 + (i % 2)),
-    ar ? q.listen : q.trueFalse,
+    q.listen,
   ];
 };
 

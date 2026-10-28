@@ -93,9 +93,13 @@ kids mode).
 
 ## Rules
 
-- Every course is built twice: an Arabic course and an English course. A
-  question and its options are always in one language; there are no
-  translation questions.
+- Every course is built twice: an Arabic course and an English course. There
+  are no translation questions.
+- The Quran is memorised in Arabic: Quran text is **always Arabic**, in
+  English courses too. English courses differ in their instructions, and the
+  app shows the English meaning (Sahih International) under each ayah in
+  questions, options and "Read first". Hadith and adhkar English courses use
+  the English text.
 - Every challenge links to its `source_texts` row; the app shows the citation.
 - Wrong answers are always other real texts or real values from the data.
   When a surah repeats an ayah (e.g. Al-Kafirun), every equally right answer
