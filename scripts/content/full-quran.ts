@@ -6,12 +6,14 @@ import {
   num,
 } from "./courses";
 import { quranExam } from "./exams";
+import { lessonInParts } from "./parts";
 import { quranQuestions } from "./quran-questions";
 import { type SourceText, type Surah, surahAyat } from "./sources";
 
 // The whole Quran: one unit per surah, in mushaf order. Each unit has a
-// lesson per group of ayat and ends with an exam whose questions span more
-// than one ayah.
+// lesson per group of ayat, read and answered a couple of ayat at a time
+// (parts.ts), and ends with an exam whose questions span more than one
+// ayah.
 
 const AYAT_PER_LESSON = 5;
 
@@ -55,20 +57,21 @@ const surahUnit = (
     const range = `${num(lang, from + 1)}–${num(lang, to)}`;
     // Then, to close the lesson, its ayat in order (2 or more).
     const putInOrder = to - from >= 2 ? q.orderAyat(from, to - from) : null;
-    const challenges = [
-      ...Array.from({ length: to - from }, (_, k) => forAyah(from + k)).flat(),
-      ...(putInOrder ? [putInOrder] : []),
-    ];
+    // A couple of ayat at a time: read them (and the next one, which "what
+    // comes next" asks about), then their questions; the order at the end.
+    const parts = lessonInParts(
+      ayat.slice(from, to),
+      ayat[to],
+      (k) => forAyah(from + k),
+      putInOrder ? [putInOrder] : []
+    );
     const { hizbQuarter } = ayat[from];
-    if (challenges.length > 0)
+    if (parts.challenges.length > 0)
       lessons.push({
         title: ar ? `الآيات ${range}` : `Ayat ${range}`,
-        // Read first: the lesson's ayat, plus the next one, which "what comes
-        // next" asks about for the last ayah.
-        study: ayat.slice(from, to + 1).map((a) => a.key),
+        ...parts,
         // Grouped on the learn page by the hizb quarter the lesson starts in.
         section: hizbQuarter ? hizbSection(hizbQuarter, lang) : undefined,
-        challenges,
       });
   }
 

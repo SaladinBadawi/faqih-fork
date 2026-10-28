@@ -4,6 +4,7 @@ import type {
   ReadAloud,
 } from "@/lib/exercises";
 
+import { lessonInParts } from "./parts";
 import type { SourceText } from "./sources";
 
 // Builds courses from imported source texts, one course per language.
@@ -33,6 +34,8 @@ export type ChallengeSpec = {
   question: string;
   sourceKey: string;
   options: OptionSpec[];
+  /** The lesson part it is asked in (see parts.ts). Unset: no parts. */
+  part?: number;
 };
 
 export type LessonSpec = {
@@ -43,6 +46,12 @@ export type LessonSpec = {
    * the texts the lesson's questions are about, in order of first use.
    */
   study?: string[];
+  /**
+   * Read, then answer, a few ayat at a time: the source keys read before
+   * each part's questions (parts.ts). Unset: read all of `study`, then
+   * answer all the questions.
+   */
+  parts?: string[][];
   /** Group heading on the learn page, e.g. "الحزب ١ · الربع الثاني". */
   section?: string;
   challenges: ChallengeSpec[];
@@ -210,23 +219,28 @@ export const buildFatiha = (ayat: SourceText[], lang: Language): CourseSpec => {
         description: ar
           ? "ترتيب الآيات وإكمالها (٧ آيات)"
           : "The Opening: order and completion",
+        // Every lesson is about the whole surah, a couple of ayat at a
+        // time (read them, then their questions), and ends by putting its
+        // ayat in order.
         lessons: [
           {
             title: ar ? "ترتيب الآيات" : "What comes next?",
-            challenges: ayat.slice(0, -1).map((a, i) => next(a, ayat[i + 1])),
+            questionsFor: (i: number) =>
+              i + 1 < ayat.length ? [next(ayat[i], ayat[i + 1])] : [],
           },
           {
             title: ar ? "أكمل الآية" : "Complete the ayah",
-            challenges: halves.map(complete),
+            questionsFor: (i: number) =>
+              halves.filter((h) => h.ayah === ayat[i]).map(complete),
           },
-          // Every lesson is about the whole surah: read it all first, and
-          // end by putting its ayat in order.
-        ].map((lesson) => ({
-          ...lesson,
-          study: ayat.map((a) => a.key),
-          challenges: putInOrder
-            ? [...lesson.challenges, putInOrder]
-            : lesson.challenges,
+        ].map(({ title, questionsFor }) => ({
+          title,
+          ...lessonInParts(
+            ayat,
+            undefined,
+            questionsFor,
+            putInOrder ? [putInOrder] : []
+          ),
         })),
       },
     ],

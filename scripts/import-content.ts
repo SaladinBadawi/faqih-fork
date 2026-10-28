@@ -155,6 +155,10 @@ const insertCourse = async (
               : (lesson.study ?? [
                   ...new Set(lesson.challenges.map((c) => c.sourceKey)),
                 ]),
+          parts:
+            (lesson.kind ?? "lesson") === "exam"
+              ? null
+              : (lesson.parts ?? null),
           order: l + 1,
           reviewStatus: "draft" as const,
         }))
@@ -174,6 +178,7 @@ const insertCourse = async (
             type: challenge.type ?? ("ASSIST" as const),
             payload: challenge.payload ?? null,
             readAloud: challenge.readAloud ?? null,
+            part: challenge.part ?? null,
             prompt: challenge.prompt,
             question: challenge.question,
             sourceTextId,
