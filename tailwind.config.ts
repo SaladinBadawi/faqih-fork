@@ -23,6 +23,7 @@ const config = {
         sans: ["var(--font-nunito)", "var(--font-arabic)", "sans-serif"],
         quran: ["var(--font-quran)", "serif"],
         arabic: ["var(--font-arabic)", "serif"],
+        kufi: ["var(--font-kufi)", "var(--font-arabic)", "sans-serif"],
       },
       colors: {
         // Faqih's colours (see docs/BRAND.md): navy for the app and its
