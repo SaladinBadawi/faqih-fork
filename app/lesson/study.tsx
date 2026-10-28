@@ -104,7 +104,7 @@ export const Study = ({ texts, onStart }: StudyProps) => {
                 >
                   {body}
                   {number !== null && (
-                    <span className="ms-1 text-green-600">
+                    <span className="ms-1 text-gold-600">
                       ﴿{formatNumber("ar", number)}﴾
                     </span>
                   )}
