@@ -250,16 +250,20 @@ export const getLesson = cache(async (id?: number) => {
     return { ...challenge, completed };
   });
 
-  // The texts to read before the questions, in the lesson's order.
+  // The texts to read before the questions, in the lesson's order; for a
+  // lesson in parts, also what to read before each part.
   const study = data.study ?? [];
-  const texts = study.length
+  const keys = [...new Set([...study, ...(data.parts ?? []).flat()])];
+  const texts = keys.length
     ? await db.query.sourceTexts.findMany({
-        where: inArray(sourceTexts.key, study),
+        where: inArray(sourceTexts.key, keys),
       })
     : [];
-  const studyTexts = study
-    .map((key) => texts.find((t) => t.key === key))
-    .filter((t) => t !== undefined);
+  const textOf = (key: string) => texts.find((t) => t.key === key);
+  const inOrder = (list: string[]) =>
+    list.map(textOf).filter((t) => t !== undefined);
+  const studyTexts = inOrder(study);
+  const studyParts = data.parts ? data.parts.map(inOrder) : null;
 
   // English mode: the meaning of each ayah shown in the lesson (questions,
   // options), shown under the Arabic. Keyed by "surah:ayah".
@@ -291,6 +295,7 @@ export const getLesson = cache(async (id?: number) => {
     ...data,
     challenges: normalizedChallenges,
     studyTexts,
+    studyParts,
     meanings,
     nextLesson,
   };

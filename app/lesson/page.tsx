@@ -29,6 +29,7 @@ const LessonPage = async () => {
       reviewStatus={lesson.reviewStatus}
       isExam={lesson.kind === "exam"}
       studyTexts={lesson.studyTexts}
+      studyParts={lesson.studyParts}
       meanings={lesson.meanings}
       nextLesson={lesson.nextLesson}
       initialLessonChallenges={lesson.challenges}

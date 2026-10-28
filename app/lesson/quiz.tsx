@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState, useTransition } from "react";
 
-import { Volume2 } from "lucide-react";
+import { BookOpen, Volume2 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import Confetti from "react-confetti";
@@ -15,7 +15,7 @@ import {
 } from "@/actions/challenge-progress";
 import { reviewAnswer } from "@/actions/review";
 import { reduceHearts } from "@/actions/user-progress";
-import { useMessages } from "@/components/locale-provider";
+import { useLocale, useMessages } from "@/components/locale-provider";
 import { MeaningsProvider } from "@/components/meanings";
 import { useIsKids, useMode } from "@/components/mode-provider";
 import { type Step, isSpeakable, useReadAloud } from "@/components/read-aloud";
@@ -35,6 +35,7 @@ import {
   type OrderPayload,
   usesOptions,
 } from "@/lib/exercises";
+import { formatNumber } from "@/lib/i18n";
 import { LAST_UNIT_COOKIE, setPreferenceCookie } from "@/lib/mode";
 import { recitationAudio } from "@/lib/recitation";
 import { useHeartsModal } from "@/store/use-hearts-modal";
@@ -66,6 +67,11 @@ type QuizProps = {
   review?: { returnHref: string };
   /** Read first: the texts the lesson is about, shown before the questions. */
   studyTexts?: (typeof sourceTexts.$inferSelect)[];
+  /**
+   * Lessons in parts: what to read before each part's questions
+   * (challenges.part). Unset: read `studyTexts` once, then all questions.
+   */
+  studyParts?: (typeof sourceTexts.$inferSelect)[][] | null;
   /** English mode: the meaning of each ayah in the lesson, by "surah:ayah". */
   meanings?: Record<string, string>;
   /** The next lesson: "Continue" goes there, and it is preloaded. */
@@ -91,6 +97,7 @@ export const Quiz = ({
   unitId,
   review,
   studyTexts = [],
+  studyParts,
   meanings = {},
   nextLesson,
   reviewStatus,
@@ -106,6 +113,7 @@ export const Quiz = ({
   });
   const { width, height } = useWindowSize();
   const t = useMessages();
+  const locale = useLocale();
   const isKids = useIsKids();
   const mode = useMode();
   const { enabled: readAloudOn, play, stop, preload } = useReadAloud();
@@ -125,10 +133,6 @@ export const Quiz = ({
     return initialPercentage === 100 ? 0 : initialPercentage;
   });
   const [challenges, setChallenges] = useState(initialLessonChallenges);
-  // Lessons open on what they're about; exams and reviews go straight in.
-  const [studying, setStudying] = useState(
-    () => !review && !isExam && studyTexts.length > 0
-  );
   const [activeIndex, setActiveIndex] = useState(() => {
     const uncompletedIndex = challenges.findIndex(
       (challenge) => !challenge.completed
@@ -136,6 +140,21 @@ export const Quiz = ({
 
     return uncompletedIndex === -1 ? 0 : uncompletedIndex;
   });
+  // What to read before a question: its part's ayat in a lesson in parts
+  // (none for the final review), else the whole lesson's reading.
+  const readingFor = (index: number) => {
+    const part = challenges[index]?.part;
+    return studyParts && part !== null && part !== undefined
+      ? (studyParts[part] ?? [])
+      : studyTexts;
+  };
+  const studies = !review && !isExam;
+  // Read, then answer: lessons open on what they're about (and each part
+  // on its ayat); exams and reviews go straight in. "read" must be heard
+  // or read before the questions open; "back" is a look back at it.
+  const [studying, setStudying] = useState<"read" | "back" | null>(() =>
+    studies && readingFor(activeIndex).length > 0 ? "read" : null
+  );
 
   const [selectedOption, setSelectedOption] = useState<number>();
   const [status, setStatus] = useState<"none" | "wrong" | "correct">("none");
@@ -148,6 +167,25 @@ export const Quiz = ({
   const [attempt, setAttempt] = useState(0);
 
   const challenge = challenges[activeIndex];
+
+  // A new part (after its last question, or questions skipped): read its
+  // ayat before its questions. Set while rendering, so its first question
+  // never shows before them.
+  const part = challenge?.part ?? null;
+  const [shownPart, setShownPart] = useState(part);
+  if (part !== shownPart) {
+    setShownPart(part);
+    if (studies && studyParts && part !== null)
+      setStudying(readingFor(activeIndex).length > 0 ? "read" : null);
+  }
+  // Parts with something to read, for "part 2 of 3".
+  const readParts = (studyParts ?? [])
+    .map((texts, i) => (texts.length > 0 ? i : -1))
+    .filter((i) => i >= 0);
+  // "Back to the ayat": this part's, or the whole lesson's in the review.
+  const backTexts = readingFor(activeIndex).length
+    ? readingFor(activeIndex)
+    : studyTexts;
   const options = challenge?.challengeOptions ?? [];
   const optionBased =
     !!challenge && usesOptions(challenge.type, challenge.payload);
@@ -459,10 +497,23 @@ export const Quiz = ({
         />
         <div className="flex flex-1 justify-center overflow-y-auto pt-8">
           <Study
-            texts={studyTexts}
+            key={`${part}:${studying}`}
+            texts={studying === "back" ? backTexts : readingFor(activeIndex)}
+            requireReading={studying === "read"}
+            partLabel={
+              studying === "read" && part !== null && readParts.length > 1
+                ? t.study.part(
+                    formatNumber(locale, readParts.indexOf(part) + 1),
+                    formatNumber(locale, readParts.length)
+                  )
+                : undefined
+            }
+            startLabel={
+              studying === "back" ? t.study.backToQuestions : undefined
+            }
             onStart={() => {
               stop();
-              setStudying(false);
+              setStudying(null);
             }}
           />
         </div>
@@ -491,6 +542,21 @@ export const Quiz = ({
               >
                 {title}
               </h1>
+              {/* Forgot the ayat? Read them again, then carry on. */}
+              {studies && backTexts.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    stop();
+                    setStudying("back");
+                  }}
+                  aria-label={t.lesson.backToAyat}
+                  title={t.lesson.backToAyat}
+                  className="shrink-0 rounded-xl border-2 border-b-4 p-2 text-gold-700 hover:bg-black/5 active:border-b-2"
+                >
+                  <BookOpen className="h-6 w-6" />
+                </button>
+              )}
               {/* Replay works even when read-aloud is off in Settings. */}
               {openingSteps.length > 0 && (
                 <button

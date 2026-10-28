@@ -99,6 +99,10 @@ const en = {
       "Read and listen to what this lesson is about, then answer the questions.",
     playAll: "Listen to all",
     start: "Start the questions",
+    part: (n: string, total: string) => `Part ${n} of ${total}`,
+    listenFirst:
+      "Listen to each ayah, or take a moment to read it, before the questions.",
+    backToQuestions: "Back to the questions",
     repeat: (n: number, count: string) =>
       n === 1 ? "Said once" : `Said ${count} times`,
   },
@@ -187,6 +191,7 @@ const en = {
     error: "Something went wrong. Please try again.",
     examPassed: "Exam passed! This unit is cleared.",
     listenAgain: "Listen again",
+    backToAyat: "Read the ayat again",
     cantListen: "Can't listen now",
     prompts: {
       LISTEN: "Listen and choose the ayah",
@@ -324,6 +329,9 @@ const ar: Messages = {
     intro: "اقرأ واستمع إلى ما يتناوله هذا الدرس، ثم أجب عن الأسئلة.",
     playAll: "استمع للكل",
     start: "ابدأ الأسئلة",
+    part: (n: string, total: string) => `المقطع ${n} من ${total}`,
+    listenFirst: "استمع إلى كل آية، أو خذ وقتك في قراءتها، قبل الأسئلة.",
+    backToQuestions: "عُد إلى الأسئلة",
     // Arabic counted nouns: 3-10 take the plural (مرات), 11+ the singular.
     repeat: (n: number, count: string) =>
       n === 1
@@ -419,6 +427,7 @@ const ar: Messages = {
     error: "حدث خطأ، حاول مرة أخرى.",
     examPassed: "نجحت في الاختبار! أتممت هذه الوحدة.",
     listenAgain: "استمع مرة أخرى",
+    backToAyat: "اقرأ الآيات مرة أخرى",
     cantListen: "لا أستطيع الاستماع الآن",
     prompts: {
       LISTEN: "استمع واختر الآية",
