@@ -26,6 +26,6 @@ jobs:
             echo "::notice::Add the APP_URL and CRON_SECRET repository secrets to send reminders."
             exit 0
           fi
-          curl --fail --silent --show-error --max-time 60 \
+          curl --fail-with-body --silent --show-error --max-time 60 \
             -H "Authorization: Bearer $CRON_SECRET" \
             "${APP_URL%/}/api/cron/reminders"

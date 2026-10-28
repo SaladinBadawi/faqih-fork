@@ -37,7 +37,7 @@ export const Study = ({ texts, onStart }: StudyProps) => {
   const t = useMessages();
   const locale = useLocale();
   const ar = locale === "ar";
-  const { enabled, play } = useReadAloud();
+  const { enabled, play, preload } = useReadAloud();
 
   const playAll = useMemo(
     () =>
@@ -47,6 +47,13 @@ export const Study = ({ texts, onStart }: StudyProps) => {
         .flatMap((s, i) => (i ? [{ kind: "wait", ms: 400 } as Step, s] : [s])),
     [texts]
   );
+
+  // Start downloading the recitations, so "Listen to all" starts quickly.
+  useEffect(() => {
+    preload(
+      texts.map((t) => ayahRef(t.key)).filter((r): r is string => r !== null)
+    );
+  }, [preload, texts]);
 
   // With read-aloud on (kids by default), recite them all straight away.
   useEffect(() => {
@@ -78,33 +85,41 @@ export const Study = ({ texts, onStart }: StudyProps) => {
           const ref = ayahRef(text.key);
           const number = ref ? Number(ref.split(":")[1]) : null;
           const step = stepFor(text);
-          const body = ar ? text.arabic : (text.translation ?? text.arabic);
+          // Always the Arabic; in English mode the meaning goes under it.
+          const body = text.arabic;
           return (
             <li
               key={text.key}
               className="flex items-start gap-x-3 rounded-xl border-2 p-4"
             >
-              <p
-                dir={ar ? "rtl" : "ltr"}
-                className={cn(
-                  "flex-1 text-neutral-700",
-                  ar
-                    ? ref
+              <div className="flex-1">
+                <p
+                  dir="rtl"
+                  className={cn(
+                    "text-neutral-700",
+                    ref
                       ? "font-quran text-2xl leading-[2.4]"
                       : "font-arabic text-lg leading-loose"
-                    : "text-base leading-relaxed"
-                )}
-              >
-                {!ar && number !== null && (
-                  <span className="me-1 font-bold text-green-600">
-                    ({number})
-                  </span>
-                )}
-                {body}
-                {ar && number !== null && (
-                  <span className="ms-1 text-green-600">
-                    ﴿{formatNumber(locale, number)}﴾
-                  </span>
+                  )}
+                >
+                  {body}
+                  {number !== null && (
+                    <span className="ms-1 text-green-600">
+                      ﴿{formatNumber("ar", number)}﴾
+                    </span>
+                  )}
+                </p>
+                {/* English mode: the meaning under the Arabic. */}
+                {!ar && text.translation && (
+                  <p
+                    dir="ltr"
+                    className="mt-1 text-sm leading-relaxed text-neutral-500"
+                  >
+                    {number !== null && (
+                      <span className="me-1 font-bold">({number})</span>
+                    )}
+                    {text.translation}
+                  </p>
                 )}
                 {/* Hadith and adhkar: everything their questions ask about,
                     i.e. the number, who recorded it, how many times it is said. */}
@@ -126,7 +141,7 @@ export const Study = ({ texts, onStart }: StudyProps) => {
                       .join(" · ")}
                   </span>
                 )}
-              </p>
+              </div>
               {step && (
                 <button
                   type="button"

@@ -1,3 +1,4 @@
+import { normalizeArabic } from "@/lib/arabic";
 import { type OrderPayload, type ReadAloud } from "@/lib/exercises";
 
 import { type ChallengeSpec, type CourseSpec } from "./courses";
@@ -15,7 +16,7 @@ import { type SourceText } from "./sources";
 // recitation of a fragment doesn't exist, and Quran text is never given to a
 // synthetic voice.
 //
-// Only Arabic courses: English courses show the meaning, not the Quran.
+// Every course: Quran text is Arabic in English courses too.
 
 const ELLIPSIS = " …";
 
@@ -34,8 +35,17 @@ export const buildRecitationIndex = (quran: SourceText[]): Index => {
     const ref = `${ayah.surah}:${ayah.number}`;
     index.text.set(ref, ayah.arabic);
     index.ayat.set(ayah.arabic, [...(index.ayat.get(ayah.arabic) ?? []), ref]);
-    ayahWords(ayah.arabic).forEach((word, k) => {
-      if (!index.words.has(word)) index.words.set(word, `${ref}:${k + 1}`);
+    // Word audio is numbered by Uthmani words. A shown word gets audio only
+    // if the Uthmani word at the same position is the same word (ignoring
+    // diacritics and spelling), so a chip never plays the wrong word.
+    const words = ayahWords(ayah.arabic);
+    const uthmani = ayahWords(ayah.uthmani ?? ayah.arabic);
+    words.forEach((word, k) => {
+      const same =
+        uthmani[k] !== undefined &&
+        normalizeArabic(uthmani[k]) === normalizeArabic(word);
+      if (same && !index.words.has(word))
+        index.words.set(word, `${ref}:${k + 1}`);
     });
   }
   return index;
@@ -97,18 +107,13 @@ const attachToChallenge = (
 export const withRecitations = (
   course: CourseSpec,
   index: Index
-): CourseSpec =>
-  course.language !== "ar"
-    ? course
-    : {
-        ...course,
-        units: course.units.map((unit) => ({
-          ...unit,
-          lessons: unit.lessons.map((lesson) => ({
-            ...lesson,
-            challenges: lesson.challenges.map((c) =>
-              attachToChallenge(c, index)
-            ),
-          })),
-        })),
-      };
+): CourseSpec => ({
+  ...course,
+  units: course.units.map((unit) => ({
+    ...unit,
+    lessons: unit.lessons.map((lesson) => ({
+      ...lesson,
+      challenges: lesson.challenges.map((c) => attachToChallenge(c, index)),
+    })),
+  })),
+});
