@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation";
 
 import { FeedWrapper } from "@/components/feed-wrapper";
+import { InviteCard } from "@/components/invite";
 import { Promo } from "@/components/promo";
-import { Quests } from "@/components/quests";
 import { StickyWrapper } from "@/components/sticky-wrapper";
 import { UserProgress } from "@/components/user-progress";
 import {
@@ -85,7 +85,7 @@ const LearnPage = async ({ searchParams }: LearnPageProps) => {
         />
 
         {!isPro && !isKids && <Promo />}
-        {!isKids && <Quests points={userProgress.points} />}
+        <InviteCard />
       </StickyWrapper>
       <FeedWrapper>
         <Header title={userProgress.activeCourse.title} />

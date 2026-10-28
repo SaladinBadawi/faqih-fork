@@ -33,6 +33,9 @@ export const links = {
 export const features = {
   // Stripe subscriptions ("unlimited hearts"). Off by default: knowledge stays free.
   payments: process.env.NEXT_PUBLIC_ENABLE_PAYMENTS === "true",
+  // The shop (spend points on hearts). Hidden for now; kept for when points
+  // buy badges. On with NEXT_PUBLIC_ENABLE_SHOP=true.
+  shop: process.env.NEXT_PUBLIC_ENABLE_SHOP === "true",
   // Local dev login: skips Clerk and signs you in as a fixed dev user. Never on in production.
   localAuth:
     process.env.NEXT_PUBLIC_DEV_AUTH === "local" &&

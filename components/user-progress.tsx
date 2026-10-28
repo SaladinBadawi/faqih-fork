@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
+import { features } from "@/config";
 import { courses } from "@/db/schema";
 
 type UserProgressProps = {
@@ -37,7 +38,7 @@ export const UserProgress = ({
 
       {!hideHearts && (
         <>
-          <Link href="/shop">
+          <Link href={features.shop ? "/shop" : "/leaderboard"}>
             <Button variant="ghost" className="text-orange-500">
               <Image
                 src="/points.svg"
@@ -50,7 +51,8 @@ export const UserProgress = ({
             </Button>
           </Link>
 
-          <Link href="/shop">
+          {/* Without the shop, hearts are earned back by reviewing. */}
+          <Link href={features.shop ? "/shop" : "/lesson/review"}>
             <Button variant="ghost" className="text-rose-500">
               <Image
                 src="/heart.svg"

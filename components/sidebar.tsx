@@ -4,10 +4,11 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { UserMenu } from "@/components/auth-controls";
+import { InviteButton } from "@/components/invite";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { useMessages } from "@/components/locale-provider";
 import { useIsKids } from "@/components/mode-provider";
-import { APP_NAME } from "@/config";
+import { APP_NAME, features } from "@/config";
 import { cn } from "@/lib/utils";
 
 import { SidebarItem } from "./sidebar-item";
@@ -40,6 +41,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
       <div className="flex flex-1 flex-col gap-y-2">
         <SidebarItem label={t.nav.learn} href="/learn" iconSrc="/learn.svg" />
         <SidebarItem label={t.nav.read} href="/read" iconSrc="/read.svg" />
+        <SidebarItem label={t.nav.modes} href="/modes" iconSrc="/modes.svg" />
         {/* Kids mode keeps the menu short: no points, hearts or rankings. */}
         {!isKids && (
           <>
@@ -48,12 +50,13 @@ export const Sidebar = ({ className }: SidebarProps) => {
               href="/leaderboard"
               iconSrc="/leaderboard.svg"
             />
-            <SidebarItem
-              label={t.nav.quests}
-              href="/quests"
-              iconSrc="/quests.svg"
-            />
-            <SidebarItem label={t.nav.shop} href="/shop" iconSrc="/shop.svg" />
+            {features.shop && (
+              <SidebarItem
+                label={t.nav.shop}
+                href="/shop"
+                iconSrc="/shop.svg"
+              />
+            )}
           </>
         )}
         <SidebarItem
@@ -64,6 +67,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
       </div>
 
       <div className="flex flex-col items-start gap-y-3 p-4">
+        <InviteButton />
         <LanguageSwitcher />
         <UserMenu />
       </div>

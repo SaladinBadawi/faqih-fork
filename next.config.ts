@@ -1,6 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Quests were replaced by learning modes.
+  redirects: async () => [
+    { source: "/quests", destination: "/modes", permanent: false },
+  ],
   headers: async () => [
     {
       source: "/api/(.*)",

@@ -38,7 +38,7 @@ const en = {
     learn: "Learn",
     read: "Read",
     leaderboard: "Leaderboard",
-    quests: "Quests",
+    modes: "Modes",
     shop: "Shop",
     settings: "Settings",
   },
@@ -131,11 +131,32 @@ const en = {
       },
     ],
   },
-  quests: {
-    title: "Quests",
-    viewAll: "View all",
-    description: "Complete quests by earning points.",
-    earn: (xp: string) => `Earn ${xp} XP`,
+  invite: {
+    title: "Invite friends",
+    body: "Share Faqih with family and friends, so they can learn with you.",
+    text: "Learn the Quran with me on Faqih: a few minutes a day, free.",
+    share: "Share",
+    whatsapp: "WhatsApp",
+    copy: "Copy link",
+    copied: "Link copied.",
+  },
+  modes: {
+    title: "Learning modes",
+    description: "Choose how you want to learn today.",
+    memorise: {
+      title: "Memorise",
+      body: "Lessons of a few ayat: read and listen, then answer.",
+    },
+    read: {
+      title: "Read",
+      body: "Read and listen to any surah or juz', like a mushaf.",
+    },
+    review: {
+      title: "Review",
+      body: "Go over your recent mistakes and earn hearts back.",
+    },
+    reviewEmpty: "Finish a lesson first, then review it here.",
+    exams: { title: "Exams", body: "Test yourself on a whole juz'." },
   },
   leaderboard: {
     title: "Leaderboard",
@@ -244,7 +265,7 @@ const ar: Messages = {
     learn: "تعلّم",
     read: "القراءة",
     leaderboard: "المتصدّرون",
-    quests: "المهام",
+    modes: "الأنماط",
     shop: "المتجر",
     settings: "الإعدادات",
   },
@@ -342,11 +363,32 @@ const ar: Messages = {
       },
     ],
   },
-  quests: {
-    title: "المهام",
-    viewAll: "عرض الكل",
-    description: "أكمل المهام بجمع النقاط.",
-    earn: (xp: string) => `اجمع ${xp} نقطة`,
+  invite: {
+    title: "ادعُ أصدقاءك",
+    body: "شارك فقيه مع أهلك وأصدقائك ليتعلّموا معك.",
+    text: "تعلّم القرآن معي على فقيه: دقائق قليلة كل يوم، ومجانًا.",
+    share: "مشاركة",
+    whatsapp: "واتساب",
+    copy: "نسخ الرابط",
+    copied: "تم نسخ الرابط.",
+  },
+  modes: {
+    title: "أنماط التعلّم",
+    description: "اختر كيف تريد أن تتعلّم اليوم.",
+    memorise: {
+      title: "الحفظ",
+      body: "دروس من آيات قليلة: اقرأ واستمع، ثم أجب.",
+    },
+    read: {
+      title: "القراءة",
+      body: "اقرأ واستمع لأي سورة أو جزء، كما في المصحف.",
+    },
+    review: {
+      title: "المراجعة",
+      body: "راجع أخطاءك الأخيرة واستعد قلوبك.",
+    },
+    reviewEmpty: "أنهِ درسًا أولًا، ثم راجعه هنا.",
+    exams: { title: "الاختبارات", body: "اختبر نفسك في جزء كامل." },
   },
   leaderboard: {
     title: "المتصدّرون",
