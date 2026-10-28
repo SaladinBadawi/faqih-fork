@@ -66,6 +66,8 @@ type QuizProps = {
   review?: { returnHref: string };
   /** Read first: the texts the lesson is about, shown before the questions. */
   studyTexts?: (typeof sourceTexts.$inferSelect)[];
+  /** English mode: the meaning of each ayah in the lesson, by "surah:ayah". */
+  meanings?: Record<string, string>;
   /** The next lesson: "Continue" goes there, and it is preloaded. */
   nextLesson?: { id: number; study: string[] } | null;
   reviewStatus: (typeof lessons.$inferSelect)["reviewStatus"];
@@ -89,6 +91,7 @@ export const Quiz = ({
   unitId,
   review,
   studyTexts = [],
+  meanings = {},
   nextLesson,
   reviewStatus,
   isExam,

@@ -261,7 +261,39 @@ export const getLesson = cache(async (id?: number) => {
     .map((key) => texts.find((t) => t.key === key))
     .filter((t) => t !== undefined);
 
-  return { ...data, challenges: normalizedChallenges, studyTexts, nextLesson };
+  // English mode: the meaning of each ayah shown in the lesson (questions,
+  // options), shown under the Arabic. Keyed by "surah:ayah".
+  const meanings: Record<string, string> = {};
+  if ((await getLocale()) === "en") {
+    const refs = new Set<string>();
+    for (const c of data.challenges) {
+      for (const ref of c.readAloud?.ayat ?? []) refs.add(ref);
+      for (const o of c.challengeOptions)
+        if (o.recitation?.split(":").length === 2) refs.add(o.recitation);
+      if (c.sourceText?.kind === "ayah")
+        refs.add(c.sourceText.key.replace(/^quran:/, ""));
+    }
+    if (refs.size) {
+      const rows = await db.query.sourceTexts.findMany({
+        where: inArray(
+          sourceTexts.key,
+          [...refs].map((ref) => `quran:${ref}`)
+        ),
+        columns: { key: true, translation: true },
+      });
+      for (const row of rows)
+        if (row.translation)
+          meanings[row.key.replace(/^quran:/, "")] = row.translation;
+    }
+  }
+
+  return {
+    ...data,
+    challenges: normalizedChallenges,
+    studyTexts,
+    meanings,
+    nextLesson,
+  };
 });
 
 export const getUserSubscription = cache(async () => {
