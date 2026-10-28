@@ -210,10 +210,17 @@ export const getLesson = cache(async (id?: number) => {
   if (!lessonId) return null;
 
   // Only lessons of the active course that are open (see lib/progress).
-  const lessonState = (await getUnits())
-    .flatMap((unit) => unit.lessons)
-    .find((lesson) => lesson.id === lessonId);
+  const courseLessons = (await getUnits()).flatMap((unit) => unit.lessons);
+  const position = courseLessons.findIndex((lesson) => lesson.id === lessonId);
+  const lessonState = courseLessons[position];
   if (!lessonState || lessonState.locked) return null;
+
+  // The lesson after this one in the course (e.g. ayat 11-15 after 6-10, or
+  // the unit's exam): "Continue" goes there, and it is preloaded.
+  const following = courseLessons[position + 1];
+  const nextLesson = following
+    ? { id: following.id, study: following.study ?? [] }
+    : null;
 
   const data = await db.query.lessons.findFirst({
     where: eq(lessons.id, lessonId),
@@ -254,38 +261,7 @@ export const getLesson = cache(async (id?: number) => {
     .map((key) => texts.find((t) => t.key === key))
     .filter((t) => t !== undefined);
 
-  // English mode: the meaning of each ayah shown in the lesson (questions,
-  // options), shown under the Arabic. Keyed by "surah:ayah".
-  const meanings: Record<string, string> = {};
-  if ((await getLocale()) === "en") {
-    const refs = new Set<string>();
-    for (const c of data.challenges) {
-      for (const ref of c.readAloud?.ayat ?? []) refs.add(ref);
-      for (const o of c.challengeOptions)
-        if (o.recitation?.split(":").length === 2) refs.add(o.recitation);
-      if (c.sourceText?.kind === "ayah")
-        refs.add(c.sourceText.key.replace(/^quran:/, ""));
-    }
-    if (refs.size) {
-      const rows = await db.query.sourceTexts.findMany({
-        where: inArray(
-          sourceTexts.key,
-          [...refs].map((ref) => `quran:${ref}`)
-        ),
-        columns: { key: true, translation: true },
-      });
-      for (const row of rows)
-        if (row.translation)
-          meanings[row.key.replace(/^quran:/, "")] = row.translation;
-    }
-  }
-
-  return {
-    ...data,
-    challenges: normalizedChallenges,
-    studyTexts,
-    meanings,
-  };
+  return { ...data, challenges: normalizedChallenges, studyTexts, nextLesson };
 });
 
 export const getUserSubscription = cache(async () => {
