@@ -83,6 +83,9 @@ export const lessons = pgTable("lessons", {
   section: text("section"),
   // Source keys shown before the questions ("read first"), in order.
   study: jsonb("study").$type<string[]>(),
+  // Read, then answer, a few ayat at a time: the source keys read before
+  // each part's questions (challenges.part). Null: one read, then all.
+  parts: jsonb("parts").$type<string[][]>(),
   reviewStatus: reviewStatusEnum("review_status").notNull().default("draft"),
   unitId: integer("unit_id")
     .references(() => units.id, {
@@ -116,6 +119,8 @@ export const challenges = pgTable("challenges", {
   payload: jsonb("payload").$type<ChallengePayload>(),
   // Ayat shown in the question, recited when it's read aloud (lib/recitation).
   readAloud: jsonb("read_aloud").$type<ReadAloud>(),
+  // The lesson part it is asked in (lessons.parts), from 0. Null: no parts.
+  part: integer("part"),
   sourceTextId: integer("source_text_id").references(() => sourceTexts.id, {
     onDelete: "set null",
   }),

@@ -1,5 +1,6 @@
-import { type CourseSpec, type Language, type LessonSpec } from "./courses";
+import { type ChallengeSpec, type CourseSpec, type Language } from "./courses";
 import { quranExam } from "./exams";
+import { lessonInParts } from "./parts";
 import { quranQuestions } from "./quran-questions";
 import { type SourceText, type Surah, surahAyat } from "./sources";
 
@@ -20,11 +21,19 @@ const surahUnit = (
 ) => {
   const ar = lang === "ar";
   const q = quranQuestions(ayat, others, lang, "kids");
-  const each = <T>(make: (i: number) => T | null) =>
-    ayat.map((_, i) => make(i)).filter((c): c is T => c !== null);
+  // Per ayah, so each lesson can go a couple of ayat at a time (parts.ts).
+  const each =
+    (make: (i: number) => ChallengeSpec | null) =>
+    (i: number): ChallengeSpec[] => {
+      const c = make(i);
+      return c ? [c] : [];
+    };
 
   // One kind of question per lesson, so a child practises one skill at a time.
-  const lessons: LessonSpec[] = [
+  const lessons: {
+    title: string;
+    challenges: (i: number) => ChallengeSpec[];
+  }[] = [
     {
       title: ar ? "ما الآية التالية؟" : "What comes next?",
       challenges: each(q.next),
@@ -51,9 +60,9 @@ const surahUnit = (
     },
   ];
 
-  // Each kids lesson practises the whole surah: read it all first, and end
-  // by putting its ayat in order.
-  const study = ayat.map((a) => a.key);
+  // Each kids lesson practises the whole surah, a couple of ayat at a time
+  // (read them, then their questions), and ends by putting its ayat in
+  // order.
   const putInOrder = q.orderAyat(0, ayat.length);
 
   // The exam's own question makers: different wrong answers from lessons.
@@ -74,12 +83,14 @@ const surahUnit = (
       : `Learn ${surah.englishName} ayah by ayah`,
     // A lesson with no challenges could never be completed.
     lessons: [
-      ...lessons.map((lesson) => ({
-        ...lesson,
-        study,
-        challenges: putInOrder
-          ? [...lesson.challenges, putInOrder]
-          : lesson.challenges,
+      ...lessons.map(({ title, challenges }) => ({
+        title,
+        ...lessonInParts(
+          ayat,
+          undefined,
+          challenges,
+          putInOrder ? [putInOrder] : []
+        ),
       })),
       ...(exam ? [exam] : []),
     ].filter((l) => l.challenges.length > 0),
