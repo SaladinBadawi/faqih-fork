@@ -494,7 +494,7 @@ export const Quiz = ({
                   type="button"
                   onClick={() => play(openingSteps)}
                   aria-label={t.lesson.listenAgain}
-                  className="shrink-0 rounded-xl border-2 border-b-4 p-2 text-sky-500 hover:bg-black/5 active:border-b-2"
+                  className="shrink-0 rounded-xl border-2 border-b-4 p-2 text-brand-500 hover:bg-black/5 active:border-b-2"
                 >
                   <Volume2 className="h-6 w-6" />
                 </button>
@@ -521,7 +521,7 @@ export const Quiz = ({
                       type="button"
                       disabled={pending}
                       onClick={onCantListen}
-                      className="mx-auto mb-6 block text-sm font-bold text-sky-500 hover:underline"
+                      className="mx-auto mb-6 block text-sm font-bold text-brand-500 hover:underline"
                     >
                       {t.lesson.cantListen}
                     </button>

@@ -1,8 +1,12 @@
 import { ClerkProvider } from "@clerk/nextjs";
 import { arSA } from "@clerk/localizations";
 import type { Metadata, Viewport } from "next";
-import { Amiri_Quran, Noto_Naskh_Arabic, Nunito } from "next/font/google";
-import { preconnect } from "react-dom";
+import {
+  Amiri_Quran,
+  Noto_Naskh_Arabic,
+  Nunito,
+  Reem_Kufi,
+} from "next/font/google";
 
 import { LocaleProvider } from "@/components/locale-provider";
 import { ModeProvider } from "@/components/mode-provider";
@@ -32,9 +36,15 @@ const arabicFont = Noto_Naskh_Arabic({
   subsets: ["arabic"],
   variable: "--font-arabic",
 });
+// The name فقيه in the logo (components/logo).
+const kufiFont = Reem_Kufi({
+  subsets: ["arabic"],
+  weight: "700",
+  variable: "--font-kufi",
+});
 
 export const viewport: Viewport = {
-  themeColor: "#22C55E",
+  themeColor: "#1b3a6b",
 };
 
 export const generateMetadata = async (): Promise<Metadata> => {
@@ -69,7 +79,8 @@ export default async function RootLayout({
           locale === "ar" ? "font-arabic" : "font-sans",
           font.variable,
           quranFont.variable,
-          arabicFont.variable
+          arabicFont.variable,
+          kufiFont.variable
         )}
       >
         <LocaleProvider locale={locale}>
@@ -99,7 +110,7 @@ export default async function RootLayout({
           logoImageUrl: "/favicon.ico",
         },
         variables: {
-          colorPrimary: "#22C55E",
+          colorPrimary: "#1b3a6b",
         },
       }}
       afterSignOutUrl="/"

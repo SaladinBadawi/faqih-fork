@@ -23,8 +23,35 @@ const config = {
         sans: ["var(--font-nunito)", "var(--font-arabic)", "sans-serif"],
         quran: ["var(--font-quran)", "serif"],
         arabic: ["var(--font-arabic)", "serif"],
+        kufi: ["var(--font-kufi)", "var(--font-arabic)", "sans-serif"],
       },
       colors: {
+        // Faqih's colours (see docs/BRAND.md): navy for the app and its
+        // actions, gold for what is achieved and for ayah markers. Green is
+        // only for a right answer, rose only for a wrong one.
+        brand: {
+          50: "#eef3fa",
+          100: "#dbe5f3",
+          200: "#b7cae6",
+          300: "#8aa8d3",
+          400: "#5a80bb",
+          500: "#3a62a0",
+          600: "#284d86",
+          700: "#1b3a6b",
+          800: "#142c52",
+          900: "#0e1f3b",
+        },
+        gold: {
+          50: "#fff9e5",
+          100: "#fff1bf",
+          200: "#ffe380",
+          300: "#ffd640",
+          400: "#ffc800",
+          500: "#e6b400",
+          600: "#b88f00",
+          700: "#8a6b00",
+          800: "#5c4700",
+        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

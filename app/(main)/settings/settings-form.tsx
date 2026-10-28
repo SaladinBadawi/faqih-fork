@@ -47,15 +47,15 @@ const Choice = ({
     aria-pressed={selected}
     className={cn(
       "flex w-full items-start gap-x-4 rounded-xl border-2 border-b-4 p-4 text-start hover:bg-black/5",
-      selected && "border-sky-300 bg-sky-100 hover:bg-sky-100"
+      selected && "border-brand-300 bg-brand-100 hover:bg-brand-100"
     )}
   >
-    <Icon className="mt-1 h-6 w-6 shrink-0 text-sky-500" />
+    <Icon className="mt-1 h-6 w-6 shrink-0 text-brand-500" />
     <div className="flex-1">
       <p className="font-bold text-neutral-700">{title}</p>
       {description && <p className="text-sm text-neutral-500">{description}</p>}
     </div>
-    {selected && <Check className="h-5 w-5 text-sky-500" />}
+    {selected && <Check className="h-5 w-5 text-brand-500" />}
   </button>
 );
 

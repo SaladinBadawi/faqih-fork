@@ -27,11 +27,11 @@ export const TodaysWird = async ({
     <div
       className={cn(
         "mb-8 flex w-full items-center justify-between gap-x-4 rounded-xl border-2 border-b-4 p-4",
-        highlight && "border-amber-400 bg-amber-50"
+        highlight && "border-gold-400 bg-gold-50"
       )}
     >
       <div className="flex items-center gap-x-3">
-        <BookOpenCheck className="h-8 w-8 shrink-0 text-amber-500" />
+        <BookOpenCheck className="h-8 w-8 shrink-0 text-gold-600" />
         <div>
           <p className="font-bold text-neutral-700">{t.learn.todaysWird}</p>
           <p className="text-sm text-neutral-500">

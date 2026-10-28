@@ -1,14 +1,14 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 
 import { UserMenu } from "@/components/auth-controls";
 import { InviteButton } from "@/components/invite";
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { Logo } from "@/components/logo";
 import { useMessages } from "@/components/locale-provider";
 import { useIsKids } from "@/components/mode-provider";
-import { APP_NAME, features } from "@/config";
+import { features } from "@/config";
 import { cn } from "@/lib/utils";
 
 import { SidebarItem } from "./sidebar-item";
@@ -30,11 +30,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
     >
       <Link href="/learn">
         <div className="flex items-center gap-x-3 pb-7 ps-4 pt-8">
-          <Image src="/mascot.svg" alt="Mascot" height={40} width={40} />
-
-          <h1 className="text-2xl font-extrabold tracking-wide text-green-600">
-            {APP_NAME}
-          </h1>
+          <Logo />
         </div>
       </Link>
 

@@ -122,7 +122,7 @@ export const Tour = ({ open: show }: { open: boolean }) => {
                   }}
                   className={cn(
                     "flex flex-col items-center gap-y-2 rounded-xl border-2 border-b-4 p-4 font-bold text-neutral-700 hover:bg-black/5",
-                    mode === value && "border-sky-300 bg-sky-100 text-sky-600"
+                    mode === value && "border-brand-300 bg-brand-100 text-brand-600"
                   )}
                 >
                   <Icon className="h-8 w-8" />
@@ -135,9 +135,9 @@ export const Tour = ({ open: show }: { open: boolean }) => {
                 type="checkbox"
                 checked={readAloud}
                 onChange={(e) => setReadAloud(e.target.checked)}
-                className="h-5 w-5 accent-sky-500"
+                className="h-5 w-5 accent-brand-500"
               />
-              <Volume2 className="h-5 w-5 text-sky-500" />
+              <Volume2 className="h-5 w-5 text-brand-500" />
               {t.settings.readAloud}
             </label>
           </div>
@@ -150,7 +150,7 @@ export const Tour = ({ open: show }: { open: boolean }) => {
               key={i}
               className={cn(
                 "h-2 w-2 rounded-full bg-neutral-300",
-                i === step && "bg-green-500"
+                i === step && "bg-brand-600"
               )}
             />
           ))}

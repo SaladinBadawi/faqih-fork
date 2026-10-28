@@ -75,11 +75,11 @@ const LeaderboardPage = async () => {
               key={userProgress.userId}
               className="flex w-full items-center rounded-xl p-2 px-4 hover:bg-gray-200/50"
             >
-              <p className="me-4 font-bold text-lime-700">
+              <p className="me-4 font-bold text-brand-700">
                 {formatNumber(locale, i + 1)}
               </p>
 
-              <Avatar className="me-6 ms-3 h-12 w-12 border bg-green-500">
+              <Avatar className="me-6 ms-3 h-12 w-12 border bg-brand-500">
                 <AvatarImage
                   src={
                     profiles.get(userProgress.userId)?.imageUrl ??
