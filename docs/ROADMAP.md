@@ -105,8 +105,12 @@ part-time).** Full Quran adds ≈ 3–4 weeks, and Tajweed adds ≈ 3–4 weeks.
   to" picker on the learn page. A surah is **cleared** when its exam is
   passed or all its lessons are done; moving past it without either leaves
   it unfinished. Inside a surah that isn't cleared, lessons open one by one,
-  but the exam is always open, so a learner can test out. Once cleared, all
-  its lessons are open to practise.
+  and the exam once they are all done (read and learn first, then be
+  tested). Once cleared, all its lessons are open to practise.
+- **Read, then answer**: a Quran lesson goes two ayat at a time: read them
+  (heard to the end, or time to read them, before the questions open), then
+  only their questions; it ends with a review of the whole lesson. "Read the
+  ayat again" during the questions goes back to them.
 - **Kids / full mode**, a per-device setting (Settings page and tour):
   - Kids: only kids courses, no hearts, no shop, leaderboard or quests, bigger
     cards and buttons, no keyboard-shortcut badges.

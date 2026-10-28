@@ -4,8 +4,9 @@
 // - Every unit (surah) is open: learners pick any surah, in any order.
 // - A unit is cleared when its exam is passed or all its lessons are done.
 //   Moving on to another surah without either leaves it unfinished.
-// - Inside a unit that isn't cleared, lessons open one after another, but
-//   the exam is always open, so a learner who knows the surah can test out.
+// - Inside a unit that isn't cleared, lessons open one after another, and
+//   the exam once they are all done: read and learn first, then be tested.
+//   (A unit with no lessons, like a juz' exam, has its exam open.)
 // - Once a unit is cleared, all its lessons are open to practise.
 
 export type LessonKind = "lesson" | "exam";
@@ -49,6 +50,8 @@ export const computeProgress = <U extends UnitInput>(
     const cleared = examPassed || completed || (lessonsDone && !exam);
 
     const next = lessons.find((l) => !l.completed);
+    // An exam passed before this rule stays open to retake.
+    const examOpen = examPassed || lessons.every((l) => l.completed);
 
     return {
       ...unit,
@@ -58,7 +61,10 @@ export const computeProgress = <U extends UnitInput>(
       lessons: unit.lessons.map((lesson) => {
         const current = lesson.id === next?.id;
         const open =
-          cleared || lesson.completed || current || lesson.kind === "exam";
+          cleared ||
+          lesson.completed ||
+          current ||
+          (lesson.kind === "exam" && examOpen);
         return { ...lesson, current, locked: !open };
       }),
     };
