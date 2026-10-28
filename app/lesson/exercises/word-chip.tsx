@@ -36,7 +36,7 @@ export const WordChip = ({
         isArabic(text)
           ? "font-arabic text-lg leading-loose lg:text-xl"
           : "text-sm lg:text-base",
-        tone === "selected" && "border-sky-300 bg-sky-100 text-sky-600",
+        tone === "selected" && "border-brand-300 bg-brand-100 text-brand-600",
         tone === "correct" && "border-green-300 bg-green-100 text-green-600",
         tone === "wrong" && "border-rose-300 bg-rose-100 text-rose-600",
         invisible && "invisible",
@@ -45,7 +45,7 @@ export const WordChip = ({
       )}
     >
       {badge !== undefined && (
-        <span className="absolute -top-2 start-2 rounded-full bg-sky-500 px-1.5 text-xs font-bold text-white">
+        <span className="absolute -top-2 start-2 rounded-full bg-brand-500 px-1.5 text-xs font-bold text-white">
           {badge}
         </span>
       )}

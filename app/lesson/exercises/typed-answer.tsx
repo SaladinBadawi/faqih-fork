@@ -36,7 +36,7 @@ export const TypedAnswer = ({
   };
 
   const className = cn(
-    "w-full rounded-xl border-2 border-b-4 bg-white px-4 py-3 text-neutral-700 outline-none focus:border-sky-300",
+    "w-full rounded-xl border-2 border-b-4 bg-white px-4 py-3 text-neutral-700 outline-none focus:border-brand-300",
     arabic ? "font-arabic text-xl leading-loose" : "text-base",
     status === "correct" && "border-green-300 bg-green-100",
     status === "wrong" && "border-rose-300 bg-rose-100"

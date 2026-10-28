@@ -29,14 +29,14 @@ export const SourceNote = ({ source, isDraft }: SourceNoteProps) => {
     <div className="mt-6 flex flex-col gap-y-1 text-xs text-muted-foreground lg:text-sm">
       {source && (
         <p className="flex items-center gap-x-1.5">
-          <BookOpenCheck className="h-4 w-4 shrink-0 text-green-600" />
+          <BookOpenCheck className="h-4 w-4 shrink-0 text-brand-600" />
           <span>
             {t.source.label}:{" "}
             <a
               href={source.sourceUrl}
               target="_blank"
               rel="noreferrer noopener"
-              className="font-semibold text-green-700 underline-offset-2 hover:underline"
+              className="font-semibold text-brand-700 underline-offset-2 hover:underline"
             >
               {citation}
             </a>

@@ -66,7 +66,7 @@ export const ReadIndex = ({ lastRead, surahs, ajza }: ReadIndexProps) => {
   return (
     <div className="mx-auto flex w-full max-w-[700px] flex-col gap-y-5 px-6 pb-10">
       <div className="flex flex-col items-center gap-y-2 text-center">
-        <BookOpen className="h-14 w-14 text-green-500" />
+        <BookOpen className="h-14 w-14 text-brand-600" />
         <h1 className="text-2xl font-bold text-neutral-800">{t.read.title}</h1>
         <p className="text-muted-foreground">{t.read.intro}</p>
       </div>
@@ -80,7 +80,7 @@ export const ReadIndex = ({ lastRead, surahs, ajza }: ReadIndexProps) => {
       {lastRead && continueLabel && (
         <Link
           href={`/read/${lastRead}`}
-          className="flex items-center justify-between rounded-xl border-2 border-b-4 border-green-300 bg-green-50 px-4 py-3 font-bold text-green-700 hover:bg-green-100"
+          className="flex items-center justify-between rounded-xl border-2 border-b-4 border-brand-300 bg-brand-50 px-4 py-3 font-bold text-brand-700 hover:bg-brand-100"
         >
           <span>{t.read.continue}</span>
           <span className={cn(ar && "font-arabic")}>{continueLabel}</span>
@@ -97,7 +97,7 @@ export const ReadIndex = ({ lastRead, surahs, ajza }: ReadIndexProps) => {
             onClick={() => setTab(key)}
             className={cn(
               "rounded-xl border-2 border-b-4 py-2 font-bold text-neutral-500 hover:bg-black/5",
-              tab === key && "border-sky-300 bg-sky-100 text-sky-600"
+              tab === key && "border-brand-300 bg-brand-100 text-brand-600"
             )}
           >
             {t.read[key]}
@@ -107,7 +107,7 @@ export const ReadIndex = ({ lastRead, surahs, ajza }: ReadIndexProps) => {
 
       {tab === "surahs" ? (
         <>
-          <label className="flex items-center gap-x-3 rounded-xl border-2 border-b-4 bg-white px-4 py-2 focus-within:border-sky-300">
+          <label className="flex items-center gap-x-3 rounded-xl border-2 border-b-4 bg-white px-4 py-2 focus-within:border-brand-300">
             <Search className="h-5 w-5 shrink-0 text-neutral-400" />
             <input
               value={query}

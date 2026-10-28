@@ -34,7 +34,7 @@ const arabicFont = Noto_Naskh_Arabic({
 });
 
 export const viewport: Viewport = {
-  themeColor: "#22C55E",
+  themeColor: "#1b3a6b",
 };
 
 export const generateMetadata = async (): Promise<Metadata> => {
@@ -99,7 +99,7 @@ export default async function RootLayout({
           logoImageUrl: "/favicon.ico",
         },
         variables: {
-          colorPrimary: "#22C55E",
+          colorPrimary: "#1b3a6b",
         },
       }}
       afterSignOutUrl="/"

@@ -64,7 +64,7 @@ export const Study = ({ texts, onStart }: StudyProps) => {
     <div className="flex w-full flex-col gap-y-6 px-6 lg:w-[600px] lg:px-0">
       <div className="flex items-center justify-between gap-x-3">
         <h1 className="flex items-center gap-x-2 text-lg font-bold text-neutral-700 lg:text-3xl">
-          <BookOpen className="h-7 w-7 shrink-0 text-green-500" />
+          <BookOpen className="h-7 w-7 shrink-0 text-brand-600" />
           {t.study.title}
         </h1>
         {playAll.length > 0 && (
@@ -104,7 +104,7 @@ export const Study = ({ texts, onStart }: StudyProps) => {
                 >
                   {body}
                   {number !== null && (
-                    <span className="ms-1 text-green-600">
+                    <span className="ms-1 text-gold-600">
                       ﴿{formatNumber("ar", number)}﴾
                     </span>
                   )}
@@ -147,7 +147,7 @@ export const Study = ({ texts, onStart }: StudyProps) => {
                   type="button"
                   onClick={() => play([step])}
                   aria-label={t.lesson.play}
-                  className="shrink-0 rounded-xl border-2 border-b-4 p-2 text-sky-500 hover:bg-black/5 active:border-b-2"
+                  className="shrink-0 rounded-xl border-2 border-b-4 p-2 text-brand-500 hover:bg-black/5 active:border-b-2"
                 >
                   <Volume2 className="h-5 w-5" />
                 </button>

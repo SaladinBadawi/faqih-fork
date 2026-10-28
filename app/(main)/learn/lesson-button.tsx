@@ -23,9 +23,9 @@ const LessonLabel = ({
     className={cn(
       "mt-1 block max-w-[140px] text-center text-sm font-bold leading-tight",
       exam
-        ? "text-amber-600"
+        ? "text-gold-700"
         : completed
-          ? "text-green-600"
+          ? "text-brand-600"
           : "text-neutral-500"
     )}
   >
@@ -103,7 +103,7 @@ export const LessonButton = ({
       >
         {current ? (
           <div className="relative h-[102px] w-[102px]">
-            <div className="absolute -top-6 left-2.5 z-10 animate-bounce rounded-xl border-2 bg-white px-3 py-2.5 font-bold uppercase tracking-wide text-green-500">
+            <div className="absolute -top-6 left-2.5 z-10 animate-bounce rounded-xl border-2 bg-white px-3 py-2.5 font-bold uppercase tracking-wide text-brand-600">
               {t.learn.start}
               <div
                 className="absolute -bottom-2 left-1/2 h-0 w-0 -translate-x-1/2 transform border-x-8 border-t-8 border-x-transparent"
@@ -114,7 +114,7 @@ export const LessonButton = ({
               value={Number.isNaN(percentage) ? 0 : percentage}
               styles={{
                 path: {
-                  stroke: "#4ade80",
+                  stroke: "#3a62a0",
                 },
                 trail: {
                   stroke: "#e5e7eb",
@@ -148,7 +148,7 @@ export const LessonButton = ({
                 "h-[70px] w-[70px] border-b-8",
                 exam &&
                   !locked &&
-                  "border-amber-600 bg-amber-500 hover:bg-amber-500/90"
+                  "border-gold-600 bg-gold-500 hover:bg-gold-500/90"
               )}
             >
               <Icon

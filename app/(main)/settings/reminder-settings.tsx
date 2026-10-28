@@ -159,7 +159,7 @@ export const ReminderSettings = () => {
             onClick={() => (status === "on" ? turnOff() : save(time))}
             className={cn(
               "flex items-center gap-x-2 rounded-xl border-2 border-b-4 px-4 py-3 font-bold text-neutral-700 hover:bg-black/5 disabled:opacity-50",
-              status === "on" && "border-sky-300 bg-sky-100 text-sky-600"
+              status === "on" && "border-brand-300 bg-brand-100 text-brand-600"
             )}
           >
             {status === "on" ? (
