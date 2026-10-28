@@ -12,7 +12,22 @@ const manifest = (): MetadataRoute.Manifest => ({
   display: "standalone",
   background_color: "#ffffff",
   theme_color: "#1b3a6b",
-  icons: [{ src: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
+  icons: [
+    { src: "/icon-192.png", sizes: "192x192", type: "image/png" },
+    // The mark sits inside the safe zone, so Android may crop it to any shape.
+    {
+      src: "/icon-512.png",
+      sizes: "512x512",
+      type: "image/png",
+      purpose: "any",
+    },
+    {
+      src: "/icon-512.png",
+      sizes: "512x512",
+      type: "image/png",
+      purpose: "maskable",
+    },
+  ],
 });
 
 export default manifest;

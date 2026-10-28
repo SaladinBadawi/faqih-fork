@@ -1,5 +1,15 @@
 # Faqih's look
 
+## Logo
+
+- **Mark:** the letter ف in the eight-pointed hizb star (۞) of the mushaf.
+  It is drawn as shapes (no font) in `components/logo.tsx` and
+  `app/icon.svg`. The home-screen icons (`app/apple-icon.png`,
+  `public/icon-*.png`) and `app/favicon.ico` are the mark on navy.
+- **Name:** both languages, the app's language first. فقيه in Reem Kufi
+  (bold) over Faqih in Nunito in Arabic, and the other way round in English
+  (`<Logo />`).
+
 ## Colours
 
 Tailwind colours `brand` and `gold` (`tailwind.config.ts`).

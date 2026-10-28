@@ -1,7 +1,12 @@
 import { ClerkProvider } from "@clerk/nextjs";
 import { arSA } from "@clerk/localizations";
 import type { Metadata, Viewport } from "next";
-import { Amiri_Quran, Noto_Naskh_Arabic, Nunito } from "next/font/google";
+import {
+  Amiri_Quran,
+  Noto_Naskh_Arabic,
+  Nunito,
+  Reem_Kufi,
+} from "next/font/google";
 import { preconnect } from "react-dom";
 
 import { LocaleProvider } from "@/components/locale-provider";
@@ -31,6 +36,12 @@ const quranFont = Amiri_Quran({
 const arabicFont = Noto_Naskh_Arabic({
   subsets: ["arabic"],
   variable: "--font-arabic",
+});
+// The name فقيه in the logo (components/logo).
+const kufiFont = Reem_Kufi({
+  subsets: ["arabic"],
+  weight: "700",
+  variable: "--font-kufi",
 });
 
 export const viewport: Viewport = {
@@ -69,7 +80,8 @@ export default async function RootLayout({
           locale === "ar" ? "font-arabic" : "font-sans",
           font.variable,
           quranFont.variable,
-          arabicFont.variable
+          arabicFont.variable,
+          kufiFont.variable
         )}
       >
         <LocaleProvider locale={locale}>
