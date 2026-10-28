@@ -62,8 +62,7 @@ faqih/
     |-- apple-icon.png
     |-- favicon.ico
     |-- globals.css
-    |-- icon1.png
-    |-- icon2.png
+    |-- icon.svg
     |-- layout.tsx
     |-- manifest.ts
   |- components/
@@ -75,6 +74,7 @@ faqih/
     |-- invite.tsx
     |-- language-switcher.tsx
     |-- locale-provider.tsx
+    |-- logo.tsx
     |-- meanings.tsx
     |-- mobile-header.tsx
     |-- mobile-sidebar.tsx
