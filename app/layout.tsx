@@ -7,6 +7,7 @@ import {
   Nunito,
   Reem_Kufi,
 } from "next/font/google";
+import { preconnect } from "react-dom";
 
 import { LocaleProvider } from "@/components/locale-provider";
 import { ModeProvider } from "@/components/mode-provider";
