@@ -24,8 +24,8 @@ export const BlankSentence = ({ before, after, fill }: BlankSentenceProps) => {
       {before}{" "}
       <span
         className={cn(
-          "inline-block min-w-[4rem] border-b-2 border-dashed border-sky-400 px-1 text-center",
-          fill && "text-sky-600"
+          "inline-block min-w-[4rem] border-b-2 border-dashed border-brand-400 px-1 text-center",
+          fill && "text-brand-600"
         )}
       >
         {fill ?? <>&nbsp;</>}

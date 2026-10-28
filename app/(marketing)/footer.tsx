@@ -36,7 +36,7 @@ export const Footer = async () => {
               asChild
             >
               <Link href={`/courses?track=${track}`}>
-                <Icon className="me-4 h-7 w-7 text-green-600" />
+                <Icon className="me-4 h-7 w-7 text-brand-600" />
                 {label}
               </Link>
             </Button>

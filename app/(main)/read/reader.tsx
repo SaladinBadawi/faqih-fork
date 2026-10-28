@@ -109,7 +109,7 @@ export const Reader = ({
   });
 
   const marker = (n: number) => (
-    <span className="mx-1 text-green-600">﴿{formatNumber(locale, n)}﴾</span>
+    <span className="mx-1 text-gold-600">﴿{formatNumber(locale, n)}﴾</span>
   );
 
   return (
@@ -158,17 +158,17 @@ export const Reader = ({
         const offset = ayat.findIndex((a) => a.ref === section.ayat[0]?.ref);
         return (
           <section key={section.surah} className="flex flex-col gap-y-4">
-            <div className="rounded-xl border-2 border-green-200 bg-green-50 py-3 text-center">
+            <div className="rounded-xl border-2 border-brand-200 bg-brand-50 py-3 text-center">
               <h2
                 className={cn(
-                  "font-bold text-green-700",
+                  "font-bold text-brand-700",
                   ar ? "font-arabic text-xl" : "text-lg"
                 )}
               >
                 {ar ? section.name : section.englishName}
               </h2>
               {(!ar || !section.fromStart) && (
-                <p className="text-sm text-green-600">
+                <p className="text-sm text-brand-600">
                   {[
                     !ar && section.englishNameTranslation,
                     !section.fromStart &&
@@ -205,8 +205,8 @@ export const Reader = ({
                     <span
                       {...ayahProps(ayah.ref, offset + i)}
                       className={cn(
-                        "cursor-pointer rounded-lg px-0.5 hover:bg-sky-50",
-                        current === ayah.ref && "bg-sky-100 hover:bg-sky-100"
+                        "cursor-pointer rounded-lg px-0.5 hover:bg-brand-50",
+                        current === ayah.ref && "bg-brand-100 hover:bg-brand-100"
                       )}
                     >
                       {ayah.arabic}
@@ -222,9 +222,9 @@ export const Reader = ({
                     key={ayah.ref}
                     {...ayahProps(ayah.ref, offset + i)}
                     className={cn(
-                      "cursor-pointer rounded-xl border-2 p-4 hover:bg-sky-50",
+                      "cursor-pointer rounded-xl border-2 p-4 hover:bg-brand-50",
                       current === ayah.ref &&
-                        "border-sky-300 bg-sky-100 hover:bg-sky-100"
+                        "border-brand-300 bg-brand-100 hover:bg-brand-100"
                     )}
                   >
                     <p

@@ -27,7 +27,7 @@ export const AudioPlayer = ({ urls }: { urls: string[] }) => {
         type="button"
         onClick={() => play([{ kind: "audio", urls }])}
         aria-label={t.lesson.play}
-        className="flex h-20 w-20 items-center justify-center rounded-2xl border-b-4 border-sky-600 bg-sky-500 text-white hover:bg-sky-500/90 active:border-b-0"
+        className="flex h-20 w-20 items-center justify-center rounded-2xl border-b-4 border-brand-600 bg-brand-500 text-white hover:bg-brand-500/90 active:border-b-0"
       >
         <Volume2 className="h-10 w-10" />
       </button>
@@ -35,7 +35,7 @@ export const AudioPlayer = ({ urls }: { urls: string[] }) => {
         type="button"
         onClick={() => play([{ kind: "audio", urls, rate: SLOW_RATE }])}
         aria-label={t.lesson.playSlow}
-        className="flex h-14 w-14 items-center justify-center rounded-2xl border-b-4 border-sky-600 bg-sky-500 text-white hover:bg-sky-500/90 active:border-b-0"
+        className="flex h-14 w-14 items-center justify-center rounded-2xl border-b-4 border-brand-600 bg-brand-500 text-white hover:bg-brand-500/90 active:border-b-0"
       >
         <Snail className="h-7 w-7" />
       </button>

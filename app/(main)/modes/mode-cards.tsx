@@ -23,10 +23,10 @@ export type Mode = {
 } & ({ href: string } | { courseId: number });
 
 const STYLE: Record<Mode["key"], { icon: LucideIcon; color: string }> = {
-  memorise: { icon: Sparkles, color: "text-green-500 bg-green-100" },
-  read: { icon: BookOpen, color: "text-sky-500 bg-sky-100" },
+  memorise: { icon: Sparkles, color: "text-brand-600 bg-brand-100" },
+  read: { icon: BookOpen, color: "text-gold-700 bg-gold-100" },
   review: { icon: RotateCcw, color: "text-rose-500 bg-rose-100" },
-  exams: { icon: GraduationCap, color: "text-amber-500 bg-amber-100" },
+  exams: { icon: GraduationCap, color: "text-indigo-500 bg-indigo-100" },
 };
 
 export const ModeCards = ({ modes }: { modes: Mode[] }) => {

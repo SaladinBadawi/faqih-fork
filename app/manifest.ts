@@ -11,7 +11,7 @@ const manifest = (): MetadataRoute.Manifest => ({
   start_url: "/learn",
   display: "standalone",
   background_color: "#ffffff",
-  theme_color: "#22C55E",
+  theme_color: "#1b3a6b",
   icons: [{ src: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
 });
 

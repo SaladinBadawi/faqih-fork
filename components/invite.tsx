@@ -69,7 +69,7 @@ export const InviteCard = () => {
   return (
     <div className="flex flex-col gap-y-3 rounded-xl border-2 p-4">
       <div className="flex items-center gap-x-2">
-        <UserPlus className="h-6 w-6 text-sky-500" />
+        <UserPlus className="h-6 w-6 text-brand-500" />
         <h3 className="text-lg font-bold text-neutral-700">{t.invite.title}</h3>
       </div>
       <p className="text-sm text-muted-foreground">{t.invite.body}</p>

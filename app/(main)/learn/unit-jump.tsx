@@ -62,7 +62,7 @@ export const UnitJump = ({ units }: UnitJumpProps) => {
 
   return (
     <div className="relative mb-8">
-      <label className="flex items-center gap-x-3 rounded-xl border-2 border-b-4 bg-white px-4 py-2 focus-within:border-sky-300">
+      <label className="flex items-center gap-x-3 rounded-xl border-2 border-b-4 bg-white px-4 py-2 focus-within:border-brand-300">
         <Search className="h-5 w-5 shrink-0 text-neutral-400" />
         <span className="sr-only">{t.learn.jumpTo}</span>
         <input
@@ -105,7 +105,7 @@ export const UnitJump = ({ units }: UnitJumpProps) => {
                 type="button"
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => go(unit)}
-                className="flex w-full items-center gap-x-3 rounded-lg px-3 py-2 text-start hover:bg-sky-100"
+                className="flex w-full items-center gap-x-3 rounded-lg px-3 py-2 text-start hover:bg-brand-100"
               >
                 <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border-2 text-sm font-bold text-neutral-500">
                   {formatNumber(locale, unit.order)}
@@ -119,7 +119,7 @@ export const UnitJump = ({ units }: UnitJumpProps) => {
                   {unit.title}
                 </span>
                 {unit.cleared && (
-                  <CheckCircle2 className="h-5 w-5 text-amber-500" />
+                  <CheckCircle2 className="h-5 w-5 text-gold-500" />
                 )}
               </button>
             </li>

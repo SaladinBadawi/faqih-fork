@@ -26,9 +26,11 @@ export const UnitBanner = async ({
   return (
     <div
       className={cn(
-        "flex w-full items-center justify-between rounded-xl p-5 text-white",
+        "flex w-full items-center justify-between rounded-xl p-5",
         // A cleared surah stands out, so learners see what they've finished.
-        completed || passedExam ? "bg-amber-500" : "bg-green-500"
+        completed || passedExam
+          ? "bg-gold-400 text-brand-900"
+          : "bg-brand-700 text-white"
       )}
     >
       <div className="space-y-2.5">
@@ -55,7 +57,8 @@ export const UnitBanner = async ({
         <Link href={`/lesson/${continueLessonId}`}>
           <Button
             size="lg"
-            variant="secondary"
+            // Gold on the navy banner, navy on a cleared (gold) one.
+            variant={completed || passedExam ? "secondary" : "gold"}
             className="hidden border-2 border-b-4 active:border-b-2 xl:flex"
           >
             <NotebookText className="me-2" />

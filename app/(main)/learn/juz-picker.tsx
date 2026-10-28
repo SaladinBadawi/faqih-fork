@@ -56,7 +56,7 @@ export const JuzPicker = ({ ajza, selected }: JuzPickerProps) => {
           onClick={() => setOpen((o) => !o)}
           aria-expanded={open}
           aria-controls="juz-grid"
-          className="flex flex-1 items-center justify-center gap-x-2 rounded-xl border-2 border-b-4 border-sky-300 bg-sky-100 py-2 font-bold text-sky-600 hover:bg-sky-200"
+          className="flex flex-1 items-center justify-center gap-x-2 rounded-xl border-2 border-b-4 border-brand-300 bg-brand-100 py-2 font-bold text-brand-600 hover:bg-brand-200"
         >
           <LayoutGrid className="h-5 w-5" />
           {label(selected)}
@@ -89,12 +89,12 @@ export const JuzPicker = ({ ajza, selected }: JuzPickerProps) => {
                 aria-current={juz === selected ? "page" : undefined}
                 className={cn(
                   "relative flex h-11 items-center justify-center rounded-xl border-2 border-b-4 font-bold text-neutral-600 hover:bg-black/5",
-                  juz === selected && "border-sky-300 bg-sky-100 text-sky-600"
+                  juz === selected && "border-brand-300 bg-brand-100 text-brand-600"
                 )}
               >
                 {formatNumber(locale, juz)}
                 {cleared && (
-                  <CheckCircle2 className="absolute -end-1.5 -top-1.5 h-4 w-4 rounded-full bg-white text-amber-500" />
+                  <CheckCircle2 className="absolute -end-1.5 -top-1.5 h-4 w-4 rounded-full bg-white text-gold-500" />
                 )}
               </Link>
             </li>
