@@ -22,11 +22,7 @@ const LessonLabel = ({
   <span
     className={cn(
       "mt-1 block max-w-[140px] text-center text-sm font-bold leading-tight",
-      exam
-        ? "text-gold-700"
-        : completed
-          ? "text-brand-600"
-          : "text-neutral-500"
+      exam ? "text-gold-700" : completed ? "text-brand-600" : "text-neutral-500"
     )}
   >
     {text}
@@ -40,7 +36,7 @@ type LessonButtonProps = {
   locked?: boolean;
   current?: boolean;
   completed?: boolean;
-  /** The unit's exam: always open in an open unit, see lib/progress. */
+  /** The unit's exam: open once its lessons are done, see lib/progress. */
   exam?: boolean;
   percentage: number;
   /** What the lesson covers, shown under the button ("الآيات ١١–١٥"). */
