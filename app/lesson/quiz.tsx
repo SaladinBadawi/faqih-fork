@@ -105,7 +105,7 @@ export const Quiz = ({
   const t = useMessages();
   const isKids = useIsKids();
   const mode = useMode();
-  const { enabled: readAloudOn, play, stop } = useReadAloud();
+  const { enabled: readAloudOn, play, stop, preload } = useReadAloud();
 
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -199,6 +199,30 @@ export const Quiz = ({
   useEffect(() => {
     if (readAloudOn && !studying && openingSteps.length) play(openingSteps);
   }, [openingSteps, play, readAloudOn, studying]);
+
+  // Download the audio this question and the next will play, while the
+  // learner reads: listening ayat always, and with read-aloud on, the ayat in
+  // the question and in the options they may tap.
+  useEffect(() => {
+    const refsOf = (c: (typeof challenges)[number] | undefined) => {
+      if (!c) return [];
+      const listen =
+        c.type === "LISTEN"
+          ? [/^quran:(\d+:\d+)$/.exec(c.sourceText?.key ?? "")?.[1]]
+          : [];
+      const spoken = readAloudOn
+        ? [
+            ...(c.readAloud?.ayat ?? []),
+            ...c.challengeOptions.map((o) => o.recitation),
+          ]
+        : [];
+      return [...listen, ...spoken].filter((r): r is string => !!r);
+    };
+    preload([
+      ...refsOf(challenges[activeIndex]),
+      ...refsOf(challenges[activeIndex + 1]),
+    ]);
+  }, [activeIndex, challenges, preload, readAloudOn]);
 
   // Leaving the lesson stops any sound.
   useEffect(() => stop, [stop]);

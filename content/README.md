@@ -3,17 +3,22 @@
 Lessons are generated from primary texts by `npm run content:import`
 (`scripts/import-content.ts`). Add `-- --refresh` to re-download.
 
-| Course                           | Source                                                                                                | Citation shown                                                                       |
-| -------------------------------- | ----------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
-| Kids: Short Surahs               | Same Quran source; Al-Fatiha and An-Nas to Al-Fil                                                     | `Quran s:n`, links to quran.com                                                      |
-| The Whole Quran                  | Same Quran source; all 114 surahs, a lesson per 5 ayat                                                | `Quran s:n`, links to quran.com                                                      |
-| Quran: Al-Fatiha                 | [alquran.cloud](https://alquran.cloud/api): Uthmani text (Tanzil), Sahih International, Alafasy audio | `Quran 1:n`, links to quran.com                                                      |
-| Hadith: an-Nawawi's Forty (1–10) | [fawazahmed0/hadith-api](https://github.com/fawazahmed0/hadith-api)                                   | `an-Nawawi's Forty Hadith #n` + takhrij (e.g. Bukhari & Muslim), links to sunnah.com |
-| Adhkar: Morning & Evening        | [hisnmuslim.com API](https://www.hisnmuslim.com), Hisn al-Muslim ch. 27                               | `Hisn al-Muslim #id`, links to hisnmuslim.com                                        |
+| Course                           | Source                                                                                               | Citation shown                                                                       |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| Kids: Short Surahs               | Same Quran source; Al-Fatiha and An-Nas to Al-Fil                                                    | `Quran s:n`, links to quran.com                                                      |
+| The Whole Quran                  | Same Quran source; all 114 surahs, a lesson per 5 ayat                                               | `Quran s:n`, links to quran.com                                                      |
+| Quran: Al-Fatiha                 | [alquran.cloud](https://alquran.cloud/api): simple text (Tanzil), Sahih International, Alafasy audio | `Quran 1:n`, links to quran.com                                                      |
+| Hadith: an-Nawawi's Forty (1–10) | [fawazahmed0/hadith-api](https://github.com/fawazahmed0/hadith-api)                                  | `an-Nawawi's Forty Hadith #n` + takhrij (e.g. Bukhari & Muslim), links to sunnah.com |
+| Adhkar: Morning & Evening        | [hisnmuslim.com API](https://www.hisnmuslim.com), Hisn al-Muslim ch. 27                              | `Hisn al-Muslim #id`, links to hisnmuslim.com                                        |
 
 The import always loads the **full Quran** (114 surahs, 6,236 ayat) into
 `source_texts` (keys `quran:<surah>:<ayah>`) and the `surahs` table, so any
-course can use any ayah. The basmalah that the Uthmani edition puts before
+course can use any ayah. The text is Tanzil's **simple** script: full
+diacritics in everyday spelling (e.g. "وَبِالْيَوْمِ الْآخِرِ"), easier for beginners
+and kids than the Uthmani mushaf spelling. The Uthmani text is fetched too,
+only to line words up with Quran.com's word-by-word audio (numbered by
+Uthmani words); ayat whose words don't line up (about 6%, mostly "يَا" written
+as its own word) get no word audio. The basmalah that both editions put before
 the first ayah of each surah is removed (it is only an ayah in Al-Fatiha).
 
 ## Exercise types

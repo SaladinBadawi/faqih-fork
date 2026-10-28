@@ -191,7 +191,7 @@ export const buildFatiha = (ayat: SourceText[], lang: Language): CourseSpec => {
       ? {
           type: "ORDER",
           payload: { words: chips },
-          prompt: ar ? "رتّب آيات السورة" : "Put the ayat in order",
+          prompt: ar ? "رتّب آيات السورة" : "Put the ayat in order (meaning)",
           question: "",
           sourceKey: ayat[0].key,
           options: [],
@@ -209,7 +209,7 @@ export const buildFatiha = (ayat: SourceText[], lang: Language): CourseSpec => {
         title: ar ? "سورة الفاتحة" : "Al-Fatiha",
         description: ar
           ? "ترتيب الآيات وإكمالها (٧ آيات)"
-          : "The Opening: order and completion",
+          : "The Opening, in English meaning: order and completion",
         lessons: [
           {
             title: ar ? "ترتيب الآيات" : "What comes next?",

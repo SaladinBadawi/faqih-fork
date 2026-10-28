@@ -100,6 +100,7 @@ faqih/
     |-- auth.ts
     |-- exercises.ts
     |-- i18n.ts
+    |-- juz.ts
     |-- locale.ts
     |-- mode.ts
     |-- preferences.ts
