@@ -30,7 +30,8 @@ versions, and fails on react-admin's peer dependencies.
    - The first run downloads the full Quran (Arabic, English and audio links),
      an-Nawawi's Forty and Hisn al-Muslim into `content/cache/`. Later runs
      reuse the cache; add `-- --refresh` to download again.
-   - It replaces all courses, which resets everyone's progress.
+   - It replaces the courses one at a time. Learners keep their progress:
+     finished lessons stay finished, even if their questions changed.
 4. Start the app: `bun run dev`
 
 See [content/README.md](../content/README.md) for the sources and the
@@ -55,7 +56,7 @@ against the database in the `DATABASE_URL` repository secret.
   Changes that could delete data make the job fail on purpose; run
   `npx drizzle-kit push` yourself after checking what will be lost.
 - It only updates the schema. If the change also needs new or rebuilt lessons,
-  run `npm run content:import` yourself (it resets progress).
+  run `npm run content:import` yourself (learners keep their progress).
 - You can also run it by hand from the Actions tab ("Run workflow").
 
 ## Daily wird reminders (web push)
