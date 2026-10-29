@@ -1,6 +1,14 @@
 import { neon } from "@neondatabase/serverless";
 import "dotenv/config";
-import { sql as drizzleSql, getTableColumns } from "drizzle-orm";
+import {
+  sql as drizzleSql,
+  eq,
+  getTableColumns,
+  inArray,
+  isNull,
+  notInArray,
+  or,
+} from "drizzle-orm";
 import { drizzle } from "drizzle-orm/neon-http";
 
 import * as schema from "@/db/schema";
@@ -14,6 +22,11 @@ import {
 import { withExams } from "./content/exams";
 import { buildFullQuran } from "./content/full-quran";
 import { buildJuzExams } from "./content/juz-exams";
+import {
+  leaveCourse,
+  restoreProgress,
+  saveProgress,
+} from "./content/keep-progress";
 import { buildKidsShortSurahs } from "./content/kids";
 import { buildRecitationIndex, withRecitations } from "./content/recitations";
 import {
@@ -28,7 +41,9 @@ import {
 // Usage: npm run content:import [-- --refresh]
 //   --refresh  re-download from the APIs instead of using content/cache
 //
-// Replaces ALL courses (and user progress on them) with the imported ones.
+// Replaces all courses with the imported ones, one course at a time, and
+// keeps learners' progress on them (scripts/content/keep-progress.ts).
+// Courses that are no longer imported are deleted, with their progress.
 
 const sql = neon(process.env.DATABASE_URL);
 const db = drizzle(sql, { schema });
@@ -246,26 +261,60 @@ const main = async () => {
     ...morningEvening,
   ]);
 
-  console.log("Replacing courses…");
-  // Cascades to units, lessons, challenges, options and progress.
-  await db.delete(schema.courses);
-
   // Which question and option texts are whole ayat or words, to be heard
   // as recitation (Arabic courses only).
   const recitations = buildRecitationIndex(quran.ayat);
 
   // One course per language; nothing mixes Arabic and English.
-  for (const lang of ["ar", "en"] as const)
-    for (const course of [
-      buildKidsShortSurahs(quran.surahs, quran.ayat, lang),
-      buildFullQuran(quran.surahs, quran.ayat, lang),
-      buildJuzExams(quran.surahs, quran.ayat, lang),
-      // These have no exam builder of their own: exams sample their lessons.
-      withExams(buildFatiha(fatiha, lang)),
-      withExams(buildNawawi(nawawi, 10, lang)),
-      withExams(buildMorningEvening(morningEvening, lang)),
-    ])
-      await insertCourse(withRecitations(course, recitations), sourceIds);
+  const courses = (["ar", "en"] as const).flatMap((lang) => [
+    buildKidsShortSurahs(quran.surahs, quran.ayat, lang),
+    buildFullQuran(quran.surahs, quran.ayat, lang),
+    buildJuzExams(quran.surahs, quran.ayat, lang),
+    // These have no exam builder of their own: exams sample their lessons.
+    withExams(buildFatiha(fatiha, lang)),
+    withExams(buildNawawi(nawawi, 10, lang)),
+    withExams(buildMorningEvening(morningEvening, lang)),
+  ]);
+
+  console.log("Saving progress…");
+  const saved = await saveProgress(sql);
+
+  console.log("Replacing courses…");
+  for (const course of courses) {
+    // Deleting a course cascades to its lessons, questions and progress.
+    await leaveCourse(db, course.slug);
+    await db.delete(schema.courses).where(eq(schema.courses.slug, course.slug));
+    await insertCourse(withRecitations(course, recitations), sourceIds);
+    const kept = await restoreProgress(sql, db, saved, course.slug);
+    if (kept.done || kept.mistakes)
+      console.log(
+        `    progress kept: ${kept.done} answers, ${kept.mistakes} mistakes`
+      );
+  }
+
+  // Courses no longer imported; their learners pick a course again.
+  const gone = or(
+    isNull(schema.courses.slug),
+    notInArray(
+      schema.courses.slug,
+      courses.map((c) => c.slug)
+    )
+  );
+  for (const { slug } of await db
+    .select({ slug: schema.courses.slug })
+    .from(schema.courses)
+    .where(gone))
+    console.log(`  Deleting course no longer imported: ${slug ?? "(no slug)"}`);
+  await db
+    .update(schema.userProgress)
+    .set({ activeCourseId: null })
+    .where(
+      inArray(
+        schema.userProgress.activeCourseId,
+        db.select({ id: schema.courses.id }).from(schema.courses).where(gone)
+      )
+    );
+  await db.delete(schema.courses).where(gone);
 
   console.log("Done. All lessons are drafts until reviewed.");
 };
