@@ -67,4 +67,4 @@ jobs:
 
       - name: Reminder
         run: |
-          echo "::notice::Schema is up to date. If this change needs new or rebuilt lessons (e.g. exams), run 'npm run content:import' locally; it resets progress, so it is not automatic."
+          echo "::notice::Schema is up to date. Lessons are rebuilt by the Update lessons workflow (content-import.yml)."

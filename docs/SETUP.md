@@ -55,9 +55,20 @@ against the database in the `DATABASE_URL` repository secret.
 - Safe changes (new tables, columns, enum values) apply automatically.
   Changes that could delete data make the job fail on purpose; run
   `npx drizzle-kit push` yourself after checking what will be lost.
-- It only updates the schema. If the change also needs new or rebuilt lessons,
-  run `npm run content:import` yourself (learners keep their progress).
 - You can also run it by hand from the Actions tab ("Run workflow").
+
+When a merge changes how lessons are made (`scripts/content/`,
+`scripts/import-content.ts`, `content/references/`, or the schema and the
+`lib/` files those scripts use), the **Update lessons** Action
+(`.github/workflows/content-import.yml`) pushes the schema and then runs
+`content:import`, so the live lessons match the code.
+
+- Learners keep their progress (`scripts/content/keep-progress.ts`). Progress
+  on a lesson that was removed or renamed is dropped.
+- While a course is being replaced (a minute or two for the full Quran), its
+  learners land on the course list.
+- Re-imported lessons are drafts again (see Draft content).
+- Run it by hand from the Actions tab ("Run workflow").
 
 ## Daily wird reminders (web push)
 
