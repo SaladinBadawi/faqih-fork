@@ -1,6 +1,6 @@
 import { cache } from "react";
 
-import { and, eq, inArray } from "drizzle-orm";
+import { and, countDistinct, eq, inArray, sql } from "drizzle-orm";
 
 import { features } from "@/config";
 import { getAuth } from "@/lib/auth";
@@ -13,6 +13,7 @@ import { computeProgress, firstOpenLesson } from "@/lib/progress";
 import db from "./drizzle";
 import {
   challengeProgress,
+  challenges,
   courses,
   lessons,
   mistakes,
@@ -81,45 +82,52 @@ export const getUnits = cache(async () => {
 
   if (!userId || !userProgress?.activeCourseId) return [];
 
-  // Only ids and progress: the full Quran course has thousands of challenges,
-  // and the learn page doesn't need their text.
-  const data = await db.query.units.findMany({
-    where: eq(units.courseId, userProgress.activeCourseId),
-    orderBy: (units, { asc }) => [asc(units.order)],
-    with: {
-      lessons: {
-        where: visibleLessons,
-        orderBy: (lessons, { asc }) => [asc(lessons.order)],
-        with: {
-          challenges: {
-            columns: { id: true },
-            with: {
-              challengeProgress: {
-                columns: { completed: true },
-                where: eq(challengeProgress.userId, userId),
-              },
-            },
-          },
+  // The full Quran course has thousands of lessons and tens of thousands of
+  // challenges: the database counts each lesson's challenges and how many
+  // the learner has done, rather than sending every challenge here.
+  const [data, counts] = await Promise.all([
+    db.query.units.findMany({
+      where: eq(units.courseId, userProgress.activeCourseId),
+      orderBy: (units, { asc }) => [asc(units.order)],
+      with: {
+        lessons: {
+          where: visibleLessons,
+          orderBy: (lessons, { asc }) => [asc(lessons.order)],
         },
       },
-    },
-  });
+    }),
+    db
+      .select({
+        lessonId: challenges.lessonId,
+        total: countDistinct(challenges.id),
+        done: sql<number>`count(distinct ${challenges.id}) filter (where ${challengeProgress.completed})`.mapWith(
+          Number
+        ),
+      })
+      .from(challenges)
+      .innerJoin(lessons, eq(lessons.id, challenges.lessonId))
+      .innerJoin(units, eq(units.id, lessons.unitId))
+      .leftJoin(
+        challengeProgress,
+        and(
+          eq(challengeProgress.challengeId, challenges.id),
+          eq(challengeProgress.userId, userId)
+        )
+      )
+      .where(eq(units.courseId, userProgress.activeCourseId))
+      .groupBy(challenges.lessonId),
+  ]);
+  const countOf = new Map(counts.map((c) => [c.lessonId, c]));
 
   const withCompletion = data.map((unit) => ({
     ...unit,
-    lessons: unit.lessons.map(({ challenges, ...lesson }) => {
-      const done = challenges.filter(
-        (challenge) =>
-          challenge.challengeProgress.length > 0 &&
-          challenge.challengeProgress.every((progress) => progress.completed)
-      ).length;
+    lessons: unit.lessons.map((lesson) => {
+      const { total = 0, done = 0 } = countOf.get(lesson.id) ?? {};
 
       return {
         ...lesson,
-        completed: challenges.length > 0 && done === challenges.length,
-        percentage: challenges.length
-          ? Math.round((done / challenges.length) * 100)
-          : 0,
+        completed: total > 0 && done === total,
+        percentage: total ? Math.round((done / total) * 100) : 0,
       };
     }),
   }));
