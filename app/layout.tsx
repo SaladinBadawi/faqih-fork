@@ -12,6 +12,7 @@ import { preconnect } from "react-dom";
 import { LocaleProvider } from "@/components/locale-provider";
 import { ModeProvider } from "@/components/mode-provider";
 import { ReadAloudProvider } from "@/components/read-aloud";
+import { TimeZoneCookie } from "@/components/time-zone-cookie";
 import { ExitModal } from "@/components/modals/exit-modal";
 import { HeartsModal } from "@/components/modals/hearts-modal";
 import { PracticeModal } from "@/components/modals/practice-modal";
@@ -88,6 +89,7 @@ export default async function RootLayout({
           <ModeProvider mode={mode}>
             <ReadAloudProvider enabled={readAloud}>
               <Toaster theme="light" richColors closeButton />
+              <TimeZoneCookie />
               <ExitModal />
               <HeartsModal />
               <PracticeModal />
