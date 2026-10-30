@@ -16,6 +16,7 @@ import {
 import { reviewAnswer } from "@/actions/review";
 import { reduceHearts } from "@/actions/user-progress";
 import { useLocale, useMessages } from "@/components/locale-provider";
+import { PreloadPage } from "@/components/preload-page";
 import { MeaningsProvider } from "@/components/meanings";
 import { useIsKids, useMode } from "@/components/mode-provider";
 import { type Step, isSpeakable, useReadAloud } from "@/components/read-aloud";
@@ -265,19 +266,19 @@ export const Quiz = ({
     ]);
   }, [activeIndex, challenges, preload, readAloudOn]);
 
-  // Near the end of the lesson, get the next one ready: its page, and the
-  // recitation of the ayat it opens with ("Read first"), so moving on from
-  // ayat 6-10 to 11-15 doesn't wait for the network.
+  // Near the end of the lesson, get the recitation of the ayat the next one
+  // opens with ("Read first"), so moving on from ayat 6-10 to 11-15 doesn't
+  // wait for the network. Its page is loaded once this one is finished
+  // (PreloadPage below): before that, the next lesson is still locked.
   const nearEnd = challenges.length - activeIndex <= 2;
   useEffect(() => {
     if (!nearEnd || !nextLesson || review) return;
-    router.prefetch(`/lesson/${nextLesson.id}`);
     preload(
       nextLesson.study
         .map((key) => /^quran:(\d+:\d+)$/.exec(key)?.[1])
         .filter((ref): ref is string => !!ref)
     );
-  }, [nearEnd, nextLesson, preload, review, router]);
+  }, [nearEnd, nextLesson, preload, review]);
 
   // Leaving the lesson stops any sound.
   useEffect(() => stop, [stop]);
@@ -422,6 +423,9 @@ export const Quiz = ({
       <>
         {/* No music (ma'azif): just the short "correct" sound, once. */}
         <audio src="/correct.wav" autoPlay />
+        {nextLesson && !review && (
+          <PreloadPage href={`/lesson/${nextLesson.id}`} />
+        )}
         <Confetti
           recycle={false}
           numberOfPieces={500}

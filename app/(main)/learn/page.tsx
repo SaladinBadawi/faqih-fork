@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 
 import { FeedWrapper } from "@/components/feed-wrapper";
 import { InviteCard } from "@/components/invite";
+import { PreloadPage } from "@/components/preload-page";
 import { Promo } from "@/components/promo";
 import { StickyWrapper } from "@/components/sticky-wrapper";
 import { UserProgress } from "@/components/user-progress";
@@ -89,6 +90,8 @@ const LearnPage = async ({ searchParams }: LearnPageProps) => {
       </StickyWrapper>
       <FeedWrapper>
         <Header title={userProgress.activeCourse.title} />
+        {/* Today's wird is the likely next tap: have it ready. */}
+        {wird && <PreloadPage href={`/lesson/${wird.id}`} />}
         {wird && wirdUnit && (
           <TodaysWird
             lessonId={wird.id}
