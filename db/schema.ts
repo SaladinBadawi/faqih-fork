@@ -1,6 +1,7 @@
 import { relations } from "drizzle-orm";
 import {
   boolean,
+  index,
   integer,
   jsonb,
   pgEnum,
@@ -48,17 +49,24 @@ export const coursesRelations = relations(courses, ({ many }) => ({
   units: many(units),
 }));
 
-export const units = pgTable("units", {
-  id: serial("id").primaryKey(),
-  title: text("title").notNull(), // Unit 1
-  description: text("description").notNull(), // Learn the basics of spanish
-  courseId: integer("course_id")
-    .references(() => courses.id, {
-      onDelete: "cascade",
-    })
-    .notNull(),
-  order: integer("order").notNull(),
-});
+// Postgres doesn't index foreign keys by itself. The learn page and lessons
+// look rows up by their parent (a course's units, a unit's lessons, a
+// lesson's challenges, a learner's progress), so each of those is indexed.
+export const units = pgTable(
+  "units",
+  {
+    id: serial("id").primaryKey(),
+    title: text("title").notNull(), // Unit 1
+    description: text("description").notNull(), // Learn the basics of spanish
+    courseId: integer("course_id")
+      .references(() => courses.id, {
+        onDelete: "cascade",
+      })
+      .notNull(),
+    order: integer("order").notNull(),
+  },
+  (table) => [index("units_course_id_idx").on(table.courseId)]
+);
 
 export const unitsRelations = relations(units, ({ many, one }) => ({
   course: one(courses, {
@@ -75,25 +83,29 @@ export const reviewStatusEnum = pgEnum("review_status", ["draft", "reviewed"]);
 // without marking this unit's lessons as done.
 export const lessonKindEnum = pgEnum("lesson_kind", ["lesson", "exam"]);
 
-export const lessons = pgTable("lessons", {
-  id: serial("id").primaryKey(),
-  title: text("title").notNull(),
-  kind: lessonKindEnum("kind").notNull().default("lesson"),
-  // Group heading on the learn page (e.g. the hizb quarter a lesson is in).
-  section: text("section"),
-  // Source keys shown before the questions ("read first"), in order.
-  study: jsonb("study").$type<string[]>(),
-  // Read, then answer, a few ayat at a time: the source keys read before
-  // each part's questions (challenges.part). Null: one read, then all.
-  parts: jsonb("parts").$type<string[][]>(),
-  reviewStatus: reviewStatusEnum("review_status").notNull().default("draft"),
-  unitId: integer("unit_id")
-    .references(() => units.id, {
-      onDelete: "cascade",
-    })
-    .notNull(),
-  order: integer("order").notNull(),
-});
+export const lessons = pgTable(
+  "lessons",
+  {
+    id: serial("id").primaryKey(),
+    title: text("title").notNull(),
+    kind: lessonKindEnum("kind").notNull().default("lesson"),
+    // Group heading on the learn page (e.g. the hizb quarter a lesson is in).
+    section: text("section"),
+    // Source keys shown before the questions ("read first"), in order.
+    study: jsonb("study").$type<string[]>(),
+    // Read, then answer, a few ayat at a time: the source keys read before
+    // each part's questions (challenges.part). Null: one read, then all.
+    parts: jsonb("parts").$type<string[][]>(),
+    reviewStatus: reviewStatusEnum("review_status").notNull().default("draft"),
+    unitId: integer("unit_id")
+      .references(() => units.id, {
+        onDelete: "cascade",
+      })
+      .notNull(),
+    order: integer("order").notNull(),
+  },
+  (table) => [index("lessons_unit_id_idx").on(table.unitId)]
+);
 
 export const lessonsRelations = relations(lessons, ({ one, many }) => ({
   unit: one(units, {
@@ -105,27 +117,31 @@ export const lessonsRelations = relations(lessons, ({ one, many }) => ({
 
 export const challengesEnum = pgEnum("type", CHALLENGE_TYPES);
 
-export const challenges = pgTable("challenges", {
-  id: serial("id").primaryKey(),
-  lessonId: integer("lesson_id")
-    .references(() => lessons.id, {
-      onDelete: "cascade",
-    })
-    .notNull(),
-  type: challengesEnum("type").notNull(),
-  question: text("question").notNull(),
-  prompt: text("prompt"), // overrides the default title shown above the question
-  // Type-specific data (word order, pairs, typed answer...); see lib/exercises.
-  payload: jsonb("payload").$type<ChallengePayload>(),
-  // Ayat shown in the question, recited when it's read aloud (lib/recitation).
-  readAloud: jsonb("read_aloud").$type<ReadAloud>(),
-  // The lesson part it is asked in (lessons.parts), from 0. Null: no parts.
-  part: integer("part"),
-  sourceTextId: integer("source_text_id").references(() => sourceTexts.id, {
-    onDelete: "set null",
-  }),
-  order: integer("order").notNull(),
-});
+export const challenges = pgTable(
+  "challenges",
+  {
+    id: serial("id").primaryKey(),
+    lessonId: integer("lesson_id")
+      .references(() => lessons.id, {
+        onDelete: "cascade",
+      })
+      .notNull(),
+    type: challengesEnum("type").notNull(),
+    question: text("question").notNull(),
+    prompt: text("prompt"), // overrides the default title shown above the question
+    // Type-specific data (word order, pairs, typed answer...); see lib/exercises.
+    payload: jsonb("payload").$type<ChallengePayload>(),
+    // Ayat shown in the question, recited when it's read aloud (lib/recitation).
+    readAloud: jsonb("read_aloud").$type<ReadAloud>(),
+    // The lesson part it is asked in (lessons.parts), from 0. Null: no parts.
+    part: integer("part"),
+    sourceTextId: integer("source_text_id").references(() => sourceTexts.id, {
+      onDelete: "set null",
+    }),
+    order: integer("order").notNull(),
+  },
+  (table) => [index("challenges_lesson_id_idx").on(table.lessonId)]
+);
 
 export const challengesRelations = relations(challenges, ({ one, many }) => ({
   lesson: one(lessons, {
@@ -179,21 +195,25 @@ export const sourceTextsRelations = relations(sourceTexts, ({ many }) => ({
   challenges: many(challenges),
 }));
 
-export const challengeOptions = pgTable("challenge_options", {
-  id: serial("id").primaryKey(),
-  challengeId: integer("challenge_id")
-    .references(() => challenges.id, {
-      onDelete: "cascade",
-    })
-    .notNull(),
-  text: text("text").notNull(),
-  correct: boolean("correct").notNull(),
-  imageSrc: text("image_src"),
-  audioSrc: text("audio_src"),
-  // The ayah ("s:a") or word ("s:a:w") this option shows, played as
-  // recitation when it's tapped (lib/recitation). Null: not Quran text.
-  recitation: text("recitation"),
-});
+export const challengeOptions = pgTable(
+  "challenge_options",
+  {
+    id: serial("id").primaryKey(),
+    challengeId: integer("challenge_id")
+      .references(() => challenges.id, {
+        onDelete: "cascade",
+      })
+      .notNull(),
+    text: text("text").notNull(),
+    correct: boolean("correct").notNull(),
+    imageSrc: text("image_src"),
+    audioSrc: text("audio_src"),
+    // The ayah ("s:a") or word ("s:a:w") this option shows, played as
+    // recitation when it's tapped (lib/recitation). Null: not Quran text.
+    recitation: text("recitation"),
+  },
+  (table) => [index("challenge_options_challenge_id_idx").on(table.challengeId)]
+);
 
 export const challengeOptionsRelations = relations(
   challengeOptions,
@@ -205,16 +225,25 @@ export const challengeOptionsRelations = relations(
   })
 );
 
-export const challengeProgress = pgTable("challenge_progress", {
-  id: serial("id").primaryKey(),
-  userId: text("user_id").notNull(),
-  challengeId: integer("challenge_id")
-    .references(() => challenges.id, {
-      onDelete: "cascade",
-    })
-    .notNull(),
-  completed: boolean("completed").notNull().default(false),
-});
+export const challengeProgress = pgTable(
+  "challenge_progress",
+  {
+    id: serial("id").primaryKey(),
+    userId: text("user_id").notNull(),
+    challengeId: integer("challenge_id")
+      .references(() => challenges.id, {
+        onDelete: "cascade",
+      })
+      .notNull(),
+    completed: boolean("completed").notNull().default(false),
+  },
+  (table) => [
+    index("challenge_progress_user_id_challenge_id_idx").on(
+      table.userId,
+      table.challengeId
+    ),
+  ]
+);
 
 export const challengeProgressRelations = relations(
   challengeProgress,
