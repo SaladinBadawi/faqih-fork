@@ -58,6 +58,7 @@ import { formatNumber } from "@/lib/i18n";
 import { LAST_UNIT_COOKIE, setPreferenceCookie } from "@/lib/mode";
 import { isOfflineError, queueAnswer } from "@/lib/offline-queue";
 import { recitationAudio } from "@/lib/recitation";
+import { type Sticker } from "@/lib/stickers";
 import { useHeartsModal } from "@/store/use-hearts-modal";
 import { usePracticeModal } from "@/store/use-practice-modal";
 
@@ -72,6 +73,7 @@ import { Header } from "./header";
 import { QuestionBubble } from "./question-bubble";
 import { ResultCard } from "./result-card";
 import { SourceNote } from "./source-note";
+import { StickerEarned } from "./sticker-earned";
 import { Study } from "./study";
 
 type QuizProps = {
@@ -101,6 +103,11 @@ type QuizProps = {
   nextLesson?: { id: number; study: string[] } | null;
   reviewStatus: (typeof lessons.$inferSelect)["reviewStatus"];
   isExam?: boolean;
+  /**
+   * Kids mode: the sticker this lesson gives (lib/stickers), and whether it
+   * was already earned before this time.
+   */
+  sticker?: (Sticker & { earned: boolean }) | null;
   initialLessonChallenges: (typeof challenges.$inferSelect & {
     completed: boolean;
     challengeOptions: (typeof challengeOptions.$inferSelect)[];
@@ -125,6 +132,7 @@ export const Quiz = ({
   nextLesson,
   reviewStatus,
   isExam,
+  sticker,
   initialLessonChallenges,
   userSubscription,
 }: QuizProps) => {
@@ -553,6 +561,10 @@ export const Quiz = ({
                   ? t.lesson.examPassed
                   : t.lesson.finished}
           </h1>
+
+          {isKids && sticker && !review && (
+            <StickerEarned sticker={sticker} already={sticker.earned} />
+          )}
 
           <div className="flex w-full items-center gap-x-4">
             {/* A hearts review earns hearts, not points. */}

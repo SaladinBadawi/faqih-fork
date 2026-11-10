@@ -131,7 +131,7 @@ part-time).** Full Quran adds ≈ 3–4 weeks, and Tajweed adds ≈ 3–4 weeks.
 
 **Left:**
 
-- Rewards and stickers for kids.
+- Repeat-N-times audio for kids who can't read yet.
 - Audio for MATCH items and ayah fragments.
 
 ### M3 — Kids track (3–4 weeks, runs alongside M2; content is the bottleneck)
@@ -139,6 +139,9 @@ part-time).** Full Quran adds ≈ 3–4 weeks, and Tajweed adds ≈ 3–4 weeks.
 - Al-Fatiha and the last 10 surahs: listen, repeat, order and complete.
 - ✅ Repetition through a spaced-repetition review queue, plus a daily goal and
   streak.
+- ✅ Stickers: one for each lesson finished (crescent, star, lantern, palm,
+  mosque dome, flower; a gold medal for a surah exam), collected in a
+  Stickers tab. Worked out from progress, never random.
 - Short stories of the Prophet ﷺ and the Sahabah, each with a short quiz.
 - Short facts about the Prophet ﷺ (family, Makkah and Madinah, character).
 - Parent-managed profiles or guest mode, so children don't need their own

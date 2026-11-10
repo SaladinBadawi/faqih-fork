@@ -111,6 +111,14 @@ kids mode).
   questions. An ayah counts as heard after its first play, so repeats never
   hold back the questions. Taps on words and options still play once.
 
+## Stickers (kids)
+
+Each kids lesson gives a sticker once it is completed (`lib/stickers.ts`):
+its design comes from the lesson's place in its surah, and its colour from
+the surah. A surah exam gives a gold medal. Nothing is stored: stickers come
+from progress, so re-importing lessons keeps them, and no sticker is ever
+random. Designs are objects only, never people or animals.
+
 ## Rules
 
 - Every course is built twice: an Arabic course and an English course. There
